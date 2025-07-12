@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/diego872/gantt.git"
+    "url": "git+https://github.com/gantt-flow/web.git"
   },
   "keywords": [
     "api",
@@ -20,9 +20,9 @@
   "author": "Gantt Flow Team",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/diego872/gantt/issues"
+    "url": "https://github.com/gantt-flow/web/issues"
   },
-  "homepage": "https://github.com/diego872/gantt#readme",
+  "homepage": "https://github.com/gantt-flow/web#readme",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.5.0",
