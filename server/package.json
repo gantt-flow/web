@@ -1,0 +1,36 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "REST API for managing tasks",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diego872/gantt.git"
+  },
+  "keywords": [
+    "api",
+    "express",
+    "backend"
+  ],
+  "author": "Gantt Flow Team",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/diego872/gantt/issues"
+  },
+  "homepage": "https://github.com/diego872/gantt#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.15.2"
+  },
+  "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
