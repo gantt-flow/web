@@ -1,0 +1,76 @@
+# Environment files
+.env*
+.env
+
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# Build output
+dist/
+build/
+coverage/
+
+# Sensitive files
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Database dumps
+*.sql
+*.sqlite
+*.db
+
+# Miscellaneous
+*.tgz
+*.gz
+*.zip
+*.bak
+*.tmp
+
+# Yarn & PnP
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# next.js
+/.next/
+/out/
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Parcel
+.parcel-cache/
+
+# Sass
+.sass-cache/
+
+# ESLint
+.eslintcache
