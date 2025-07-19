@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 37, "column": 0}, "map": {"version":3,"sources":["file:///Users/diegosalinas/Documents/gantt/web/client/src/components/ui/button.tsx"],"sourcesContent":["'use client';\n\nexport default function Button({ \n    text, \n    type = \"button\", \n    className,\n}: { \n    text: string, \n    type?: \"button\"| \"submit\" | \"reset\", \n    className?: string\n}) {\n    return (\n        <button\n            type={type}\n            className={`${className}`}\n        >   \n            {text}\n        </button>\n    );\n}"],"names":[],"mappings":";;;;AAAA;;AAEe,SAAS,OAAO,EAC3B,IAAI,EACJ,OAAO,QAAQ,EACf,SAAS,EAKZ;IACG,qBACI,8OAAC;QACG,MAAM;QACN,WAAW,GAAG,WAAW;kBAExB;;;;;;AAGb","debugId":null}}]
+}
