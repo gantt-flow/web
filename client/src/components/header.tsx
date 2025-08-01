@@ -2,11 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import Sidebar from "./sidebar";
+import { profile } from "console";
+
+const profileDropdownItems = [
+    {label: "Perfil", link: "/perfil"},
+    {label: "Ajustes", link: "/ajustes"}
+];
 
 
 export default function Header() {
 
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const clearInput = () => {
@@ -14,6 +22,10 @@ export default function Header() {
         inputRef.current.value = "";
         inputRef.current.focus(); // opcional: vuelve a enfocar el input
         }
+    };
+
+    const toggleDropdown = () => {
+      setIsDropdownOpen(!isDropdownOpen);  
     };
 
 
@@ -72,16 +84,34 @@ export default function Header() {
                             height={40}
                             priority
                         />    
-
-                        <Image
+                        <button id="dropdownDefaultButton" onClick={toggleDropdown} className="relative cursor-pointer" type="button">
+                            <Image
                             className="dark:invert"
                             src="/defaultUserPicture.svg"
                             alt="Default User Picture Icon"
                             width={40}
                             height={40}
                             priority
-                        />
+                            />
+
+                            {/* Dropdown menu*/}
+                            {isDropdownOpen && (
+                                <div className="bg-white absolute mt-2 z-10 right-0 rounded-lg shadow-sm w-32 dark:bg-gray-700">
+                                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                                        {profileDropdownItems.map(({ label, link }, index) => (
+                                            <li key={label}>
+                                                <Link href={link} className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                    {label}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </button>
                     </div>
+
+                    
                 </div> 
             </div>
         </div>
