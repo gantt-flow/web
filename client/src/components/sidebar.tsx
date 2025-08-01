@@ -3,9 +3,9 @@ import Link from "next/link";
 
 const sideBarItems = [
     { icon: <House/>, label: 'Inicio', link: "/inicio" },
-    { icon: <ChartGantt/>, label: 'Gantt', link: "/gantt" },
-    { icon: <FolderKanban/>, label: 'Proyectos', link: "/projects" },
-    { icon: <Logs/>, label: 'Logs', link: "/logs" }
+    { icon: <ChartGantt/>, label: 'Gantt', link: "/inicio/gantt" },
+    { icon: <FolderKanban/>, label: 'Proyectos', link: "/inicio/proyectos" },
+    { icon: <Logs/>, label: 'Logs', link: "/inicio/logs" }
 ];
 
 export default function Sidebar() {

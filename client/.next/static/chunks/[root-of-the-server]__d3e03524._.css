@@ -148,7 +148,6 @@
       --tw-rotate-z: initial;
       --tw-skew-x: initial;
       --tw-skew-y: initial;
-      --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
       --tw-font-weight: initial;
       --tw-shadow: 0 0 rgba(0, 0, 0, 0);
@@ -186,7 +185,6 @@
       --tw-rotate-z: initial;
       --tw-skew-x: initial;
       --tw-skew-y: initial;
-      --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
       --tw-font-weight: initial;
       --tw-shadow: 0 0 rgba(0, 0, 0, 0);
@@ -680,14 +678,6 @@
     bottom: calc(var(--spacing) * 3);
   }
 
-  .left-0 {
-    left: calc(var(--spacing) * 0);
-  }
-
-  .left-1 {
-    left: calc(var(--spacing) * 1);
-  }
-
   .z-10 {
     z-index: 10;
   }
@@ -732,14 +722,6 @@
     margin-top: calc(var(--spacing) * 10);
   }
 
-  .mt-12 {
-    margin-top: calc(var(--spacing) * 12);
-  }
-
-  .mt-14 {
-    margin-top: calc(var(--spacing) * 14);
-  }
-
   .mt-30 {
     margin-top: calc(var(--spacing) * 30);
   }
@@ -780,10 +762,6 @@
     display: flex;
   }
 
-  .hidden {
-    display: none;
-  }
-
   .h-12 {
     height: calc(var(--spacing) * 12);
   }
@@ -810,10 +788,6 @@
 
   .w-32 {
     width: calc(var(--spacing) * 32);
-  }
-
-  .w-44 {
-    width: calc(var(--spacing) * 44);
   }
 
   .w-48 {
@@ -876,18 +850,6 @@
     gap: calc(var(--spacing) * 5);
   }
 
-  :where(.divide-y > :not(:last-child)) {
-    --tw-divide-y-reverse: 0;
-    border-bottom-style: var(--tw-border-style);
-    border-top-style: var(--tw-border-style);
-    border-top-width: calc(1px * var(--tw-divide-y-reverse));
-    border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
-  }
-
-  :where(.divide-gray-100 > :not(:last-child)) {
-    border-color: var(--color-gray-100);
-  }
-
   .self-center {
     align-self: center;
   }
@@ -942,20 +904,12 @@
     padding-inline: calc(var(--spacing) * 5);
   }
 
-  .px-6 {
-    padding-inline: calc(var(--spacing) * 6);
-  }
-
   .py-2 {
     padding-block: calc(var(--spacing) * 2);
   }
 
   .py-3 {
     padding-block: calc(var(--spacing) * 3);
-  }
-
-  .py-10 {
-    padding-block: calc(var(--spacing) * 10);
   }
 
   .ps-3:not(:-webkit-any(:lang(ae), :lang(ar), :lang(arc), :lang(bcc), :lang(bqi), :lang(ckb), :lang(dv), :lang(fa), :lang(glk), :lang(he), :lang(ku), :lang(mzn), :lang(nqo), :lang(pnb), :lang(ps), :lang(sd), :lang(ug), :lang(ur), :lang(yi))) {
@@ -1180,12 +1134,6 @@ input[type="search"]::-webkit-search-results-decoration {
 @property --tw-skew-y {
   syntax: "*";
   inherits: false
-}
-
-@property --tw-divide-y-reverse {
-  syntax: "*";
-  inherits: false;
-  initial-value: 0;
 }
 
 @property --tw-border-style {
