@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///Users/diegosalinas/Documents/Proyecto%20Modular/web/client/src/app/inicio/proyectos/nuevo/page.tsx"],"sourcesContent":["\nexport default function Proyectos(){\n    return(\n        <div className=\"flex flex-row w-full\">\n\n            <h1>Nuevo proyecto</h1>\n\n        </div>\n    )\n}"],"names":[],"mappings":";;;;;AACe,SAAS;IACpB,qBACI,8OAAC;QAAI,WAAU;kBAEX,cAAA,8OAAC;sBAAG;;;;;;;;;;;AAIhB","debugId":null}}]
+}

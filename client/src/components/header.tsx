@@ -3,19 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import Sidebar from "./sidebar";
-import { profile } from "console";
 
 const profileDropdownItems = [
     {label: "Perfil", link: "/perfil"},
     {label: "Ajustes", link: "/ajustes"}
 ];
 
-
 export default function Header() {
 
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+    const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+    const [isBellDropdownOpen, setIsBellProfileDropdownOpen] = useState(false);
 
     const clearInput = () => {
         if (inputRef.current) {
@@ -24,10 +22,15 @@ export default function Header() {
         }
     };
 
-    const toggleDropdown = () => {
-      setIsDropdownOpen(!isDropdownOpen);  
+    const profileToggleDropdown = () => {
+      setIsProfileDropdownOpen(!isProfileDropdownOpen);  
+      setIsBellProfileDropdownOpen(false);
     };
 
+    const bellToggleDropdown = () => {
+        setIsBellProfileDropdownOpen(!isBellDropdownOpen);
+        setIsProfileDropdownOpen(false);
+    }
 
     return(
         <div className="flex flex-col">
@@ -76,15 +79,43 @@ export default function Header() {
                     </div>
 
                     <div className="flex gap-5">
-                        <Image
-                            className="dark:invert"
-                            src="/bell.svg"
-                            alt="Bell Icon"
-                            width={40}
-                            height={40}
-                            priority
-                        />    
-                        <button id="dropdownDefaultButton" onClick={toggleDropdown} className="relative cursor-pointer" type="button">
+
+                        <button onClick={bellToggleDropdown} className="relative cursor-pointer" type="button">
+                            <Image
+                                className="dark:invert"
+                                src="/bell.svg"
+                                alt="Bell Icon"
+                                width={40}
+                                height={40}
+                                priority
+                            /> 
+
+                            {/* Bell dropdown */}
+                            { isBellDropdownOpen && (
+                                <div className="bg-white absolute mt-2 z-10 right-0 rounded-lg shadow-sm w-128 dark:bg-gray-700">
+                                    <div className="mt-4">
+                                        Notificaciones
+                                    </div>
+                                    
+                                    <ul className="py-2 ml-2 mr-2 text-gray-700 dark:text-gray-200 text-left">
+                                        <li className="py-3 hover:bg-gray-100">
+                                            Este es un ejemplo de notificación
+                                        </li>
+                                        <li className="py-3 hover:bg-gray-100">
+                                            Este es un ejemplo de notificación
+                                        </li>
+                                        <li className="py-3 hover:bg-gray-100">
+                                            Este es un ejemplo de notificación
+                                        </li>
+                                        <li className="py-3 hover:bg-gray-100">
+                                            Este es un ejemplo de notificación
+                                        </li>
+                                    </ul>
+                                </div>
+                            )}
+                        </button>
+
+                        <button onClick={profileToggleDropdown} className="relative cursor-pointer" type="button">
                             <Image
                             className="dark:invert"
                             src="/defaultUserPicture.svg"
@@ -95,7 +126,7 @@ export default function Header() {
                             />
 
                             {/* Dropdown menu*/}
-                            {isDropdownOpen && (
+                            {isProfileDropdownOpen && (
                                 <div className="bg-white absolute mt-2 z-10 right-0 rounded-lg shadow-sm w-32 dark:bg-gray-700">
                                     <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
                                         {profileDropdownItems.map(({ label, link }, index) => (

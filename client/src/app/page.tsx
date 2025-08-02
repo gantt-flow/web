@@ -19,11 +19,21 @@ export default function Home() {
           <Link className="ml-10 text-[18px]" href="">Inicio</Link>
           <Link className="ml-10 text-[18px]" href="">¿Por qué GanttFlow?</Link>
         </div>
-        
 
         <div className="flex flex-row ml-auto gap-5">
-          <Button text="Iniciar Sesión" type="button" className="p-2 rounded-lg  #FFFFFF border border-gray-200 hover:bg-gray-100 hover:text-green-500" redirectTo="/auth/login"/>
-          <Button text="Registrarse" type="button" className="p-2 rounded-lg bg-green-500 border border-gray-200 hover:bg-gray-100 hover:text-green-500" redirectTo="/auth/signUp"/>
+          <Button 
+            text="Iniciar Sesión" 
+            type="button" 
+            className="p-2 rounded-lg  #FFFFFF border border-gray-200 hover:bg-gray-100 hover:text-green-500" 
+            redirectTo="/auth/login"
+          />
+          
+          <Button 
+            text="Registrarse" 
+            type="button" 
+            className="p-2 rounded-lg bg-green-500 border border-gray-200 hover:bg-gray-100 hover:text-green-500" 
+            redirectTo="/auth/signUp"
+          />
         </div>
         
       </header>
