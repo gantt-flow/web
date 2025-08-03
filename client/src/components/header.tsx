@@ -37,7 +37,7 @@ export default function Header() {
             <div className="flex flex-row border-b border-gray-300">
                 <div className="flex w-full justify-between m-3">
                     <div className="flex ml-2">
-                        <Link href="/dashboard">
+                        <Link href="/inicio">
                             <Image
                             className="dark:invert border"
                             src="/logo.svg"

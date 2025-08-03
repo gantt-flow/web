@@ -1,5 +1,7 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/auth/login/page": "app/auth/login/page.js",
+  "/auth/signUp/page": "app/auth/signUp/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/inicio/gantt/page": "app/inicio/gantt/page.js",
   "/inicio/logs/page": "app/inicio/logs/page.js",
