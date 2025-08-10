@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import { connectToDB } from './config/db.js';
 import usersRoutes from './routes/users.routes.js';
 import activityLogsRoutes from './routes/activityLogs.routes.js';
@@ -11,18 +12,24 @@ import notificationsRoutes from './routes/notifications.routes.js';
 import projectsRoutes from './routes/projects.routes.js';
 import remindersRoutes from './routes/reminders.routes.js';
 import tasksRoutes from './routes/tasks.routes.js';
+import authRoutes from './routes/auth.routes.js';
 
 
 dotenv.config(); // Load environment variables from .env file
 const app = express();
-// Use PORT from environment or default to 3000
-const PORT = process.env.PORT || 3000;
+// Use PORT from environment or default to 5000
+const PORT = process.env.PORT || 8080;
 // Middlware to parse JSON
 app.use(express.json());
+// Enable CORS for specific origin
+app.use(cors({
+    origin: '*',
+    optionsSuccessStatus: 200
+}))
 
 
 app.use('/users', usersRoutes);
-app.use('activityLogs', activityLogsRoutes);
+app.use('/activityLogs', activityLogsRoutes);
 app.use('/attachments', attachmentsRoutes);
 app.use('/auditLogs', auditLogRoutes);
 app.use('/comments', commentsRoutes);
@@ -31,6 +38,7 @@ app.use('/notifications', notificationsRoutes);
 app.use('/projects', projectsRoutes);
 app.use('/reminders', remindersRoutes);
 app.use('/tasks', tasksRoutes);
+app.use('/auth', authRoutes);
 
 
 app.listen(PORT, () => {

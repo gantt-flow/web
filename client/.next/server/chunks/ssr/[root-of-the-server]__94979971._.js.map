@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///Users/diegosalinas/Documents/gantt/web/client/src/app/page.tsx"],"sourcesContent":["import Image from \"next/image\";\nimport Link from \"next/link\";\n\nexport default function Home() {\n  return (\n    <div>\n      <header className=\"flex flex-row m-5\">\n        <Image\n        className=\"dark:invert\"\n        src=\"/logo.svg\"\n        alt=\"Gantt Logo\"\n        width={180}\n        height={37}\n        priority\n        />\n\n        <Link href=\"\">Inicio</Link>\n        <Link href=\"\">¿Por qué GanttFlow?</Link>\n\n      </header>\n\n      <main className=\"flex flex-col gap-[32px] row-start-2 items-center sm:items-start\">\n      \n        \n      </main>\n\n      <footer className=\"row-start-3 flex gap-[24px] flex-wrap items-center justify-center\">\n      </footer>\n    </div>\n  );\n}\n"],"names":[],"mappings":";;;;AAAA;AACA;;;;AAEe,SAAS;IACtB,qBACE,8OAAC;;0BACC,8OAAC;gBAAO,WAAU;;kCAChB,8OAAC,6HAAA,CAAA,UAAK;wBACN,WAAU;wBACV,KAAI;wBACJ,KAAI;wBACJ,OAAO;wBACP,QAAQ;wBACR,QAAQ;;;;;;kCAGR,8OAAC,4JAAA,CAAA,UAAI;wBAAC,MAAK;kCAAG;;;;;;kCACd,8OAAC,4JAAA,CAAA,UAAI;wBAAC,MAAK;kCAAG;;;;;;;;;;;;0BAIhB,8OAAC;gBAAK,WAAU;;;;;;0BAKhB,8OAAC;gBAAO,WAAU;;;;;;;;;;;;AAIxB","debugId":null}}]
-}

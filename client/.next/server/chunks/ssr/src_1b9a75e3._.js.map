@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 5, "column": 0}, "map": {"version":3,"sources":["file:///Users/diegosalinas/Documents/gantt/web/client/src/components/header.tsx"],"sourcesContent":["import Image from \"next/image\";\n\n\nexport default function Header() {\n    return(\n        <div className=\"flex flex-row\">\n            \n        </div>\n    )\n}"],"names":[],"mappings":";;;;;AAGe,SAAS;IACpB,qBACI,8OAAC;QAAI,WAAU;;;;;;AAIvB","debugId":null}},
-    {"offset": {"line": 23, "column": 0}, "map": {"version":3,"sources":["file:///Users/diegosalinas/Documents/gantt/web/client/src/app/dashboard/layout.tsx"],"sourcesContent":["import Header from '@/components/header';\n\nexport default function DashboardLayout({\n  children,\n}: {\n  children: React.ReactNode\n}) {\n  return (\n    <section>\n        <Header />\n        {children}\n    </section>);\n  \n}"],"names":[],"mappings":";;;;AAAA;;;AAEe,SAAS,gBAAgB,EACtC,QAAQ,EAGT;IACC,qBACE,8OAAC;;0BACG,8OAAC,4HAAA,CAAA,UAAM;;;;;YACN;;;;;;;AAGT","debugId":null}}]
-}

@@ -1,19 +1,48 @@
+'use client';
+
+import { useState } from "react";
+import { useRouter } from 'next/navigation';
+import { login } from '@/services/authService';
+import axios from 'axios';
 import Image from "next/image";
 
 export default function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const router = useRouter();
+
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(''); // Limpiar errores previos
+
+        try {
+             await login({ email, password });
+            
+            // Redirigir al usuario a la página de su perfil
+            router.push('/inicio');
+
+        } catch (err) {
+            console.error(err);
+            setError('Credenciales inválidas. Por favor, intenta de nuevo.');
+        }
+    };
+
+
     return (
         <div className="flex flex-row h-screen">
 
             <div className="flex flex-col basis-1/2">
-
                 <div className="flex flex-col w-2/3 self-center mt-30">
                     <h1 className="text-[36px]">Inicia sesión</h1>
 
-                    <form className="flex flex-col mt-6">
+                    <form className="flex flex-col mt-6" onSubmit={handleSubmit}>
+                        {error && <p className="text-red-500 mb-6">{error}</p>}
                         <label>Correo</label>
-                        <input type="email" className="border border-gray-300 rounded-lg p-3 mb-4" required />
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="border border-gray-300 rounded-lg p-3 mb-4" required />
                         <label className="mt-4">Contraseña</label>
-                        <input type="password" className="border border-gray-300 rounded-lg p-3 mb-8" required />
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="border border-gray-300 rounded-lg p-3 mb-8" required />
                         <button type="submit" className="bg-green-500 text-white p-2 h-12 rounded-lg hover:bg-green-600">Iniciar Sesión</button>
                     </form>
                 </div>
