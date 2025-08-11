@@ -1,5 +1,9 @@
+'use client';
+
 import { Menu, House, ChartGantt, FolderKanban, Logs, LogOut } from "lucide-react"
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
+import { logout } from '@/services/authService';
 
 const sideBarItems = [
     { icon: <House/>, label: 'Inicio', link: "/inicio" },
@@ -9,6 +13,19 @@ const sideBarItems = [
 ];
 
 export default function Sidebar() {
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await logout(); // Llama al servicio que llama al backend
+            router.push('/auth/login'); // Redirige al usuario a la página de login
+        } catch (error) {
+            console.error("Error al cerrar sesión:", error);
+            // Opcional: mostrar un mensaje de error al usuario
+        }
+    };
+
+
     return (
         <aside className="h-full w-48">
             <nav className="h-full flex flex-col" role="navigation" aria-label="Sidebar">
@@ -27,12 +44,10 @@ export default function Sidebar() {
                 
 
                 <div className="flex px-5">
-                    <Link href="/logout">
-                        <div  className="flex items-center py-3 my-5 cursor-pointer">
-                            <LogOut />
-                            <span className="px-3">Salir</span>
-                        </div>
-                    </Link>
+                     <button onClick={handleLogout} className="flex items-center cursor-pointer py-3 my-5 w-full text-left hover:bg-gray-100 rounded-md">
+                        <LogOut />
+                        <span className="px-3">Salir</span>
+                    </button>
                 </div>
             </nav>
         </aside>

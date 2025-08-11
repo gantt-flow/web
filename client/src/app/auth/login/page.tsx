@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { login } from '@/services/authService';
-import axios from 'axios';
 import Image from "next/image";
+
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -14,20 +14,24 @@ export default function Login() {
 
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(''); // Limpiar errores previos
+    e.preventDefault(); // Previene la recarga de la página
+    setError('');
+    console.log('1. El formulario fue enviado.');
 
-        try {
-             await login({ email, password });
-            
-            // Redirigir al usuario a la página de su perfil
-            router.push('/inicio');
+    try {
+        console.log('2. Intentando llamar al servicio de login...');
+        await login({ email, password });
+        
+        // Si llegamos aquí, el login en el backend fue exitoso.
+        console.log('3. Login exitoso. Redirigiendo a /inicio...');
+        router.push('/inicio');
 
-        } catch (err) {
-            console.error(err);
-            setError('Credenciales inválidas. Por favor, intenta de nuevo.');
-        }
-    };
+    } catch (err) {
+        // Si algo sale mal en la llamada a `login()`, se ejecutará esto.
+        console.error('4. Ocurrió un error:', err);
+        setError('Credenciales inválidas o error en el servidor.');
+    }
+};
 
 
     return (

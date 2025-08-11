@@ -1,6 +1,30 @@
 {
   "app": {
+    "[project]/src/app/_not-found/page": [
+      "static/media/01e93191657a0358-s.p.932b7ca3.woff2",
+      "static/media/e71cd185bf53b7d5-s.p.010b419d.woff2"
+    ],
     "[project]/src/app/auth/login/page": [
+      "static/media/01e93191657a0358-s.p.932b7ca3.woff2",
+      "static/media/e71cd185bf53b7d5-s.p.010b419d.woff2"
+    ],
+    "[project]/src/app/inicio/gantt/page": [
+      "static/media/01e93191657a0358-s.p.932b7ca3.woff2",
+      "static/media/e71cd185bf53b7d5-s.p.010b419d.woff2"
+    ],
+    "[project]/src/app/inicio/logs/page": [
+      "static/media/01e93191657a0358-s.p.932b7ca3.woff2",
+      "static/media/e71cd185bf53b7d5-s.p.010b419d.woff2"
+    ],
+    "[project]/src/app/inicio/page": [
+      "static/media/01e93191657a0358-s.p.932b7ca3.woff2",
+      "static/media/e71cd185bf53b7d5-s.p.010b419d.woff2"
+    ],
+    "[project]/src/app/inicio/proyectos/page": [
+      "static/media/01e93191657a0358-s.p.932b7ca3.woff2",
+      "static/media/e71cd185bf53b7d5-s.p.010b419d.woff2"
+    ],
+    "[project]/src/app/page": [
       "static/media/01e93191657a0358-s.p.932b7ca3.woff2",
       "static/media/e71cd185bf53b7d5-s.p.010b419d.woff2"
     ]

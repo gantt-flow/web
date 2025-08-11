@@ -1,15 +1,16 @@
 import express from "express";
+import auth from '../middleware/authMiddleware.js';
 import { createProject, getProjectById, updateProject, deleteProject } from "../controllers/projects.controller.js";
 
 const router = express.Router();
 
 // Route to create a new project
-router.post("/", createProject);
+router.post("/", auth, createProject);
 // Route to get a project by ID
-router.get("/:id", getProjectById);
+router.get("/:id", auth, getProjectById);
 // Route to update a project by ID
-router.put("/:id", updateProject);
+router.put("/:id", auth, updateProject);
 // Route to delete a project by ID
-router.delete("/:id", deleteProject);
+router.delete("/:id", auth, deleteProject);
 
 export default router;

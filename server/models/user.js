@@ -5,7 +5,6 @@ const userSchema = new Schema({
     name: {
         type: String,
         required: true,
-        unique: true
     },
     email: {
         type: String,
@@ -18,7 +17,7 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['project_admin','member','colaborator','client','audit'],
+        enum: ['Administrador de proyectos','Miembro de equipo','Colaborador', 'Cliente','Auditor'],
         required: true
     },
     isActive: {
@@ -62,11 +61,11 @@ const userSchema = new Schema({
         type: Boolean,
         default: false // Indica si el usuario tiene acceso a los registros de auditoría
     },
-    projectIds: [{
+    projectId: [{
         type: Schema.Types.ObjectId,
         ref: 'Project' // Referencia a la colección de proyectos
     }],
-    taskIds: [{
+    taskId: [{
         type: Schema.Types.ObjectId,
         ref: 'Task' // Referencia a la colección de tareas
     }],

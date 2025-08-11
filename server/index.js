@@ -23,8 +23,9 @@ const PORT = process.env.PORT || 8080;
 app.use(express.json());
 // Enable CORS for specific origin
 app.use(cors({
-    origin: '*',
-    optionsSuccessStatus: 200
+    origin: 'http://localhost:3000',
+    optionsSuccessStatus: 200,
+    credentials: true
 }))
 
 

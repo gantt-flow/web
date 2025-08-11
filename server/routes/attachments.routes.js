@@ -1,11 +1,12 @@
 import express from "express";
+import auth from '../middleware/authMiddleware.js';
 import { createAttachment, getAttachment, updateAttachment, deleteAttachment } from "../controllers/attachment.controller.js";
 
 const router = express.Router();
 
-router.post("/", createAttachment);
-router.get("/:id", getAttachment);
-router.put("/:id", updateAttachment);
-router.delete("/:id", deleteAttachment);
+router.post("/", auth, createAttachment);
+router.get("/:id", auth, getAttachment);
+router.put("/:id", auth, updateAttachment);
+router.delete("/:id", auth, deleteAttachment);
 
 export default router;

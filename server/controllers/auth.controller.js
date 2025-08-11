@@ -1,7 +1,6 @@
-import express from 'express';
-import bycript from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js'; 
+import User from '../models/user.js'; 
 
 // @route   POST /api/auth/login
 // @desc    Autentica un usuario y devuelve un token en una cookie
@@ -11,27 +10,24 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Check if user exists by email
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Verify password
-        const isMatch = await bycript.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.passwordHash);
+
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Generate JWT token
         const payload = {
             user: {
                 id: user.id
             }
         };
 
-        // Respond with token and user info
         jwt.sign(
             payload,
             process.env.JWT_SECRET,
@@ -39,15 +35,12 @@ export const login = async (req, res) => {
             (err, token) => {
                 if (err) throw err;
 
-                // Token is sent as cookie and not in the response body
-                // The cookie is named 'token' y has the JWT
                 res.cookie('token', token, {
-                    httpOnly: true, // Cookie cannot be accessed by JavaScript!
-                    secure: process.env.NODE_ENV === 'production', // true in production (HTTPS), false in development (HTTP)
-                    sameSite: 'strict' // Protection agains CSRF attacks
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict'
                 });
 
-                // Response is sent to the client without the token in the body
                 res.status(200).json({ msg: 'Inicio de sesión exitoso' });
             }
         );
@@ -55,5 +48,51 @@ export const login = async (req, res) => {
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+export const signUp = async (req, res) => {
+
+    const { name, email, password, role} = req.body;
+
+    try {
+        const existingUser = await User.findOne({email});
+
+        if(existingUser){
+            return res.status(400).json({ message: 'User already exists'});
+        }
+
+        const newUser = new User({
+            name,
+            email,
+            passwordHash: password,
+            role,
+        });
+
+        const salt = await bcrypt.genSalt(10);
+        newUser.passwordHash = await bcrypt.hash(password, salt);
+
+        await newUser.save();
+
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @route   POST /api/auth/logout
+// @desc    Cierra la sesión del usuario limpiando la cookie
+// @access  Privado (requiere que el usuario esté logueado)
+export const logout = async (req, res) => {
+    try {
+        // La forma más limpia de borrar una cookie es con clearCookie.
+        // Esto le envía al navegador una instrucción para eliminar la cookie 'token'.
+        res.clearCookie('token');
+        res.status(200).json({ message: 'Logout exitoso' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Error en el servidor' });
     }
 };
