@@ -1,10 +1,6 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/auth/login/page": "app/auth/login/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/inicio/gantt/page": "app/inicio/gantt/page.js",
-  "/inicio/logs/page": "app/inicio/logs/page.js",
   "/inicio/page": "app/inicio/page.js",
-  "/inicio/proyectos/page": "app/inicio/proyectos/page.js",
   "/page": "app/page.js"
 }
