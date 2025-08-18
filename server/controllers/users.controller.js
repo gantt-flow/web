@@ -27,6 +27,20 @@ export const getUser = async (req, res) => {
     }
 }
 
+export const getAllUsers = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, role } = req.query;
+    const filter = role ? { role } : {};
+    const users = await User.find(filter)
+      .select('name email role isActive createdAt updatedAt')
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+    res.status(200).json(users);
+  } catch (error) {
+    logger.error(`Error fetching users: ${error.message}`);
+    handleError(res, error);
+  }
+}
 
 export const createUser = async (req, res) => {
     try {

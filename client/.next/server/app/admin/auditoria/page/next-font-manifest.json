@@ -1,0 +1,11 @@
+{
+  "pages": {},
+  "app": {
+    "[project]/src/app/admin/auditoria/page": [
+      "static/media/01e93191657a0358-s.p.932b7ca3.woff2",
+      "static/media/e71cd185bf53b7d5-s.p.010b419d.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pagesUsingSizeAdjust": false
+}
