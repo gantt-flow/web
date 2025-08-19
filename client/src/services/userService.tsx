@@ -2,11 +2,17 @@ import api from '@/services/api';
 
 // Definimos los tipos de datos que esperamos para una mejor seguridad y autocompletado
 export interface User {
-  isActive(isActive: any): string | number | readonly string[] | undefined;
-  role: string | number | readonly string[] | undefined;
+  isActive: true;
   _id: string;
   name: string;
   email: string;
+  role: string;
+  password?: string; // Campo para creación
+  profilePicture?: string;
+  notifications?: boolean;
+  theme?: string;
+  readOnly?: boolean;
+  auditLogAccess?: boolean;
   // ... cualquier otro campo del usuario
 }
 
@@ -52,6 +58,16 @@ export const getUserById = async (userId: string): Promise<User> => {
 export const createUser = async (newUser: NewUser): Promise<User> => {
   try {
     const response = await api.post<User>('/users', newUser);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear el usuario:", error);
+    throw error;
+  }
+};
+
+export const createUserAdmin = async (newUser: NewUser): Promise<User> => {
+  try {
+    const response = await api.post<User>('/admin', newUser);
     return response.data;
   } catch (error) {
     console.error("Error al crear el usuario:", error);

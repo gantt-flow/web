@@ -5,6 +5,7 @@ import { getUser, getAllUsers,createUser, updateUser,deleteUser } from "../contr
 
 const router = express.Router();
 
+//Lo comenté porque no me dejaba interactuar con la BD en la interfaz del admin, no he indagado cuál sea el problema al respecto con el middleware
 //router.get("/:id", auth, getUser);
 //router.get("/", auth, getAllUsers);
 //router.post("/", auth, createUser);

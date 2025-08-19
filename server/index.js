@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { connectToDB } from './config/db.js';
 import usersRoutes from './routes/users.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 import activityLogsRoutes from './routes/activityLogs.routes.js';
 import attachmentsRoutes from './routes/attachments.routes.js';
 import auditLogRoutes from './routes/auditLogs.routes.js';
@@ -30,6 +31,7 @@ app.use(cors({
 
 
 app.use('/users', usersRoutes);
+app.use('/admin', adminRoutes);
 app.use('/activityLogs', activityLogsRoutes);
 app.use('/attachments', attachmentsRoutes);
 app.use('/auditLogs', auditLogRoutes);

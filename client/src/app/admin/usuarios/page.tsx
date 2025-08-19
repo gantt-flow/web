@@ -2,13 +2,28 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { DataTable } from '@/components/ui/DataTable';
-import EditUserModal from '@/components/admin/EditUserModal'; // Import por defecto
-import { User, getAllUsers, deleteUser, updateUser } from '@/services/userService';
+import EditUserModal from '@/components/admin/EditUserModal';
+import CreateUserModal from '@/components/admin/CreateUserModal';
+import { User, getAllUsers, deleteUser, updateUser, createUserAdmin } from '@/services/userService';
+
+interface NewUser {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  isActive: boolean;
+  profilePicture?: string;
+  notifications?: boolean;
+  theme?: string;
+  readOnly?: boolean;
+  auditLogAccess?: boolean;
+}
 
 export default function DashboardLayoutAdmin() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // Estado para controlar el modal de creación
 
   // Fetch users al cargar el componente
   useEffect(() => {
@@ -47,6 +62,38 @@ export default function DashboardLayoutAdmin() {
       console.error('Error al actualizar usuario:', error);
     }
   };
+  // Handler para crear un nuevo usuario
+  const handleCreateUser = async (newUserData: Partial<User>) => {
+  try {
+    // Verifica campos obligatorios
+    if (!newUserData.name || !newUserData.email || !newUserData.password) {
+      throw new Error('Nombre, email y contraseña son campos requeridos');
+    }
+    
+    // Crea un objeto que cumpla con la interfaz NewUser
+    const userToCreate = {
+      name: newUserData.name,
+      email: newUserData.email,
+      password: newUserData.password,
+      role: newUserData.role || 'Miembro de equipo', // Valor por defecto
+      isActive: newUserData.isActive !== undefined ? newUserData.isActive : true,
+      profilePicture: newUserData.profilePicture || 'default-profile.png',
+      notifications: newUserData.notifications !== undefined ? newUserData.notifications : true,
+      theme: newUserData.theme || 'system',
+      readOnly: newUserData.readOnly || false,
+      auditLogAccess: newUserData.auditLogAccess || false
+    };
+    
+    // Usa aserción de tipo para cumplir con NewUser
+    const newUser = await createUserAdmin(userToCreate as NewUser);
+    
+    setUsers([...users, newUser]);
+    setIsCreateModalOpen(false);
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+    alert(error);
+  }
+};
 
   // Columnas de la tabla
   const userColumns = [
@@ -79,7 +126,10 @@ export default function DashboardLayoutAdmin() {
       <div className="flex-1 p-8 bg-gray-50">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">Gestión de Usuarios</h1>
-          <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+          <button 
+            onClick={() => setIsCreateModalOpen(true)} // Abrir modal de creación
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+          >
             + Nuevo Usuario
           </button>
         </div>
@@ -106,6 +156,13 @@ export default function DashboardLayoutAdmin() {
             onSave={handleSaveUser}
           />
         )}
+        {/*Modal de creación*/}
+      {isCreateModalOpen && (
+        <CreateUserModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreate={handleCreateUser}
+        />
+      )}
       </div>
     </div>
   );
