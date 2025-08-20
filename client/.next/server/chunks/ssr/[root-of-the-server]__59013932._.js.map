@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 19, "column": 0}, "map": {"version":3,"sources":["file:///Users/diegosalinas/Documents/Proyecto%20Modular/web/client/src/app/auth/login/page.tsx"],"sourcesContent":["// En tu archivo login.tsx\n\nconst handleSubmit = async (e: React.FormEvent) => {\n    e.preventDefault(); // Previene la recarga de la página\n    setError('');\n    console.log('1. El formulario fue enviado.');\n\n    try {\n        console.log('2. Intentando llamar al servicio de login...');\n        await login({ email, password });\n        \n        // Si llegamos aquí, el login en el backend fue exitoso.\n        console.log('3. Login exitoso. Redirigiendo a /inicio...');\n        router.push('/inicio');\n\n    } catch (err) {\n        // Si algo sale mal en la llamada a `login()`, se ejecutará esto.\n        console.error('4. Ocurrió un error:', err);\n        setError('Credenciales inválidas o error en el servidor.');\n    }\n};"],"names":[],"mappings":"AAAA,0BAA0B;AAE1B,MAAM,eAAe,OAAO;IACxB,EAAE,cAAc,IAAI,mCAAmC;IACvD,SAAS;IACT,QAAQ,GAAG,CAAC;IAEZ,IAAI;QACA,QAAQ,GAAG,CAAC;QACZ,MAAM,MAAM;YAAE;YAAO;QAAS;QAE9B,wDAAwD;QACxD,QAAQ,GAAG,CAAC;QACZ,OAAO,IAAI,CAAC;IAEhB,EAAE,OAAO,KAAK;QACV,iEAAiE;QACjE,QAAQ,KAAK,CAAC,wBAAwB;QACtC,SAAS;IACb;AACJ","debugId":null}}]
-}

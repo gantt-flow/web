@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Jos%C3%A9%20Luis%20CS/Documents/Modular/proyecto%202025B/Versiones/2.1/web/client/src/app/admin/auditoria/page.tsx"],"sourcesContent":["export default function DashboardLayoutAdmin(){\r\n    return(\r\n        <div className=\"flex flex-row\">\r\n            \r\n        </div>\r\n    )\r\n}"],"names":[],"mappings":";;;;;AAAe,SAAS;IACpB,qBACI,8OAAC;QAAI,WAAU;;;;;;AAIvB","debugId":null}}]
-}

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Jos%C3%A9%20Luis%20CS/Documents/Modular/proyecto%202025B/Versiones/2.1/web/client/src/app/inicio/page.tsx"],"sourcesContent":["\n\nexport default function HomePage() {\n\n    return (\n        <div className=\"flex flex-row\">\n            <h1>Bienvenido a la página de inicio</h1>\n        </div>\n    );\n}"],"names":[],"mappings":";;;;;AAEe,SAAS;IAEpB,qBACI,8OAAC;QAAI,WAAU;kBACX,cAAA,8OAAC;sBAAG;;;;;;;;;;;AAGhB","debugId":null}}]
-}
