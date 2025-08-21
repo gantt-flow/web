@@ -1,43 +1,57 @@
-import { Users, ClipboardList, Shield, LogOut, Settings} from "lucide-react";
-import Link from "next/link";
+'use client';
 
-const adminSideBarItems = [
+import { Users, ClipboardList, Shield, LogOut, Settings } from "lucide-react"
+import Link from "next/link";
+import { useRouter } from 'next/navigation';
+import { logout } from '@/services/authService';
+
+const sideBarItems = [
     { icon: <Users size={20} />, label: 'Usuarios', link: "/admin/usuarios" },
     { icon: <ClipboardList size={20} />, label: 'Auditoría', link: "/admin/auditoria" },
     { icon: <Shield size={20} />, label: 'Permisos', link: "/admin/permisos" },
-    { icon: <Settings size={20} />, label: 'Configuración', link: "/ajustes" }
+    //{ icon: <Settings size={20} />, label: 'Configuración', link: "/ajustes" }
 ];
 
-export default function AdminSidebar() {
+export default function Sidebar() {
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await logout(); // Llama al servicio que llama al backend
+            router.push('/auth/login'); // Redirige al usuario a la página de login
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
+        } catch (error) {
+            console.error("Error al cerrar sesión:", error);
+            // Opcional: mostrar un mensaje de error al usuario
+            router.push('/auth/login');
+        }
+    };
+
+
     return (
-        <aside className="h-full w-64 bg-gray-800 text-white">
-            <div className="p-5 border-b border-gray-700">
-                <h1 className="text-xl font-bold">Panel Administrador</h1>
-            </div>
-            
-            <nav className="h-full flex flex-col justify-between" role="navigation" aria-label="Admin Sidebar">
-                <ul className="flex flex-col py-4">
-                    {adminSideBarItems.map(({ icon, label, link}, index) => (
-                    <li key={label}>
-                        <Link href={link}>
-                            <div className="flex items-center py-3 px-5 hover:bg-gray-700 transition-all cursor-pointer">
-                                <span className="flex items-center text-gray-300">
-                                    {icon}
-                                </span>   
-                                <span className="px-3 font-medium">{label}</span>
-                            </div>
-                        </Link>
-                    </li>
-                    ))}
-                </ul>
+        <aside className="h-full w-48">
+            <nav className="h-full flex flex-col" role="navigation" aria-label="Sidebar">
+                    <ul className="flex flex-1 flex-col px-5">
+                        {sideBarItems.map(({ icon, label, link}, index) => (
+                        <li key={label}>
+                            <Link href={link}>
+                                <div className="flex items-center py-3 my-5 cursor-pointer">
+                                    {icon}   
+                                    <span className="px-3">{label}</span>
+                                </div>
+                            </Link>
+                        </li>
+                        ))}
+                    </ul>
                 
-                <div className="border-t border-gray-700">
-                    <Link href="/logout">
-                        <div className="flex items-center py-4 px-5 hover:bg-gray-700 cursor-pointer">
-                            <LogOut size={20} className="text-red-400" />
-                            <span className="px-3 text-red-400 font-medium">Salir</span>
-                        </div>
-                    </Link>
+
+                <div className="flex px-5">
+                     <button onClick={handleLogout} className="flex items-center cursor-pointer py-3 my-5 w-full text-left hover:bg-gray-100 rounded-md">
+                        <LogOut />
+                        <span className="px-3">Salir</span>
+                    </button>
                 </div>
             </nav>
         </aside>
