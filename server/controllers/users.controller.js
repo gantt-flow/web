@@ -2,6 +2,7 @@ import User from '../models/user.js';
 import { isValidObjectId } from 'mongoose'; // Import Mongoose's isValidObjectId for ID validation
 import { logger } from '../utils/logger.js';
 import bcrypt from 'bcryptjs';
+import { generateAuditLog } from '../utils/auditService.js';
 
 
 export const getUser = async (req, res) => {
@@ -58,7 +59,7 @@ export const createUser = async (req, res) => {
         }
 
         // Hash the password before saving (if using bcrypt)
-        const passwordHash = await bcrypt.hash(user.password, 10); // Replace with hashPassword(userData.password) if using bcrypt
+        const passwordHash = await bcrypt.hash(User.password, 10); // Replace with hashPassword(userData.password) if using bcrypt
 
         // Create a new user in the database
         const newUser = new User({
@@ -70,6 +71,7 @@ export const createUser = async (req, res) => {
         })
 
         await newUser.save();
+        await generateAuditLog(req, 'CREATE', 'User', newUser._id, `Usuario creado: ${newUser.email}`);
 
         res.status(201).json({ message: 'User created successfully', user: newUser });
     } catch (error) {
@@ -96,6 +98,8 @@ export const updateUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        await generateAuditLog(req, 'UPDATE', 'User', userId, `Usuario actualizado: Campos modificados: ${Object.keys(updateData).join(', ')}`);
+
         res.status(200).json(updatedUser);
     } catch (error) {
         logger.error(`Error updating user: ${error.message}`);
@@ -119,6 +123,8 @@ export const deleteUser = async (req, res) => {
         if (!deletedUser) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        await generateAuditLog(req, 'DELETE', 'User', userId, `Usuario eliminado: ${deletedUser.email}`);
 
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {

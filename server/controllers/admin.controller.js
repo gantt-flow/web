@@ -1,5 +1,6 @@
 import User from '../models/user.js';
 import bcrypt from 'bcryptjs';
+import { generateAuditLog } from '../utils/auditService.js';
 
 export const createUserAdmin = async (req, res) => {
   try {
@@ -37,6 +38,7 @@ export const createUserAdmin = async (req, res) => {
     });
 
     await newUser.save();
+    await generateAuditLog(req, 'CREATE', 'User', newUser._id, `Usuario creado: ${newUser.email}`);
 
     // Preparar respuesta sin información sensible
     const userResponse = { ...newUser.toObject() };

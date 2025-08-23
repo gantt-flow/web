@@ -1,9 +1,10 @@
+// server/routes/auditLog.routes.js
 import express from "express";
 import auth from '../middleware/authMiddleware.js';
-import { createAuditLog } from "../controllers/auditLog.controller.js";
+import { getAuditLogs} from "../controllers/auditLog.controller.js";
 
 const router = express.Router();
 
-router.post("/", auth, createAuditLog);
+router.get("/", auth, getAuditLogs);
 
 export default router;

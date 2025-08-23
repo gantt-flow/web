@@ -54,3 +54,13 @@ export const registerAndLogin = async (signUpData: SignUpData) => {
 export const logout = async () => {
   await api.post('/auth/logout');
 };
+
+// Añade esta función para verificar el estado de autenticación
+export const checkAuth = async () => {
+  try {
+    const response = await api.get('/auth/verify');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

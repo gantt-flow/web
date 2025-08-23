@@ -24,7 +24,10 @@ export const login = async (req, res) => {
 
         const payload = {
             user: {
-                id: user.id
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role
             }
         };
 
@@ -41,7 +44,10 @@ export const login = async (req, res) => {
                     sameSite: 'strict'
                 });
 
-                res.status(200).json({ msg: 'Inicio de sesión exitoso' });
+                res.status(200).json({ 
+                    msg: 'Inicio de sesión exitoso',
+                    user: payload.user 
+                });
             }
         );
 

@@ -1,36 +1,73 @@
-import AuditLog from "../models/auditLog.js";
-import { isValidObjectId } from "mongoose";
-import { logger } from "../utils/logger.js";
+import AuditLog from '../models/auditLog.js';
+import { logger } from '../utils/logger.js';
 
-export const createAuditLog = async (req, res) => {
-    try {
-        const { action, details, relatedEntity, performedBy, ipAddress, device } = req.body;
+export const getAuditLogs = async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 50, 
+      action, 
+      entityType, 
+      startDate, 
+      endDate,
+      userId,
+      sortBy = 'timestamp',
+      sortOrder = 'desc'
+    } = req.query;
 
-        // Validate the performedBy field
-        if (!isValidObjectId(performedBy)) {
-            return res.status(400).json({ message: 'Invalid user ID' });
-        }
+    // Construir filtros
+    const filter = {};
+    if (action) filter.action = action;
+    if (entityType) filter['relatedEntity.type'] = entityType;
+    if (userId) filter['performedBy'] = userId;
 
-        // Validate the required fields
-        if (!action || !relatedEntity || !performedBy) {
-            return res.status(400).json({ message: 'Fill all the required fields' });
-        }
-
-        // Create a new audit log entry
-        const newAuditLog = new AuditLog({
-            action,
-            details,
-            relatedEntity,
-            performedBy,
-            ipAddress,
-            device
-        });
-
-        await newAuditLog.save();
-
-        res.status(201).json({ message: 'Audit log created successfully', auditLog: newAuditLog });
-    } catch (error) {
-        logger.error(`Error creating audit log: ${error.message}`);
-        res.status(500).json({ message: 'Internal server error' });
+    // Filtro por fecha
+    if (startDate || endDate) {
+      filter.timestamp = {};
+      if (startDate) filter.timestamp.$gte = new Date(startDate);
+      if (endDate) filter.timestamp.$lte = new Date(endDate);
     }
-}
+
+    // Validar y parsear parámetros de paginación
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(Math.max(1, parseInt(limit)), 100);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Configurar ordenamiento
+    const sortOptions = {};
+    sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+    // Obtener logs con paginación
+    const auditLogs = await AuditLog.find(filter)
+      .populate('performedBy', 'name email role')
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limitNum);
+
+    // Contar total de documentos
+    const total = await AuditLog.countDocuments(filter);
+
+    res.status(200).json({
+      logs: auditLogs,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum)
+      },
+      filters: {
+        action,
+        entityType,
+        startDate,
+        endDate,
+        userId
+      }
+    });
+  } catch (error) {
+    logger.error(`Error obteniendo logs de auditoría: ${error.message}`);
+    res.status(500).json({ 
+      message: 'Error interno del servidor',
+      error: error.message 
+    });
+  }
+};

@@ -5,6 +5,6 @@ import { createUserAdmin } from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
-router.post("/", createUserAdmin);
+router.post("/",auth ,createUserAdmin);
 
 export default router;

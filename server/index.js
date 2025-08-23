@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { connectToDB } from './config/db.js';
 import usersRoutes from './routes/users.routes.js';
 import adminRoutes from './routes/admin.routes.js';
@@ -14,6 +15,7 @@ import projectsRoutes from './routes/projects.routes.js';
 import remindersRoutes from './routes/reminders.routes.js';
 import tasksRoutes from './routes/tasks.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import verifyRoutes from './routes/verify.routes.js';
 
 
 dotenv.config(); // Load environment variables from .env file
@@ -22,6 +24,8 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 // Middlware to parse JSON
 app.use(express.json());
+app.use(cookieParser()); // Parsear cookies
+
 // Enable CORS for specific origin
 app.use(cors({
     origin: 'http://localhost:3000',
@@ -42,6 +46,7 @@ app.use('/projects', projectsRoutes);
 app.use('/reminders', remindersRoutes);
 app.use('/tasks', tasksRoutes);
 app.use('/auth', authRoutes);
+app.use('/auth/verify', verifyRoutes);
 
 
 app.listen(PORT, () => {
