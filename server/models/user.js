@@ -17,7 +17,7 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['Administrador de proyectos','Miembro de equipo','Colaborador', 'Cliente','Auditor'],
+        enum: ['Administrador de sistema','Administrador de proyectos','Miembro de equipo','Colaborador', 'Cliente','Auditor'],
         required: true
     },
     isActive: {
