@@ -95,7 +95,8 @@ const CreateUserModal = ({ onClose, onCreate }: CreateUserModalProps) => {
               className="w-full p-2 border rounded text-black"
               required
             >
-              <option value="Administrador de proyectos">Administrador</option>
+              <option value="Administrador de sistema" className="text-black">Administrador de sistema</option>
+              <option value="Administrador de proyectos" className="text-black">Administrador de proyectos</option>
               <option value="Miembro de equipo">Miembro</option>
               <option value="Colaborador">Colaborador</option>
               <option value="Cliente">Cliente</option>
