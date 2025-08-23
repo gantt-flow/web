@@ -1,6 +1,7 @@
 import Attachment from "../models/attachment.js";
 import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
+import { generateAuditLog } from '../utils/auditService.js';
 
 export const createAttachment = async (req, res) => {
     try {

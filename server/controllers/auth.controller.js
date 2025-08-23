@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js'; 
 
+
 // @route   POST /api/auth/login
 // @desc    Autentica un usuario y devuelve un token en una cookie
 // @access  Publico

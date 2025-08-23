@@ -1,6 +1,7 @@
 import Notification from "../models/notification.js";
 import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
+import { generateAuditLog } from '../utils/auditService.js';
 
 export const createNotification = async (req, res) => {
     try {
@@ -24,6 +25,8 @@ export const createNotification = async (req, res) => {
         });
 
         await newNotification.save();
+
+        await generateAuditLog(req, 'CREATE', 'Notification',newNotification._id,`Notificación creada para el usuario ${recipientId}: "${title}"`);
 
         res.status(201).json({ message: 'Notification created successfully', notification: newNotification });
     } catch (error) {

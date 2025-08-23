@@ -1,6 +1,7 @@
 import Comment from "../models/comment.js";
 import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
+import { generateAuditLog } from '../utils/auditService.js';
 
 export const createComment = async (req, res) => {
     try {
@@ -24,6 +25,8 @@ export const createComment = async (req, res) => {
         });
 
         await newComment.save();
+
+        await generateAuditLog(req,'CREATE','Comment', newComment._id, `Comentario creado por usuario ${userId} en entidad ${relatedEntity}`);
 
         res.status(201).json({ message: 'Comment created successfully', comment: newComment });
     } catch (error) {
@@ -71,6 +74,8 @@ export const deleteComment = async (req, res) => {
             return res.status(404).json({ message: 'Comment not found' });
         }
 
+        await generateAuditLog(req, 'DELETE', 'Comment', commentId, `Comentario eliminado: "${commentId.comment.substring(0, 50)}${commentId.comment.length > 50 ? '...' : ''}"`);
+
         res.status(200).json({ message: 'Comment deleted successfully', comment: deletedComment });
     } catch (error) {
         logger.error(`Error deleting comment: ${error.message}`);
@@ -99,6 +104,8 @@ export const updateComment = async (req, res) => {
         if (!updatedComment) {
             return res.status(404).json({ message: 'Comment not found' });
         }
+
+        await generateAuditLog(req,'UPDATE', 'Comment', commentId, `Comentario actualizado. Anterior: "${createComment.comment.substring(0, 50)}${createComment.comment.length > 50 ? '...' : ''}". Nuevo: "${comment.substring(0, 50)}${comment.length > 50 ? '...' : ''}"` );
 
         res.status(200).json({ message: 'Comment updated successfully', comment: updatedComment });
     } catch (error) {

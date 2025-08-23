@@ -1,6 +1,7 @@
 import Project from "../models/project.js";
 import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
+import { generateAuditLog } from '../utils/auditService.js';
 
 export const createProject = async (req, res) => {
     try {
@@ -24,6 +25,8 @@ export const createProject = async (req, res) => {
         });
 
         await newProject.save();
+
+        await generateAuditLog(req, 'CREATE', 'Project', newProject._id, `Proyecto creado: "${name}" - Propietario: ${ownerId}`);
 
         res.status(201).json({ message: 'Project created successfully', project: newProject });
     } catch (error) {
@@ -72,6 +75,8 @@ export const updateProject = async (req, res) => {
             return res.status(404).json({ message: 'Project not found' });
         }
 
+        await generateAuditLog(req, 'UPDATE', 'Project', id, `Proyecto actualizado: "${createProject.name}". Cambios: ${changes.join(', ')}`);
+
         res.status(200).json({ message: 'Project updated successfully', project: updatedProject });
     } catch (error) {
         logger.error(`Error updating project: ${error.message}`);
@@ -94,6 +99,8 @@ export const deleteProject = async (req, res) => {
         if (!deletedProject) {
             return res.status(404).json({ message: 'Project not found' });
         }
+
+        await generateAuditLog(req, 'DELETE', 'Project', id, `Proyecto eliminado: "${Project.name}" - Propietario: ${Project.ownerId}`);
 
         res.status(200).json({ message: 'Project deleted successfully' });
     } catch (error) {

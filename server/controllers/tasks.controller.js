@@ -2,6 +2,7 @@ import Task from "../models/task.js";
 import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
 import { handleError } from "../utils/errorHandler.js";
+import { generateAuditLog } from '../utils/auditService.js';
 
 export const createTask = async (req, res) => {
     try {
@@ -27,6 +28,8 @@ export const createTask = async (req, res) => {
         });
 
         await newTask.save();
+
+        await generateAuditLog(req, 'CREATE', 'Task', newTask._id, `Tarea creada: "${title}" - Asignada a: ${assignedTo} - Proyecto: ${projectId} - Fecha límite: ${dueDate}`);
 
         res.status(201).json({ message: 'Task created successfully', task: newTask });
     } catch (error) {
@@ -75,6 +78,8 @@ export const updateTask = async (req, res) => {
             return res.status(404).json({ message: 'Task not found' });
         }
 
+        await generateAuditLog(req, 'UPDATE', 'Task', taskId, `Tarea actualizada: "${currentTask.title}". Cambios: ${changes.join(', ')}`);
+
         res.status(200).json({ message: 'Task updated successfully', task: updatedTask });
     } catch (error) {
         logger.error(`Error updating task: ${error.message}`);
@@ -97,6 +102,8 @@ export const deleteTask = async (req, res) => {
         if (!deletedTask) {
             return res.status(404).json({ message: 'Task not found' });
         }
+
+        await generateAuditLog(req, 'DELETE', 'Task', taskId, `Tarea eliminada: "${Task.title}" - Proyecto: ${Task.projectId} - Asignada a: ${Task.assignedTo}`);
 
         res.status(200).json({ message: 'Task deleted successfully' });
     } catch (error) {
