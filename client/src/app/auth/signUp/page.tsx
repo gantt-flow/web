@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { registerAndLogin } from '@/services/authService';
 import Image from "next/image";
+import Link from 'next/link';
 
 // Roles
 const userRoles = ['Administrador de proyectos', 'Miembro de equipo', 'Colaborador', 'Cliente', 'Auditor'];
@@ -123,23 +124,25 @@ export default function SignUpPage() {
                 </div>
                 <p className="mt-8 text-center">
                     {/* NOTA: Este enlace apunta a la misma página de registro, quizás debería ir a una página de "recuperar contraseña" */}
-                    <a href="/auth/forgot-password" className="hover:underline">¿Olvidaste tu contraseña?</a>
+                    <Link href="/auth/olvide-contraseña" className="hover:underline">¿Olvidaste tu contraseña?</Link>
                 </p>
                 <p className="mt-4 text-center">
-                    ¿Ya tienes una cuenta? <a href="/auth/login" className="hover:underline">Inicia sesión aquí</a>
+                    ¿Ya tienes una cuenta? <Link href="/auth/login" className="hover:underline">Inicia sesión aquí</Link>
                 </p>
             </div>
 
             <div className="flex flex-col basis-1/2 bg-green-500">
                 <div className="flex flex-col self-center mt-30">
-                    <Image
-                        className="dark:invert"
-                        src="/ganttFlowWhite.svg"
-                        alt="Gantt Logo"
-                        width={346}
-                        height={77}
-                        priority
-                    />
+                    <Link href="/">
+                        <Image
+                            className="dark:invert"
+                            src="/ganttFlowWhite.svg"
+                            alt="Gantt Logo"
+                            width={346}
+                            height={77}
+                            priority
+                        />
+                    </Link>
                 </div>
                 <p className="mt-30 text-center text-white text-[30px] w-2/3 self-center">La solución que necesitas para tu proyecto</p>
             </div>

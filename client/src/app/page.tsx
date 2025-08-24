@@ -16,8 +16,8 @@ export default function Home() {
         />
 
         <div className="flex items-center flex-1">
-          <Link className="ml-10 text-[18px]" href="">Inicio</Link>
-          <Link className="ml-10 text-[18px]" href="">¿Por qué GanttFlow?</Link>
+          <Link className="ml-10 text-[18px]" href="/sobre-nosotros">Sobre nosotros</Link>
+          <Link className="ml-10 text-[18px]" href="/porque">¿Por qué GanttFlow?</Link>
         </div>
 
         <div className="flex flex-row ml-auto gap-5">
@@ -54,7 +54,12 @@ export default function Home() {
           height={550}
           />
 
-          <Button text="Registrate" type="button" className="p-2 w-1/6 self-center rounded-lg bg-green-500 hover:bg-gray-100 hover:text-green-500"></Button>
+          <Button 
+            text="Registrate" 
+            type="button" 
+            className="p-2 w-1/6 self-center rounded-lg bg-green-500 hover:bg-gray-100 hover:text-green-500"
+            redirectTo="/auth/signUp"
+          />
           <p className="mt-5 text-[18px] self-center">Mantente organizado, cumple con los plazos y colabora sin complicaciones con tu equipo.</p>
 
         </div>
@@ -99,7 +104,7 @@ export default function Home() {
                 className="p-2 rounded-lg flex items-center"
                 aria-label="GitHub Profile"
               >
-                <Image src="/githubLogo.png" alt="GitHub" width={24} height={24} />
+                <Image src="/githubLogo.svg" alt="GitHub" width={24} height={24} />
               </a>
             </div>
 

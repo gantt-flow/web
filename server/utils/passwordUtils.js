@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
  */
 export const hashPassword = async (password, saltRounds = 10) => {
     if (!password) throw new Error('Password is required for hashing');
-    return bcrypt.hash(password, saltRounds);
+    return await bcrypt.hash(password, saltRounds);
 };
 
 /**

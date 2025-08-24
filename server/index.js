@@ -15,12 +15,11 @@ import projectsRoutes from './routes/projects.routes.js';
 import remindersRoutes from './routes/reminders.routes.js';
 import tasksRoutes from './routes/tasks.routes.js';
 import authRoutes from './routes/auth.routes.js';
-import verifyRoutes from './routes/verify.routes.js';
 
 
 dotenv.config(); // Load environment variables from .env file
 const app = express();
-// Use PORT from environment or default to 5000
+// Use PORT from environment or default to 8080
 const PORT = process.env.PORT || 8080;
 // Middlware to parse JSON
 app.use(express.json());
@@ -32,7 +31,6 @@ app.use(cors({
     optionsSuccessStatus: 200,
     credentials: true
 }))
-
 
 app.use('/users', usersRoutes);
 app.use('/admin', adminRoutes);
@@ -46,7 +44,6 @@ app.use('/projects', projectsRoutes);
 app.use('/reminders', remindersRoutes);
 app.use('/tasks', tasksRoutes);
 app.use('/auth', authRoutes);
-app.use('/auth/verify', verifyRoutes);
 
 
 app.listen(PORT, () => {

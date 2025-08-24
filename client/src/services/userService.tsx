@@ -13,12 +13,27 @@ export interface User {
   theme?: string;
   readOnly?: boolean;
   auditLogAccess?: boolean;
-  // ... cualquier otro campo del usuario
 }
 
 export interface NewUser {
     name: string;
     email: string;
+}
+
+// Interfaz para los datos del usuario autenticado
+export interface AuthenticatedUser {
+  authenticated: boolean;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
+    profilePicture?: string;
+    notifications?: boolean;
+    theme?: string;
+    readOnly?: boolean;
+    auditLogAccess?: boolean;
+  }
 }
 
 /**
@@ -34,6 +49,18 @@ export const getAllUsers = async (): Promise<User[]> => {
     throw error;
   }
 };
+
+
+// Checks authentication status, returns user data if authenticated
+export const getCurrentUser = async (): Promise<AuthenticatedUser> => {
+  try {
+    const response = await api.get<AuthenticatedUser>('/auth/verify');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 /**
  * Obtiene un usuario por su ID

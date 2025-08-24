@@ -6,6 +6,15 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface SignUpData {
+  email: string;
+  password: string;
+  name: string;
+  role: string;
+  projectId?: string;
+}
+
+
 /**
  * Realiza una petición de login al backend.
  * @param credentials El objeto con el email y la contraseña del usuario.
@@ -17,14 +26,6 @@ export const login = async (credentials: LoginCredentials) => {
   return response.data;
 };
 
-export interface SignUpData {
-  email: string;
-  password: string;
-  name: string;
-  role: string;
-  // profilePicture: File | null;
-  projectId?: string;
-}
 
 /**
  * Realiza una petición de registro al backend.
@@ -55,12 +56,3 @@ export const logout = async () => {
   await api.post('/auth/logout');
 };
 
-// Añade esta función para verificar el estado de autenticación
-export const checkAuth = async () => {
-  try {
-    const response = await api.get('/auth/verify');
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
