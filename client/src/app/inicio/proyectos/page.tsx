@@ -17,7 +17,7 @@ export default function Proyectos(){
                 setIsLoading(true);
                 setError(null);
 
-                // Obtener el usuario actual
+                // Obtener el usuario actual para conseguir su ID
                 const { user } = await getCurrentUser();
                 
                 if (user && user._id) {

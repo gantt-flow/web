@@ -29,15 +29,14 @@ api.interceptors.response.use(
   // La segunda función se ejecuta para respuestas con error
   (error) => {
     // Verificamos si el error tiene una respuesta del servidor y un código de estado
+    // Si el código es 401 (No autorizado), significa que el token no es válido o ha expirado.
     if (error.response && error.response.status === 401) {
-      // Si el código es 401 (No autorizado), significa que el token no es válido o ha expirado.
-    
       // Verificamos que no estemos ya en una página pública para evitar bucles de redirección.
       if (typeof window !== 'undefined' && window.location.pathname !== '/auth/login') {
         console.error("Sesión expirada o no autorizada. Redirigiendo al inicio...");
         
-        // Redirigimos al usuario a la página de inicio.
-        // El servidor ya considera la sesión inválida. Lo importante es sacar al usuario de la vista protegida.
+        // El servidor ya considera la sesión inválida. Sacamos al usuario del frontend.
+        // Usuario es redirigido a la página de inicio.
         window.location.href = '/auth/login'; 
       }
     }

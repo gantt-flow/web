@@ -1,13 +1,13 @@
 import api from '@/services/api';
 
-// Definimos los tipos de datos que esperamos para una mejor seguridad y autocompletado
+// Interfaz de usuario según el backend para obtener todos los usuarios
 export interface User {
   isActive: true;
   _id: string;
   name: string;
   email: string;
   role: string;
-  password?: string; // Campo para creación
+  password?: string;
   profilePicture?: string;
   notifications?: boolean;
   theme?: string;
@@ -26,6 +26,7 @@ export interface AuthenticatedUser {
   }
 }
 
+// Interfaz para crear un nuevo usuario
 export interface NewUser {
     name: string;
     email: string;
@@ -47,8 +48,12 @@ export const getAllUsers = async (): Promise<User[]> => {
 };
 
 
-// Checks authentication status, returns user data if authenticated
-// Just shows non-sensitive user data and non project, tasks or team details
+/**
+ * Crea un nuevo usuario
+ * @desc Revisa el estado de autenticacion, regresa datos del usuario si está autenticado
+ * Solo muestra datos no sensibles del usuario y no detalles de proyectos, tareas o equipo
+ * @returns El objeto del usuario autenticado
+ */
 export const getCurrentUser = async (): Promise<AuthenticatedUser> => {
   try {
     const response = await api.get<AuthenticatedUser>('/users/current');
@@ -58,21 +63,6 @@ export const getCurrentUser = async (): Promise<AuthenticatedUser> => {
   }
 };
 
-
-/**
- * Obtiene un usuario por su ID
- * @param userId El ID del usuario
- * @returns El objeto del usuario
- */
-export const getUserById = async (userId: string): Promise<User> => {
-  try {
-    const response = await api.get<User>(`/users/${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error al obtener el usuario ${userId}:`, error);
-    throw error;
-  }
-};
 
 /**
  * Crea un nuevo usuario
