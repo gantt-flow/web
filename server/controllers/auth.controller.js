@@ -31,10 +31,10 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // 6. Create the payload for the JWT, containing non-sensitive user data.
+        // Create the payload for the JWT, containing non-sensitive user data.
         const payload = {
             user: {
-                id: user.id,
+                _id: user.id,
                 email: user.email,
                 name: user.name,
                 role: user.role
@@ -58,8 +58,7 @@ export const login = async (req, res) => {
 
                 // Send a success response with user data.
                 res.status(200).json({ 
-                    msg: 'Login successful',
-                    user: payload.user 
+                    msg: 'Login successful'
                 });
             }
         );
@@ -67,7 +66,7 @@ export const login = async (req, res) => {
     } catch (err) {
         // Log and send a generic server error if anything goes wrong.
         console.error(err.message);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error'});
     }
 };
 
@@ -134,11 +133,3 @@ export const logout = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
-
-export const verifyAuth = async (req, res) => {
-    res.json({ 
-      authenticated: true, 
-      user: req.user 
-    });
-}

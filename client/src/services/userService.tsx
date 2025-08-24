@@ -15,11 +15,6 @@ export interface User {
   auditLogAccess?: boolean;
 }
 
-export interface NewUser {
-    name: string;
-    email: string;
-}
-
 // Interfaz para los datos del usuario autenticado
 export interface AuthenticatedUser {
   authenticated: boolean;
@@ -28,13 +23,14 @@ export interface AuthenticatedUser {
     name: string;
     email: string;
     role: string;
-    profilePicture?: string;
-    notifications?: boolean;
-    theme?: string;
-    readOnly?: boolean;
-    auditLogAccess?: boolean;
   }
 }
+
+export interface NewUser {
+    name: string;
+    email: string;
+}
+
 
 /**
  * Obtiene la lista de todos los usuarios
@@ -52,9 +48,10 @@ export const getAllUsers = async (): Promise<User[]> => {
 
 
 // Checks authentication status, returns user data if authenticated
+// Just shows non-sensitive user data and non project, tasks or team details
 export const getCurrentUser = async (): Promise<AuthenticatedUser> => {
   try {
-    const response = await api.get<AuthenticatedUser>('/auth/verify');
+    const response = await api.get<AuthenticatedUser>('/users/current');
     return response.data;
   } catch (error) {
     throw error;

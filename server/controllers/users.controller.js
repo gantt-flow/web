@@ -1,11 +1,24 @@
 import User from '../models/user.js';
 import { isValidObjectId } from 'mongoose'; // Import Mongoose's isValidObjectId for ID validation
 import { logger } from '../utils/logger.js';
+import { handleError } from '../utils/errorHandler.js';
 import { generateAuditLog } from '../utils/auditService.js';
 import { hashPassword } from '../utils/passwordUtils.js';
 
 
-export const getUser = async (req, res) => {
+export const getCurrentUser = async (req, res) => {
+    try {
+        res.status(200).json({
+            authenticated: true,
+            user: req.user // req.user is set in the auth middleware and sends only non-sensitive user data
+        });
+    } catch (error) {
+        logger.error(`Error fetching user: ${error.message}`);
+        handleError(res, error);
+    }
+}
+
+export const getUserWithId = async (req, res) => {
     try {
         const userId = req.params.id;
 
@@ -27,6 +40,7 @@ export const getUser = async (req, res) => {
         handleError(res, error);
     }
 }
+
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -157,6 +171,29 @@ export const deleteUser = async (req, res) => {
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
         logger.error(`Error deleting user: ${error.message}`);
+        handleError(res, error);
+    }
+}
+
+export const getCurrentUserProjects = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // Validate the user ID
+        if (!isValidObjectId(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
+
+        // Fetch the user from the database
+        const user = await User.findById(userId).populate('projectId').select('projectId'); // Populate only the projects field
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json(user.projectId);
+    } catch (error) {
+        logger.error(`Error fetching user's projects: ${error.message}`);
         handleError(res, error);
     }
 }

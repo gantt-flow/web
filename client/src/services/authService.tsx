@@ -21,7 +21,7 @@ export interface SignUpData {
  * @returns Una promesa que resuelve con la respuesta del servidor.
  */
 export const login = async (credentials: LoginCredentials) => {
-  // Aquí es donde ocurre la llamada a la API
+  // Llamada a la API
   const response = await api.post('/auth/login', credentials);
   return response.data;
 };

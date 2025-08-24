@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useEffect, use} from 'react';
+import {useState, useEffect } from 'react';
 import { getCurrentUser } from '@/services/userService';
 
 export default function HomePage() {
@@ -10,7 +10,6 @@ export default function HomePage() {
     useEffect(() => {
         const fetchUser= async () => {
             try {
-
                 const { user } = await getCurrentUser();
                 if (user && user.name) {
                     setUserName(user.name);

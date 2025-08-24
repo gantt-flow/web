@@ -20,7 +20,6 @@ export default function Login() {
 
     try {
         await login({ email, password });
-        
         // Si llegamos aquí, el login en el backend fue exitoso.
         router.push('/inicio');
 

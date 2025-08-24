@@ -109,3 +109,12 @@ export const deleteProject = async (req, res) => {
     }
 }
 
+export const getAllProjects = async (req, res) => {
+    try {
+        const projects = await Project.find();
+        res.status(200).json(projects);
+    } catch (error) {
+        logger.error(`Error fetching all projects: ${error.message}`);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
