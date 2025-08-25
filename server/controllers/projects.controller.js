@@ -45,7 +45,9 @@ export const getProjectById = async (req, res) => {
         }
 
         // Fetch the project by ID
-        const project = await Project.findById(id).populate('ownerId', 'name email');
+        const project = await Project.findById(id)
+            .populate('projectManager', 'name')
+            .populate('teamMembers', 'name email role profilePicture');;
 
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });
@@ -118,3 +120,52 @@ export const getAllProjects = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+
+export const addMemberToProject = async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const { email } = req.body;
+
+        const userToAdd = await User.findOne({ email });
+        if (!userToAdd) {
+            return res.status(404).json({ message: 'Usuario no encontrado con ese email.' });
+        }
+
+        const project = await Project.findByIdAndUpdate(
+            projectId,
+            { $addToSet: { teamMembers: userToAdd._id } }, // $addToSet evita duplicados
+            { new: true }
+        ).populate('teamMembers', 'name email role profilePicture');
+
+        if (!project) {
+            return res.status(404).json({ message: 'Proyecto no encontrado.' });
+        }
+
+        res.status(200).json(updatedProject.teamMembers);
+    } catch (error) {
+        logger.error(`Error adding member to project: ${error.message}`);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
+export const removeMemberFromProject = async (req, res) => {
+    try {
+        const { projectId, memberId } = req.params;
+
+        const project = await Project.findByIdAndUpdate(
+            projectId,
+            { $pull: { teamMembers: memberId } }, // $pull elimina un elemento de un array
+            { new: true }
+        );
+
+        if (!project) {
+            return res.status(404).json({ message: 'Proyecto no encontrado.' });
+        }
+
+        res.status(200).json({ message: 'Miembro eliminado correctamente.' });
+    } catch (error) {
+        logger.error(`Error removing member from project: ${error.message}`);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};

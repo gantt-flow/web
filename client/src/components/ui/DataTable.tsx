@@ -4,8 +4,7 @@ interface Column {
   key: string;
   header: string;
   width?: string;
-  // Añade esta nueva propiedad
-  render?: (value: any) => React.ReactNode;
+  render?: (value: any, row: any) => React.ReactNode; 
 }
 
 interface DataTableProps {
@@ -54,9 +53,8 @@ export const DataTable: FC<DataTableProps> = ({
                   key={`${index}-${column.key}`}
                   className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
                 >
-                  {/* Verifica si existe la función render */}
-                  {column.render 
-                    ? column.render(item[column.key]) 
+                  {column.render
+                    ? column.render(item[column.key], item) 
                     : item[column.key]
                   }
                 </td>
