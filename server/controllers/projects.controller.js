@@ -1,34 +1,35 @@
 import Project from "../models/project.js";
+import User from "../models/user.js";
 import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
 import { generateAuditLog } from '../utils/auditService.js';
 
 export const createProject = async (req, res) => {
     try {
-        const { name, description, ownerId } = req.body;
+        const { name, description, startDate, endDate, status } = req.body;
+        const projectManagerId = req.user._id;
 
         // Validate the required fields
-        if (!name || !description || !ownerId) {
-            return res.status(400).json({ message: 'Fill all the required fields' });
-        }
-
-        // Validate ObjectId for ownerId
-        if (!isValidObjectId(ownerId)) {
-            return res.status(400).json({ message: 'Invalid owner ID' });
+        if (!name || !description) {
+            return res.status(400).json({ message: 'Recuerda llenar los campos requeridos' });
         }
 
         // Create a new project entry
         const newProject = new Project({
             name,
             description,
-            ownerId
+            startDate,
+            endDate,
+            status,
+            projectManager: projectManagerId
         });
 
         await newProject.save();
 
-        await generateAuditLog(req, 'CREATE', 'Project', newProject._id, `Proyecto creado: "${name}" - Propietario: ${ownerId}`);
+        await generateAuditLog(req, 'CREATE', 'Project', newProject._id, `Proyecto creado: "${name}" - Propietario: ${projectManagerId}`);
 
         res.status(201).json({ message: 'Project created successfully', project: newProject });
+        
     } catch (error) {
         logger.error(`Error creating project: ${error.message}`);
         res.status(500).json({ message: 'Internal server error' });
@@ -46,8 +47,9 @@ export const getProjectById = async (req, res) => {
 
         // Fetch the project by ID
         const project = await Project.findById(id)
-            .populate('projectManager', 'name')
-            .populate('teamMembers', 'name email role profilePicture');;
+            .select('name description startDate endDate status')
+            .populate('teamMembers', 'name email role profilePicture')
+            .populate('projectManager', 'name');
 
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });
@@ -57,6 +59,30 @@ export const getProjectById = async (req, res) => {
     } catch (error) {
         logger.error(`Error fetching project by ID: ${error.message}`);
         res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+
+export const getCurrentUserProjects = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // Validate the user ID
+        if (!isValidObjectId(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
+
+        // Fetch the user from the database
+        const user = await User.findById(userId).populate('projectId').select('projectId'); // Populate only the projects field
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json(user.projectId);
+    } catch (error) {
+        logger.error(`Error fetching user's projects: ${error.message}`);
+        handleError(res, error);
     }
 }
 
@@ -132,17 +158,24 @@ export const addMemberToProject = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado con ese email.' });
         }
 
+        // Solo se actualiza el proyecto
         const project = await Project.findByIdAndUpdate(
             projectId,
-            { $addToSet: { teamMembers: userToAdd._id } }, // $addToSet evita duplicados
+            { $addToSet: { teamMembers: userToAdd._id } },
             { new: true }
-        ).populate('teamMembers', 'name email role profilePicture');
+        );
 
         if (!project) {
             return res.status(404).json({ message: 'Proyecto no encontrado.' });
         }
 
-        res.status(200).json(updatedProject.teamMembers);
+        // Se vuelve a buscar el proyecto y se poblan los datos
+        const populatedProject = await Project.findById(project._id)
+            .populate('teamMembers', 'name email role profilePicture');
+
+        // Se envía la lista de miembros ya poblada
+        res.status(200).json(populatedProject.teamMembers);
+
     } catch (error) {
         logger.error(`Error adding member to project: ${error.message}`);
         res.status(500).json({ message: 'Error interno del servidor' });

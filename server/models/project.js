@@ -21,8 +21,8 @@ const projectSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['not_started', 'in_progress', 'completed', 'on_hold'],
-        default: 'not_started'
+        enum: ['Sin iniciar', 'En progreso', 'Completado', 'En espera'],
+        default: 'Sin iniciar'
     },
     teamMembers: [{
         type: Schema.Types.ObjectId,
@@ -37,14 +37,8 @@ const projectSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Task'
     }],
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
+}, {
+    timestamps:true
 });
 
 const Project = mongoose.model('Project', projectSchema);

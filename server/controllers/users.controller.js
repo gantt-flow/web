@@ -115,7 +115,7 @@ export const createUser = async (req, res) => {
         // Record this important event in an audit log for security and tracking.
         await generateAuditLog(req, 'CREATE', 'User', newUser._id, `Usuario creado: ${newUser.email}`);
 
-        res.status(201).json({ message: 'User created successfully', user: newUser });
+        res.status(201).json({ message: 'User created successfully'});
     } catch (error) {
         logger.error(`Error creating user: ${error.message}`);
         handleError(res, error);
@@ -171,29 +171,6 @@ export const deleteUser = async (req, res) => {
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
         logger.error(`Error deleting user: ${error.message}`);
-        handleError(res, error);
-    }
-}
-
-export const getCurrentUserProjects = async (req, res) => {
-    try {
-        const userId = req.params.id;
-
-        // Validate the user ID
-        if (!isValidObjectId(userId)) {
-            return res.status(400).json({ message: 'Invalid user ID' });
-        }
-
-        // Fetch the user from the database
-        const user = await User.findById(userId).populate('projectId').select('projectId'); // Populate only the projects field
-        
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        res.status(200).json(user.projectId);
-    } catch (error) {
-        logger.error(`Error fetching user's projects: ${error.message}`);
         handleError(res, error);
     }
 }

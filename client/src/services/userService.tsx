@@ -1,4 +1,6 @@
 import api from '@/services/api';
+import { Projects } from './projectService';
+import { Task } from './taskService'
 
 // Interfaz de usuario según el backend para obtener todos los usuarios
 export interface User {
@@ -6,13 +8,17 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: string;
   password?: string;
+  role: string;
   profilePicture?: string;
+  twoFactorEnabled?: boolean;
   notifications?: boolean;
   theme?: string;
-  readOnly?: boolean;
+  readonly?: boolean;
   auditLogAccess?: boolean;
+  projectId: Projects[];
+  taskId: Task[];
+  permisions: string[];
 }
 
 // Interfaz para los datos del usuario autenticado
@@ -34,22 +40,7 @@ export interface NewUser {
 
 
 /**
- * Obtiene la lista de todos los usuarios
- * @returns Un array de usuarios
- */
-export const getAllUsers = async (): Promise<User[]> => {
-  try {
-    const response = await api.get<User[]>('/users');
-    return response.data;
-  } catch (error) {
-    console.error("Error al obtener los usuarios:", error);
-    throw error;
-  }
-};
-
-
-/**
- * Crea un nuevo usuario
+ * Obtiene el usuario actualmente autenticado
  * @desc Revisa el estado de autenticacion, regresa datos del usuario si está autenticado
  * Solo muestra datos no sensibles del usuario y no detalles de proyectos, tareas o equipo
  * @returns El objeto del usuario autenticado

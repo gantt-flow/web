@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Button from "@/components/ui/button";
-import { getUserProjects, UserProjects } from "@/services/projectService"; 
+import { getUserProjects, Projects } from "@/services/projectService"; 
 import { getCurrentUser } from '@/services/userService'; 
 
 
 export default function Proyectos(){
-    const [projects, setProjects] = useState<UserProjects[]>([]);
+    const [projects, setProjects] = useState<Projects[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();

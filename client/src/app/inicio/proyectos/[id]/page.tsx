@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { getProjectById, UserProjects, addMember, removeMember } from '@/services/projectService';
+import { getProjectById, Projects, addMember, removeMember } from '@/services/projectService';
 import { DataTable } from '@/components/ui/DataTable';
 import AddMemberModal from '@/components/addMember';
 import { CircleDashed, CalendarClock, Contact } from "lucide-react"
@@ -10,8 +10,7 @@ import { CircleDashed, CalendarClock, Contact } from "lucide-react"
 export default function ProjectDetailsPage() {
     const params = useParams();
     const { id: projectId } = params; // Extrae el ID de la URL
-
-    const [project, setProject] = useState<UserProjects | null>(null);
+    const [project, setProject] = useState<Projects | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -35,12 +34,13 @@ export default function ProjectDetailsPage() {
     const handleAddMember = async (email: string) => {
 
         if (typeof projectId !== 'string' || !project) return;
-        const updatedMembers = await addMember(projectId, email);
 
+        const updatedMembers = await addMember(projectId, email);
         setProject({ ...project, teamMembers: updatedMembers });
     };
 
     const handleRemoveMember = async (memberId: string) => {
+
     if (typeof projectId !== 'string' || !project) return;
         if (confirm('¿Estás seguro de que quieres eliminar a este miembro del proyecto?')) {
         await removeMember(projectId, memberId);
@@ -100,7 +100,6 @@ export default function ProjectDetailsPage() {
                     </div>
 
                     <div className='flex flex-row'>
-
                         <CalendarClock size={45} color="#d28a37" strokeWidth={1.75}/>
                         <div className='flex flex-col px-2'>
                             <p><strong>Fecha de inicio</strong></p>
@@ -110,13 +109,11 @@ export default function ProjectDetailsPage() {
                     </div>
                     
                     <div className='flex flex-row'>
-
                         <CalendarClock size={45} color="#346fe5" strokeWidth={1.75}/>
                         <div className='flex flex-col px-2'>
                             <p><strong>Fecha de fin</strong> </p>
                             <p>{new Date(project.endDate).toLocaleDateString()}</p>
                         </div>
-                        
                     </div>
                     
                     <div className='flex flex-row'>
@@ -125,7 +122,6 @@ export default function ProjectDetailsPage() {
                             <p><strong>Manager</strong> </p>
                             <p>{project.projectManager.name}</p>
                         </div>
-                        
                     </div>
                 </div>
             </div>
