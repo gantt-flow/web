@@ -62,7 +62,7 @@ export const getAllUsers = async (req, res) => {
 
       // 2. Select specific fields to return, excluding sensitive data like passwords.
       // This is also known as a "projection".
-      .select('name email role isActive createdAt updatedAt')
+      .select('name email role isActive createdAt updatedAt permisions')
 
       // 3. Skip a number of documents for pagination.
       // Example: For page 2 with a limit of 10, it skips (2-1)*10 = 10 documents.

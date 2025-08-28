@@ -80,6 +80,17 @@ export const createUserAdmin = async (newUser: NewUser): Promise<User> => {
   }
 };
 
+//Admin interface getUsers
+export const getAllUsers = async (): Promise<User[]> => {
+  try {
+    const response = await api.get<User[]>('/users');
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener los usuarios:", error);
+    throw error;
+  }
+};
+
 export const updateUser = async (userId: string, userData: Partial<User>): Promise<User> => {
   try {
     const response = await api.put<User>(`/users/${userId}`, userData);

@@ -80,7 +80,7 @@ export default function DashboardLayoutAdmin() {
       profilePicture: newUserData.profilePicture || 'default-profile.png',
       notifications: newUserData.notifications !== undefined ? newUserData.notifications : true,
       theme: newUserData.theme || 'system',
-      readOnly: newUserData.readOnly || false,
+      readOnly: newUserData.readonly || false,
       auditLogAccess: newUserData.auditLogAccess || false
     };
     
