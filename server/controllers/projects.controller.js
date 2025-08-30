@@ -202,3 +202,43 @@ export const removeMemberFromProject = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+
+export const addProjectManagerToProject = async (req, res) => {
+    try{
+
+        const userId  = req.user._id;
+        const { projectId } = req.params;
+
+        if (!userId || !projectId) {
+            return res.status(400).json({ message: 'Datos no válidos.' });
+        }
+
+        // * Solo se actualiza el campo de proyectos del usuario
+        const projectToUpdate = await Project.findByIdAndUpdate(
+            projectId,
+            { projectManager: userId },
+            { new: true }
+        );
+
+        if (!projectToUpdate) {
+            return res.status(404).json({ message: 'Proyecto no encontrado.' });
+        }
+
+        const userToAddProject = await User.findByIdAndUpdate(
+            userId,
+            { $addToSet: {projectId: Object(projectId)}},
+            { new: true }
+        )
+
+        if (!userToAddProject) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        // Se solo un mensaje de éxito
+        res.status(200).json({ message: "Proyecto agregado al usuario."});
+
+    }catch (error) {
+        logger.error(`Error adding project manager to project: ${error.message}`);
+        res.status(500).json({ message: "Error interno del servidor"})
+    }
+}

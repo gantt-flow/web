@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
-import { createProject, NewProject } from '@/services/projectService';
+import { createProject, NewProject, addProjectManagerToProject } from '@/services/projectService';
 
 
 // Estados de proyecto
@@ -36,6 +36,10 @@ export default function Proyectos(){
 
         try {
             const newProject = await createProject(formData);
+            console.log(String(newProject._id))
+            console.log(`Sin lo del string: ${newProject._id}`)
+            
+            await addProjectManagerToProject(String(newProject._id));
             router.push(`/inicio/proyectos/${newProject._id}`);
         }catch(err){
             setError('Hubo un error al crear el proyecto. Por favor, intenta de nuevo.');
@@ -43,6 +47,14 @@ export default function Proyectos(){
         } finally {
             setIsSubmitting(false);
         }
+    }
+
+    if(isSubmitting){
+        return(<p>Cargando datos...</p>)
+    }
+
+    if(error){
+        return(<p>Error: {error}</p>)
     }
 
 

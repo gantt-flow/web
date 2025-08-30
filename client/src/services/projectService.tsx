@@ -7,12 +7,12 @@ export interface Projects {
     _id: string;
     name: string;
     description: string;
-    startDate?: string;
-    endDate?: string;
-    status?: string;
+    startDate: string;
+    endDate: string;
+    status: string;
     teamMembers: User[];
-    projectManager?: User;
-    tasks?: Task[];
+    projectManager: User;
+    tasks: Task[];
 }
 
 // Definimos una interfaz para los datos de un nuevo proyecto
@@ -91,3 +91,20 @@ export const createProject = async (projectData: NewProject): Promise<NewProject
         throw error;
     }
 };
+
+
+/**
+ * Agrega el project manager a un nuevo proyecto
+ * @param projectData Los datos del nuevo proyecto
+ * @returns El objeto del proyecto creado
+ */
+export const addProjectManagerToProject = async (projectId: string) => {
+    try {
+        const response = await api.post(`/projects/addProjectManagerToProject/${projectId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error al crear el proyecto:", error);
+        throw error;
+    }
+};
+

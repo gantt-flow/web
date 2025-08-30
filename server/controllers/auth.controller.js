@@ -20,7 +20,7 @@ export const login = async (req, res) => {
         // If no user is found, send a generic error message.
         // It's a security best practice to not specify whether the email or password was wrong.
         if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
         // Compare the provided password with the hashed password stored in the database.
@@ -28,7 +28,7 @@ export const login = async (req, res) => {
 
         // If the passwords do not match, send the same generic error message.
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
         // Create the payload for the JWT, containing non-sensitive user data.
