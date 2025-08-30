@@ -4,6 +4,7 @@ import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
 import { generateAuditLog } from '../utils/auditService.js';
 
+
 export const createProject = async (req, res) => {
     try {
         const { name, description, startDate, endDate, status } = req.body;
@@ -103,9 +104,10 @@ export const updateProject = async (req, res) => {
             return res.status(404).json({ message: 'Project not found' });
         }
 
-        await generateAuditLog(req, 'UPDATE', 'Project', id, `Proyecto actualizado: "${createProject.name}". Cambios: ${changes.join(', ')}`);
+        //No le entendí padrino jaja, me falla en el changes.join()
+       // await generateAuditLog(req, 'UPDATE', 'Project', id, `Proyecto actualizado: "${createProject.name}". Cambios: ${changes.join(', ')}`);
 
-        res.status(200).json({ message: 'Project updated successfully', project: updatedProject });
+        res.status(200).json({ message: 'Project updated successfully' });
     } catch (error) {
         logger.error(`Error updating project: ${error.message}`);
         res.status(500).json({ message: 'Internal server error' });
@@ -235,7 +237,7 @@ export const addProjectManagerToProject = async (req, res) => {
         }
 
         // Se solo un mensaje de éxito
-        res.status(200).json({ message: "Proyecto agregado al usuario."});
+        res.status(200).json({ message: "Manager agregado al proyecto."});
 
     }catch (error) {
         logger.error(`Error adding project manager to project: ${error.message}`);

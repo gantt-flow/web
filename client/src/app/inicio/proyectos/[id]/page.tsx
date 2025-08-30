@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { getProjectById, Projects, addMember, removeMember } from '@/services/projectService';
 import { DataTable } from '@/components/ui/DataTable';
 import AddMemberModal from '@/components/addMember';
-import { CircleDashed, CalendarClock, Contact } from "lucide-react"
+import { CircleDashed, CalendarClock, Contact, Pen } from "lucide-react"
 
 export default function ProjectDetailsPage() {
     const params = useParams();
+    const router = useRouter();
     const { id: projectId } = params; // Extrae el ID de la URL
     const [project, setProject] = useState<Projects | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -73,6 +75,10 @@ export default function ProjectDetailsPage() {
         }
     ];
 
+    const handleEditProjectClick = (projectId: string) => {
+        router.push(`/inicio/proyectos/informacionProyecto/${projectId}`);
+    }
+
 
     if (isLoading) {
         return <div>Cargando detalles del proyecto...</div>;
@@ -84,7 +90,16 @@ export default function ProjectDetailsPage() {
 
     return (
         <div className="p-8 flex-row w-full">
-            <h1 className="text-4xl font-bold">{project.name}</h1>
+            <div className='flex flex-row'>
+                <h1 className="flex-1 text-4xl font-bold">{project.name}</h1>
+                <button 
+                    onClick={ () => handleEditProjectClick(project._id)}
+                    className='flex px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600'
+                >
+                    <Pen size={15} className='self-center mr-2'/>Editar proyecto
+                </button>
+            </div>
+            
             <p className="mt-4 text-lg text-gray-700">{project.description}</p>
 
             <div className="mt-6 p-4 border rounded-md">
@@ -126,14 +141,24 @@ export default function ProjectDetailsPage() {
                 </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-8 flex-1">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-3xl font-bold">Miembros del Equipo</h2>
                     <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
                         + Agregar Miembro
                     </button>
                 </div>
-                <DataTable columns={memberColumns} data={project.teamMembers} />
+
+                { project.teamMembers.length === 0 && (
+                   <div className='justify-self-center mt-40 text-center'>
+                    <p>¡Parece que no has agregado a nadie!</p>
+                    <p>Agrega miembros para empezar a verlos en la lista.</p>
+                   </div>
+                )}
+
+                { project.teamMembers.length > 0 && (
+                    <DataTable columns={memberColumns} data={project.teamMembers} />
+                )}
             </div>
 
             {isModalOpen && (

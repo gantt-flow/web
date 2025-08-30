@@ -108,3 +108,12 @@ export const addProjectManagerToProject = async (projectId: string) => {
     }
 };
 
+export const updateProject = async (projectId: string, projectData: NewProject) => {
+     try {
+        const response = await api.put(`/projects/${projectId}`, projectData);
+        return response.data;
+    } catch (error) {
+        console.error("Error al crear el proyecto:", error);
+        throw error;
+    }
+};

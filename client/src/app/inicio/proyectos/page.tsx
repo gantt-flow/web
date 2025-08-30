@@ -64,7 +64,7 @@ export default function Proyectos(){
                             text="Nuevo proyecto" 
                             type="button" 
                             className="w-44 p-2 self-center mt-8 cursor-pointer rounded-lg bg-green-500 border border-gray-200 hover:bg-gray-100 hover:text-green-500" 
-                            redirectTo="/inicio/proyectos/nuevo"
+                            redirectTo="/inicio/proyectos/informacionProyecto"
                         />
                     </div>
                 )}
@@ -75,7 +75,7 @@ export default function Proyectos(){
                             text="Nuevo proyecto" 
                             type="button" 
                             className="w-44 p-2 self-center mb-4 cursor-pointer rounded-lg bg-green-500 border border-gray-200 hover:bg-gray-100 hover:text-green-500" 
-                            redirectTo="/inicio/proyectos/nuevo"
+                            redirectTo="/inicio/proyectos/informacionProyecto"
                         />
                         {projects.map(project => (
                             <div key={project._id} className="p-4 mb-4 border border-blue-300 rounded-lg shadow-md bg-emerald-500/20">

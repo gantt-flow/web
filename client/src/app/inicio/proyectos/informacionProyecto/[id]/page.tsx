@@ -1,10 +1,10 @@
 'use client';
 
 
-import { useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from 'next/navigation';
 import Image from "next/image";
-import { createProject, NewProject, addProjectManagerToProject } from '@/services/projectService';
+import { NewProject, getProjectById, updateProject } from '@/services/projectService';
 
 
 // Estados de proyecto
@@ -12,6 +12,31 @@ const projectStatuses = ['Sin iniciar', 'En progreso', 'En espera']
 
 export default function Proyectos(){
     const router = useRouter();
+    const params = useParams();
+
+    const { id: projectId } = params; // Extrae el ID de la URL
+    const [project, setProject] = useState<NewProject | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchProject = async () => {
+        if (typeof projectId !== 'string') return;
+        try {
+        setIsLoading(true);
+        const projectData = await getProjectById(projectId);
+        setProject(projectData);
+        } catch (error) {
+        console.error("Error al cargar el proyecto:", error);
+        } finally {
+        setIsLoading(false);
+        }
+    };
+
+     useEffect(() => {
+        fetchProject();
+    }, [projectId]);
+
     const [formData, setFormData] = useState<NewProject>({
         name: '',
         description: '',
@@ -19,9 +44,19 @@ export default function Proyectos(){
         endDate: '',
         status: '',
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        if (project) {
+            setFormData({
+                name: project.name || '',
+                description: project.description || '',
+                startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : '',
+                endDate: project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : '',
+                status: project.status || '',
+            });
+        }
+    }, [project]);
+    
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -35,18 +70,22 @@ export default function Proyectos(){
         setIsSubmitting(true)
 
         try {
-            const newProject = await createProject(formData);
-            console.log(String(newProject._id))
-            console.log(`Sin lo del string: ${newProject._id}`)
-            
-            await addProjectManagerToProject(String(newProject._id));
-            router.push(`/inicio/proyectos/${newProject._id}`);
+            const newProject = await updateProject(String(projectId), formData);            
+            router.push(`/inicio/proyectos/${projectId}`);
         }catch(err){
-            setError('Hubo un error al crear el proyecto. Por favor, intenta de nuevo.');
+            setError('Hubo un error al editar el proyecto. Por favor, intenta de nuevo.');
             console.error(err);
         } finally {
             setIsSubmitting(false);
         }
+    }
+
+     if (isLoading) {
+        return <div>Cargando detalles del proyecto...</div>;
+    }
+
+    if (!project) {
+        return <div>Proyecto no encontrado.</div>;
     }
 
     if(isSubmitting){
@@ -63,7 +102,7 @@ export default function Proyectos(){
 
             <div className="flex flex-col mt-2 px-6">
                 <div>
-                    <h1 className="text-3xl">Nuevo proyecto</h1>
+                    <h1 className="text-3xl">Editar proyecto</h1>
                 </div>
 
                 <div className="flex flex-col flex-1">
@@ -138,7 +177,7 @@ export default function Proyectos(){
                             </div>
                         </div>
 
-                        <button type="submit" className="w-44 p-2 mt-8 cursor-pointer rounded-lg bg-green-500 border border-gray-200 hover:bg-gray-100 hover:text-green-500">Registrar proyecto</button>
+                        <button type="submit" className="w-44 p-2 mt-8 cursor-pointer rounded-lg bg-green-500 border border-gray-200 hover:bg-gray-100 hover:text-green-500">Guardar cambios</button>
                     </form>
                 </div>                
             </div>
