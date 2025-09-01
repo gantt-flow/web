@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DataTable } from '@/components/ui/DataTable';
 import EditPermissionsModal from '@/components/admin/EditPermissionsModal';
-import { User, getAllUsers, updateUser } from '@/services/userService';
+import { User, getAllUsers, updateUser, normalizePermissionsToArray } from '@/services/userService';
 
 // Definir los permisos disponibles según el modelo
 const PERMISSIONS_LIST = [
@@ -17,32 +17,6 @@ const PERMISSIONS_LIST = [
   { key: 'canViewTask', label: 'Ver Tareas' },
 ];
 
-// Ajusta aquí cuáles son los dos permisos que deben venir activos por defecto
-const DEFAULT_ACTIVE_PERMISSIONS = ['canViewProject', 'canViewTask'];
-
-/** Normaliza cualquier permisión a un array de strings */
-const normalizePermissions = (perms?: any): string[] => {
-  if (Array.isArray(perms)) {
-    return perms;
-  }
-  
-  if (perms instanceof Map) {
-    const activePermissions: string[] = [];
-    perms.forEach((value, key) => {
-      if (value) activePermissions.push(key);
-    });
-    return activePermissions;
-  }
-  
-  if (typeof perms === 'object' && perms !== null) {
-    return Object.entries(perms)
-      .filter(([_, value]) => value)
-      .map(([key, _]) => key);
-  }
-  
-  return DEFAULT_ACTIVE_PERMISSIONS;
-};
-
 export default function PermissionsAdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,12 +26,7 @@ export default function PermissionsAdminPage() {
     const fetchUsers = async () => {
       try {
         const data = await getAllUsers();
-        // Normalizamos permisos para la UI: siempre como array de strings
-        const normalizedUsers = data.map((u: User) => ({
-          ...u,
-          permisions: normalizePermissions(u.permisions)
-        }));
-        setUsers(normalizedUsers);
+        setUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);
       } finally {
@@ -69,13 +38,9 @@ export default function PermissionsAdminPage() {
 
   const handleSavePermissions = async (updatedUser: User) => {
     try {
-      // Enviamos directamente el array de strings (formato frontend)
-      // El backend debe manejar la conversión a su formato interno
-      await updateUser(updatedUser._id, { 
-        permisions: updatedUser.permisions 
-      });
+      await updateUser(updatedUser._id, { permisions: updatedUser.permisions });
       
-      // Actualizar la lista de usuarios localmente
+      // Actualizar la lista de usuarios
       setUsers(prev => prev.map(u => 
         u._id === updatedUser._id ? updatedUser : u
       ));
@@ -87,16 +52,17 @@ export default function PermissionsAdminPage() {
   };
 
   // Función para mostrar los permisos en la tabla
-  const renderPermissions = (perms?: any) => {
-    const normalized = normalizePermissions(perms);
+  const renderPermissions = (perms: any) => {
+    // Normalizar permisos a array de strings para visualización
+    const activePermissions = normalizePermissionsToArray(perms);
     
-    if (normalized.length === 0) {
+    if (activePermissions.length === 0) {
       return <span className="text-gray-500 italic">Sin permisos activos</span>;
     }
 
     return (
       <div className="flex flex-col gap-1">
-        {normalized.map(permKey => {
+        {activePermissions.map(permKey => {
           const permission = PERMISSIONS_LIST.find(p => p.key === permKey);
           return (
             <span 
@@ -119,7 +85,7 @@ export default function PermissionsAdminPage() {
       key: 'permisions', 
       header: 'Permisos', 
       width: 'w-2/5',
-      render: (value?: any) => renderPermissions(value)
+      render: (value: any) => renderPermissions(value)
     },
     {
       key: 'actions',

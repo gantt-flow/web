@@ -1,7 +1,7 @@
 // components/admin/EditPermissionsModal.tsx
 'use client';
 import { useState, useEffect } from 'react';
-import { User } from '@/services/userService';
+import { User, normalizePermissionsToMap } from '@/services/userService';
 
 // Definir los permisos disponibles según el modelo
 const PERMISSIONS_LIST = [
@@ -27,51 +27,6 @@ const groupPermissionsByCategory = () => {
   }, {} as Record<string, typeof PERMISSIONS_LIST>);
 };
 
-// Ajusta aquí cuáles son los dos permisos que deben venir activos por defecto
-const DEFAULT_ACTIVE_PERMISSIONS = ['canViewProject', 'canViewTask'];
-
-/** Convierte cualquier formato de permisos a un array de strings para el frontend */
-const convertToArrayForFrontend = (perms: any): string[] => {
-  if (Array.isArray(perms)) {
-    return perms;
-  }
-  
-  if (perms instanceof Map) {
-    const activePermissions: string[] = [];
-    perms.forEach((value, key) => {
-      if (value) activePermissions.push(key);
-    });
-    return activePermissions;
-  }
-  
-  if (typeof perms === 'object' && perms !== null) {
-    return Object.entries(perms)
-      .filter(([_, value]) => value)
-      .map(([key, _]) => key);
-  }
-  
-  return DEFAULT_ACTIVE_PERMISSIONS;
-};
-
-/** Convierte array de strings a Map para el backend */
-const convertArrayToMapForBackend = (permissionsArray: string[]): Map<string, boolean> => {
-  const permissionsMap = new Map<string, boolean>();
-  
-  // Inicializar todos los permisos como false
-  PERMISSIONS_LIST.forEach(permission => {
-    permissionsMap.set(permission.key, false);
-  });
-  
-  // Marcar como true los permisos que están en el array
-  permissionsArray.forEach(permKey => {
-    if (permissionsMap.has(permKey)) {
-      permissionsMap.set(permKey, true);
-    }
-  });
-  
-  return permissionsMap;
-};
-
 interface EditPermissionsModalProps {
   user: User;
   onClose: () => void;
@@ -79,31 +34,27 @@ interface EditPermissionsModalProps {
 }
 
 const EditPermissionsModal = ({ user, onClose, onSave }: EditPermissionsModalProps) => {
-  const [activePermissions, setActivePermissions] = useState<string[]>([]);
+  const [permissionsMap, setPermissionsMap] = useState<Map<string, boolean>>(new Map());
   const permissionGroups = groupPermissionsByCategory();
 
   useEffect(() => {
-    const permissionsArray = convertToArrayForFrontend(user.permisions);
-    setActivePermissions(permissionsArray);
+    // Normalizar permisos a Map
+    const normalizedPermissions = normalizePermissionsToMap(user.permisions);
+    setPermissionsMap(normalizedPermissions);
   }, [user]);
 
   const handlePermissionChange = (key: string, value: boolean) => {
-    setActivePermissions((prev: string[]) => {
-      if (value) {
-        // Añadir el permiso si no existe
-        return prev.includes(key) ? prev : [...prev, key];
-      } else {
-        // Remover el permiso si existe
-        return prev.filter(perm => perm !== key);
-      }
+    setPermissionsMap(prev => {
+      const newMap = new Map(prev);
+      newMap.set(key, value);
+      return newMap;
     });
   };
 
   const handleSubmit = () => {
-    // Crear usuario actualizado manteniendo todas las propiedades originales
     const updatedUser = {
       ...user,
-      permisions: activePermissions // array de strings
+      permisions: new Map(permissionsMap)
     };
     
     onSave(updatedUser);
@@ -112,22 +63,12 @@ const EditPermissionsModal = ({ user, onClose, onSave }: EditPermissionsModalPro
   const handleSelectAll = (category: string, value: boolean) => {
     const categoryPermissions = PERMISSIONS_LIST.filter(p => p.category === category);
     
-    setActivePermissions((prev: string[]) => {
-      let updated = [...prev];
-      
+    setPermissionsMap(prev => {
+      const newMap = new Map(prev);
       categoryPermissions.forEach(p => {
-        if (value) {
-          // Añadir si no existe
-          if (!updated.includes(p.key)) {
-            updated.push(p.key);
-          }
-        } else {
-          // Remover si existe
-          updated = updated.filter(perm => perm !== p.key);
-        }
+        newMap.set(p.key, value);
       });
-      
-      return updated;
+      return newMap;
     });
   };
 
@@ -170,7 +111,7 @@ const EditPermissionsModal = ({ user, onClose, onSave }: EditPermissionsModalPro
                     <input
                       type="checkbox"
                       id={permission.key}
-                      checked={activePermissions.includes(permission.key)}
+                      checked={permissionsMap.get(permission.key) || false}
                       onChange={(e) => handlePermissionChange(permission.key, e.target.checked)}
                       className="mr-3 h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
                     />

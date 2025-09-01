@@ -18,7 +18,7 @@ export interface User {
   auditLogAccess?: boolean;
   projectId: Projects[];
   taskId: Task[];
-  permisions: string[];
+  permisions: Map<string, boolean> | Record<string, boolean> | string[];
 }
 
 // Interfaz para los datos del usuario autenticado
@@ -37,6 +37,78 @@ export interface NewUser {
     name: string;
     email: string;
 }
+
+// Función para convertir objeto a Map
+export const objectToMap = (obj: Record<string, boolean>): Map<string, boolean> => {
+  const map = new Map<string, boolean>();
+  if (obj) {
+    Object.entries(obj).forEach(([key, value]) => {
+      map.set(key, value);
+    });
+  }
+  return map;
+};
+
+// Función para convertir Map a objeto
+export const mapToObject = (map: Map<string, boolean>): Record<string, boolean> => {
+  const obj: Record<string, boolean> = {};
+  if (map) {
+    map.forEach((value, key) => {
+      obj[key] = value;
+    });
+  }
+  return obj;
+};
+
+// Función para normalizar permisos a Map
+export const normalizePermissionsToMap = (perms: any): Map<string, boolean> => {
+  const permissionsMap = new Map<string, boolean>();
+  
+  if (perms instanceof Map) {
+    return perms;
+  }
+  
+  if (Array.isArray(perms)) {
+    // Si es un array de strings, convertir a Map
+    perms.forEach((perm: string) => {
+      permissionsMap.set(perm, true);
+    });
+    return permissionsMap;
+  }
+  
+  if (typeof perms === 'object' && perms !== null) {
+    // Si es un objeto, convertir a Map
+    Object.entries(perms).forEach(([key, value]) => {
+      permissionsMap.set(key, Boolean(value));
+    });
+    return permissionsMap;
+  }
+  
+  return permissionsMap;
+};
+
+// Función para normalizar permisos a array de strings (para visualización)
+export const normalizePermissionsToArray = (perms: any): string[] => {
+  if (Array.isArray(perms)) {
+    return perms;
+  }
+  
+  if (perms instanceof Map) {
+    const activePermissions: string[] = [];
+    perms.forEach((value, key) => {
+      if (value) activePermissions.push(key);
+    });
+    return activePermissions;
+  }
+  
+  if (typeof perms === 'object' && perms !== null) {
+    return Object.entries(perms)
+      .filter(([_, value]) => Boolean(value))
+      .map(([key, _]) => key);
+  }
+  
+  return [];
+};
 
 
 /**
@@ -93,8 +165,20 @@ export const getAllUsers = async (): Promise<User[]> => {
 
 export const updateUser = async (userId: string, userData: Partial<User>): Promise<User> => {
   try {
-    const response = await api.put<User>(`/users/${userId}`, userData);
-    return response.data;
+    // Convertir Map a objeto antes de enviar
+    const dataToSend = {
+      ...userData,
+      permisions: userData.permisions instanceof Map ? 
+        mapToObject(userData.permisions) : userData.permisions
+    };
+
+    const response = await api.put<any>(`/users/${userId}`, dataToSend);
+    
+    // Convertir los permisos de objeto a Map en la respuesta
+    return {
+      ...response.data,
+      permisions: objectToMap(response.data.permisions || {})
+    };
   } catch (error) {
     console.error(`Error updating user ${userId}:`, error);
     throw error;

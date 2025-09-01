@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { logout } from '@/services/authService';
 
 const sideBarItems = [
-    { icon: <Users size={20} />, label: 'Usuarios', link: "/admin/usuarios" },
-    { icon: <ClipboardList size={20} />, label: 'Auditoría', link: "/admin/auditoria" },
-    { icon: <Shield size={20} />, label: 'Permisos', link: "/admin/permisos" },
+    { icon: <Users size={20} />, label: 'Usuarios', link: "/admin/sistema/usuarios" },
+    { icon: <ClipboardList size={20} />, label: 'Auditoría', link: "/admin/sistema/auditoria" },
+    { icon: <Shield size={20} />, label: 'Permisos', link: "/admin/proyectos/permisos" },
     //{ icon: <Settings size={20} />, label: 'Configuración', link: "/ajustes" }
 ];
 
