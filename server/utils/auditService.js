@@ -14,7 +14,7 @@ import { logger } from '../utils/logger.js';
 export const generateAuditLog = async (req, action, entityType, entityId, details = '') => {
   try {
     // Validaciones básicas
-    if (!req.user || !req.user.id) {
+     if (!req.user || !req.user._id) {  
       logger.warn('No se pudo generar log de auditoría: usuario no autenticado');
       return;
     }
@@ -42,7 +42,7 @@ export const generateAuditLog = async (req, action, entityType, entityId, detail
         type: entityType,
         id: entityId
       },
-      performedBy: req.user.id,
+      performedBy: req.user._id,  // Cambiar req.user.id por req.user._id
       ipAddress: req.ip || req.connection.remoteAddress,
       device: req.headers['user-agent'] || 'Unknown',
       timestamp: new Date()
