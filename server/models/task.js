@@ -10,6 +10,10 @@ const taskSchema = new Schema({
         type: String,
         required: true
     },
+    /*typeTask: {
+        type: String,
+        required: true
+    },*/
     startDate: {
         type: Date,
         required: true
