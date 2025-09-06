@@ -7,7 +7,7 @@ export interface Notification {
     recipientId: NewUser[];
     title: string;
     message: string;
-    isRead: string;
+    isRead: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -26,7 +26,7 @@ export const getNotificationsByUser = async (): Promise< Notification[]> => {
 
 export const updateNotificationStatus = async (notificationId: string): Promise< Notification > => {
     try {
-        const response = await api.put<Notification>(`/notifications/${notificationId}`);
+        const response = await api.put<Notification>(`/notifications/${notificationId}/read`);
         return response.data;
     } catch (error) {
         console.error("Error al actualizar el estado de la notificación")

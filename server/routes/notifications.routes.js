@@ -9,6 +9,6 @@ router.post("/", auth, createNotification);
 // Route to get notifications by recipient ID
 router.get("/", auth, getAllNotificationsByUser);
 // Route to update notification status
-router.put("/:id", auth, updateNotificationStatus);
+router.put("/:notificationId/read", auth, updateNotificationStatus);
 
 export default router;

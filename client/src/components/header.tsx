@@ -37,28 +37,30 @@ export default function Header() {
     useEffect(() => {
         
         async function fetchNotifications() {
-            
             try {
-                const notifications = await getNotificationsByUser();
-                setNotifications(notifications);
+                const notificationsData = await getNotificationsByUser();
+                setNotifications(notificationsData);
             } catch(err) {
-                console.error("Erro al obtener notificaciones")
+                console.error("Error al obtener notificaciones", err)
             }
         }
         
         fetchNotifications();
     }, []);
 
-    const handleUpdateNotificationStatus = async (notificationId: string) => {
+    const handleUpdateNotificationStatus = async (notification: Notification) => {
+        if (notification.isRead) return;
 
-        if (typeof notificationId !== 'string' || !notificationId) return;
-
-        const updatedNotification = await updateNotificationStatus(notificationId);
-        // Actualiza el estado local para reflejar el cambio inmediatamente
-        setNotifications(notifications.map(n =>
-            n._id === notificationId ? { ...n, isRead: updatedNotification.isRead } : n
-        ));
-    
+        try {
+            await updateNotificationStatus(notification._id);
+            setNotifications(prev => 
+                prev.map(n => 
+                    n._id === notification._id ? { ...n, isRead: true } : n
+                )
+            );
+        } catch (error) {
+            console.error("Failed to update notification status", error);
+        }
     }
 
 
@@ -123,7 +125,7 @@ export default function Header() {
                             {/* Bell dropdown */}
                             { isBellDropdownOpen && (
                                 <div className="bg-white absolute mt-2 z-10 right-0 rounded-lg shadow-sm w-128 dark:bg-gray-700">
-                                    <div className="mt-4">
+                                    <div className="mt-4 p-3 font-semibold text-left ml-2">
                                         Notificaciones
                                     </div>
                                     
@@ -133,10 +135,14 @@ export default function Header() {
                                                 key={notification._id} 
                                                 className={`p-3 rounded-md cursor-pointer transition-colors ${
                                                     !notification.isRead
-                                                    ?'bg-green-100 hover:bg-green-200 dark:bg-green-900/50'
-                                                    :'hover:bg-gray-100 dark:hover:bg-gray-600'
+                                                    ? 'bg-green-100 hover:bg-green-200 dark:bg-green-900/50'
+                                                    : 'hover:bg-gray-100 dark:hover:bg-gray-600'
                                                 }`}
-                                                onClick={ () => handleUpdateNotificationStatus(notification._id)}>
+                                                onClick={ (e) => {
+                                                    e.stopPropagation();
+                                                    handleUpdateNotificationStatus(notification);
+                                                }}
+                                            >
                                                 <div className="flex flex-col">
                                                     <strong className="font-semibold text-gray-900 dark:text-white">
                                                         {notification.title}
@@ -178,8 +184,6 @@ export default function Header() {
                             )}
                         </button>
                     </div>
-
-                    
                 </div> 
             </div>
         </div>
