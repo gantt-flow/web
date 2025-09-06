@@ -35,9 +35,9 @@ export const createNotification = async (req, res) => {
     }
 }
 
-export const getNotificationsByRecipient = async (req, res) => {
+export const getAllNotificationsByUser = async (req, res) => {
     try {
-        const { recipientId } = req.params;
+        const recipientId = req.user._id;
 
         // Validate the recipientId field
         if (!isValidObjectId(recipientId)) {
@@ -53,6 +53,36 @@ export const getNotificationsByRecipient = async (req, res) => {
 
         res.status(200).json(notifications);
     } catch (error) {
+        logger.error(`Error fetching notifications: ${error.message}`);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+
+export const updateNotificationStatus = async (req, res) => {
+    try {
+        const { notificationId } = req.params;
+
+        if (!isValidObjectId(notificationId)) {
+            return res.status(400).json({ message: 'Datos no válidos.' });
+        }
+    
+        const notificationToUpdate = await Notification.findByIdAndUpdate(
+            notificationId,
+            { isRead: true },
+            { new: true }
+        );
+
+        if (!notificationToUpdate) {
+            return res.status(404).json({ message: 'Notificación no encontrada' });
+        }
+
+        res.status(200).json({ 
+            message: 'Notification updated successfully', 
+            notification: notificationToUpdate 
+        });
+
+    }catch (error) {
         logger.error(`Error fetching notifications: ${error.message}`);
         res.status(500).json({ message: 'Internal server error' });
     }

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { getNotificationsByUser, Notification, updateNotificationStatus } from "@/services/notificationsService";
 
 const profileDropdownItems = [
     {label: "Perfil", link: "/perfil"},
@@ -11,6 +12,7 @@ const profileDropdownItems = [
 
 export default function Header() {
 
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
     const [isBellDropdownOpen, setIsBellProfileDropdownOpen] = useState(false);
@@ -31,6 +33,34 @@ export default function Header() {
         setIsBellProfileDropdownOpen(!isBellDropdownOpen);
         setIsProfileDropdownOpen(false);
     }
+
+    useEffect(() => {
+        
+        async function fetchNotifications() {
+            
+            try {
+                const notifications = await getNotificationsByUser();
+                setNotifications(notifications);
+            } catch(err) {
+                console.error("Erro al obtener notificaciones")
+            }
+        }
+        
+        fetchNotifications();
+    }, []);
+
+    const handleUpdateNotificationStatus = async (notificationId: string) => {
+
+        if (typeof notificationId !== 'string' || !notificationId) return;
+
+        const updatedNotification = await updateNotificationStatus(notificationId);
+        // Actualiza el estado local para reflejar el cambio inmediatamente
+        setNotifications(notifications.map(n =>
+            n._id === notificationId ? { ...n, isRead: updatedNotification.isRead } : n
+        ));
+    
+    }
+
 
     return(
         <div className="flex flex-col">
@@ -98,18 +128,25 @@ export default function Header() {
                                     </div>
                                     
                                     <ul className="py-2 ml-2 mr-2 text-gray-700 dark:text-gray-200 text-left">
-                                        <li className="py-3 hover:bg-gray-100">
-                                            Este es un ejemplo de notificación
-                                        </li>
-                                        <li className="py-3 hover:bg-gray-100">
-                                            Este es un ejemplo de notificación
-                                        </li>
-                                        <li className="py-3 hover:bg-gray-100">
-                                            Este es un ejemplo de notificación
-                                        </li>
-                                        <li className="py-3 hover:bg-gray-100">
-                                            Este es un ejemplo de notificación
-                                        </li>
+                                        {notifications.map( notification => (
+                                            <li
+                                                key={notification._id} 
+                                                className={`p-3 rounded-md cursor-pointer transition-colors ${
+                                                    !notification.isRead
+                                                    ?'bg-green-100 hover:bg-green-200 dark:bg-green-900/50'
+                                                    :'hover:bg-gray-100 dark:hover:bg-gray-600'
+                                                }`}
+                                                onClick={ () => handleUpdateNotificationStatus(notification._id)}>
+                                                <div className="flex flex-col">
+                                                    <strong className="font-semibold text-gray-900 dark:text-white">
+                                                        {notification.title}
+                                                    </strong>
+                                                    <p className="text-gray-600 dark:text-gray-300 mt-1">
+                                                        {notification.message}
+                                                    </p>
+                                                </div>
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                             )}

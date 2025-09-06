@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { getProjectById, Projects, addMember, removeMember } from '@/services/projectService';
+import { getProjectById, Projects, addMember, removeMember, deleteProject } from '@/services/projectService';
 import { DataTable } from '@/components/ui/DataTable';
 import AddMemberModal from '@/components/addMember';
-import { CircleDashed, CalendarClock, Contact, Pen } from "lucide-react"
+import { CircleDashed, CalendarClock, Contact, Pen, Trash } from "lucide-react"
 
 export default function ProjectDetailsPage() {
     const params = useParams();
@@ -68,8 +68,8 @@ export default function ProjectDetailsPage() {
         header: 'Acciones',
         render: (_: any, row: any) => (
             <div className="space-x-2">
-                <button onClick={() => alert('Función de mensaje no implementada')} className="text-blue-600 hover:underline">Mensaje</button>
-                <button onClick={() => handleRemoveMember(row._id)} className="text-red-600 hover:underline">Quitar</button>
+                <button onClick={() => alert('Función de mensaje no implementada')} className="text-blue-600 hover:underline cursor-pointer">Mensaje</button>
+                <button onClick={() => handleRemoveMember(row._id)} className="text-red-600 hover:underline cursor-pointer">Quitar</button>
             </div>
         )
         }
@@ -77,6 +77,13 @@ export default function ProjectDetailsPage() {
 
     const handleEditProjectClick = (projectId: string) => {
         router.push(`/inicio/proyectos/informacionProyecto/${projectId}`);
+    }
+
+    const handleDeleteProject = async (projectId: string) => {
+        if (confirm('¿Estás seguro que deseas eliminar el proyecto?')){
+            await deleteProject(projectId);
+            router.push(`/inicio/proyectos/`);
+        }   
     }
 
 
@@ -94,9 +101,16 @@ export default function ProjectDetailsPage() {
                 <h1 className="flex-1 text-4xl font-bold">{project.name}</h1>
                 <button 
                     onClick={ () => handleEditProjectClick(project._id)}
-                    className='flex px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600'
+                    className='flex px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 cursor-pointer'
                 >
                     <Pen size={15} className='self-center mr-2'/>Editar proyecto
+                </button>
+
+                <button 
+                    onClick={() => handleDeleteProject(project._id)}
+                    className='flex ml-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer'
+                >
+                    <Trash size={15} className='self-center mr-2'/>Eliminar proyecto
                 </button>
             </div>
             
@@ -144,7 +158,7 @@ export default function ProjectDetailsPage() {
             <div className="mt-8 flex-1">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-3xl font-bold">Miembros del Equipo</h2>
-                    <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                    <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 cursor-pointer">
                         + Agregar Miembro
                     </button>
                 </div>

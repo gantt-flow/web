@@ -117,3 +117,14 @@ export const updateProject = async (projectId: string, projectData: NewProject) 
         throw error;
     }
 };
+
+
+export const deleteProject = async (projectId: string) => {
+    try {
+        const response = await api.delete(`/projects/${projectId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error al eliminar el proyecto:", error);
+        throw error;
+    }
+}
