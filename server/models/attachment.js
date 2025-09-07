@@ -22,11 +22,9 @@ const attachmentSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
-    },
-    uploadedAt: {
-        type: Date,
-        default: Date.now
     }
+}, {
+    timestamps:true
 });
 
 const Attachment = mongoose.model('Attachment', attachmentSchema);

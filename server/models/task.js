@@ -28,13 +28,13 @@ const taskSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['not_started', 'in_progress', 'completed', 'on_hold'],
-        default: 'not_started'
+        enum: ['Sin iniciar', 'En progreso', 'Completada', 'En espera'],
+        default: 'Sin iniciar'
     },
     priority: {
         type: String,
-        enum: ['low', 'medium', 'high'],
-        default: 'medium'
+        enum: ['Baja', 'Media', 'Alta'],
+        default: 'Baja'
     },
     assignedTo: [{
         type: Schema.Types.ObjectId,
@@ -62,14 +62,6 @@ const taskSchema = new Schema({
         ref: 'User',
         required: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    },
     comments: [{
         commentId: {
             type: Schema.Types.ObjectId,
@@ -88,6 +80,13 @@ const taskSchema = new Schema({
         type: String,
         required: false
     }],
+    type: {
+        type: String,
+        enum: ['Tarea', 'Milestone'],
+        default: 'Tarea'
+    }
+}, {
+    timestamps:true
 });
 
 const Task = mongoose.model('Task', taskSchema);

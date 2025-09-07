@@ -36,14 +36,12 @@ const InviteSchema = new Schema({
         type: Date,
         default: Date.now
     },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    },
     expiresAt: {
         type: Date,
         required: true
     }
+}, {
+    timestamps:true
 });
 
 const Invite = mongoose.model('Invite', InviteSchema);

@@ -34,18 +34,12 @@ const reminderSchema = new Schema({
         type: Boolean,
         default: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    },
     isSent: {
         type: Boolean,
         default: false
     }
+}, {
+    timestamps:true
 });
 
 const Reminder = mongoose.model('Reminder', reminderSchema);

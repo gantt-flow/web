@@ -24,14 +24,6 @@ const userSchema = new Schema({
         type: Boolean,
         default: true // Indica si el usuario está activo
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    },
     profilePicture: {
         type: String,
         default: 'default-profile.png' // Ruta por defecto para la imagen de perfil
@@ -83,6 +75,8 @@ const userSchema = new Schema({
             canViewTask: true
         }
     }
+}, {
+    timestamps:true
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);

@@ -1,25 +1,27 @@
 import api from '@/services/api';
-import { User } from './userService';
-import { Projects } from './projectService';
+import { NewUser } from './userService';
+import { NewProject } from './projectService';
+import { Comment } from './commentsService';
 
 export interface Task {
     _id: string;
     title: string;
     description: string;
-    startDate: string;
-    dueDate: string;
-    endDate: string;
+    startDate: Date;
+    dueDate: Date;
+    endDate: Date;
     status: string;
     priority: string;
-    assignedTo: User[];
-    projectId: Projects;
-    dependencies: string[];
+    assignedTo: NewUser[];
+    projectId: NewProject;
+    dependencies?: string[];
     estimatedHours: number;
     actualHours: number;
-    createdBy: string;
-    createdAt: string;
-    updatedAt: string;
-    comments: string[];
-    attachments: string[];
+    createdBy: NewUser;
+    createdAt?: Date;
+    updatedAt?: Date;
+    comments: Comment[];
+    attachments?: string[];
     tags: string[];
+    type: string;
 }
