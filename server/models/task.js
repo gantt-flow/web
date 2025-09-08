@@ -36,10 +36,10 @@ const taskSchema = new Schema({
         enum: ['Baja', 'Media', 'Alta'],
         default: 'Baja'
     },
-    assignedTo: [{
+    assignedTo: {
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }],
+    },
     projectId: {
         type: Schema.Types.ObjectId,
         ref: 'Project',
