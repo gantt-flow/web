@@ -1,16 +1,25 @@
 // client/src/components/gantt/TimelinePanel.tsx
 'use client';
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Task } from '@/services/taskService';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { ViewMode } from '@/app/inicio/gantt/page';
 
 const ROW_HEIGHT = 50;
 const CELL_WIDTH = 50;
 
 interface TimelinePanelProps {
   tasks: Task[];
+  viewMode: ViewMode;
 }
+
+// Mapeo de anchos de celda según la vista
+const viewModeConfig = {
+    'Día': { width: 50, unit: 'day' },
+    'Semana': { width: 150, unit: 'week' },
+    'Mes': { width: 300, unit: 'month' }
+};
 
 // Interfaz para la estructura de la cabecera de mes
 interface MonthHeader {
@@ -20,7 +29,9 @@ interface MonthHeader {
   startOffset: number; // La posición 'left' de este encabezado de mes
 }
 
-export default function TimelinePanel({ tasks }: TimelinePanelProps) {
+export default function TimelinePanel({ tasks, viewMode }: TimelinePanelProps) {
+    const parentRef = useRef<HTMLDivElement>(null);
+    const [todayOffset, setTodayOffset] = useState(0);
 
   const { allDaysInView, monthHeaders, totalWidth } = useMemo(() => {
     // Caso 1: No hay tareas. Mostramos el año actual por defecto.
@@ -78,12 +89,36 @@ export default function TimelinePanel({ tasks }: TimelinePanelProps) {
     // 3. ¡IMPORTANTE! Añadir `tasks` al array de dependencias.
   }, [tasks]);
 
-  const parentRef = useRef<HTMLDivElement>(null);
+    // Lógica para centrar en "Hoy"
+    useEffect(() => {
+        const calculateTodayOffset = () => {
+            const today = new Date();
+            const daysDiff = getDaysDiff(allDaysInView[0], today);
+            const offset = daysDiff * viewModeConfig[viewMode].width;
+            setTodayOffset(offset);
+            return offset;
+        };
+
+        const offset = calculateTodayOffset();
+
+        const handleScrollToToday = () => {
+            if (parentRef.current) {
+                parentRef.current.scrollTo({ left: offset - (parentRef.current.offsetWidth / 2), behavior: 'smooth' });
+            }
+        };
+
+        // Escuchar el evento personalizado
+        window.addEventListener('scrollToToday', handleScrollToToday);
+        
+        // Limpiar el listener al desmontar
+        return () => window.removeEventListener('scrollToToday', handleScrollToToday);
+
+    }, [allDaysInView, viewMode]);
 
   const columnVirtualizer = useVirtualizer({
     count: allDaysInView.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => CELL_WIDTH,
+    estimateSize: () => viewModeConfig[viewMode].width,
     horizontal: true,
   });
 
@@ -102,7 +137,7 @@ export default function TimelinePanel({ tasks }: TimelinePanelProps) {
       {/* El contenedor principal ahora tiene un overflow-x-auto */}
       <div ref={parentRef} className="flex-1 overflow-auto">
         {/* El div hijo tiene el ancho total para habilitar el scroll */}
-        <div style={{ width: `${totalWidth}px`, position: 'relative' }}>
+        <div style={{ width: `${totalWidth}`, position: 'relative' }}>
           
           {/* --- CABECERA DE DOS NIVELES --- */}
           <div className="sticky top-0 z-10 bg-gray-50 h-[80px]">
@@ -139,6 +174,17 @@ export default function TimelinePanel({ tasks }: TimelinePanelProps) {
                 </div>
               );
             })}
+
+            {/* Línea de "Hoy" */}
+            <div 
+                className="absolute top-0 bottom-0 z-20 border-r-2 border-red-500"
+                style={{ left: `${todayOffset}px` }}
+            >
+                <div className="sticky top-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-b-md">
+                    Hoy
+                </div>
+            </div>
+
           </div>
 
           {/* Cuadrícula de Tareas */}

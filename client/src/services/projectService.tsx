@@ -17,12 +17,12 @@ export interface Projects {
 
 // Definimos una interfaz para los datos de un nuevo proyecto
 export interface NewProject {
-    _id?: string;
+    _id: string;
     name: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-    status: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
 }
 
 
@@ -123,6 +123,27 @@ export const deleteProject = async (projectId: string) => {
     try {
         const response = await api.delete(`/projects/${projectId}`);
         return response.data;
+    } catch (error) {
+        console.error("Error al eliminar el proyecto:", error);
+        throw error;
+    }
+}
+
+
+export const getTeamMembers = async (projectId: string) => {
+    try {
+        const response = await api.get(`/projects/getTeamMembers/${projectId}`);
+        return response.data.teamMembers;
+    } catch (error) {
+        console.error("Error al eliminar el proyecto:", error);
+        throw error;
+    }
+}
+
+export const getProjectTasks = async (projectId: string) => {
+    try {
+        const response = await api.get(`/projects/getProjectTasks/${projectId}`);
+        return response.data.tasks;
     } catch (error) {
         console.error("Error al eliminar el proyecto:", error);
         throw error;

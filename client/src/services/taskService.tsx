@@ -1,5 +1,5 @@
 import api from '@/services/api';
-import { User } from './userService';
+import { NewUser, User } from './userService';
 import { NewProject } from './projectService';
 import { Comment } from './commentsService';
 
@@ -17,10 +17,26 @@ export interface Task {
     dependencies?: string[];
     estimatedHours: number;
     actualHours: number;
-    createdBy: User;
-    createdAt?: Date;
-    updatedAt?: Date;
-    comments: Comment[];
+    createdBy: NewUser;
+    comments?: Comment[];
+    attachments?: string[];
+    tags: string[];
+    type: string;
+}
+
+
+export interface NewTask {
+    title: string;
+    description: string;
+    startDate: string;
+    dueDate: string;
+    status: string;
+    priority: string;
+    assignedTo: string;
+    projectId: string;
+    dependencies: string[];
+    estimatedHours: number;
+    comment?: string;
     attachments?: string[];
     tags: string[];
     type: string;
@@ -33,6 +49,27 @@ export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
         return response.data;
     } catch (error){
         console.error("Error al obtener las tareas", error);
+        throw error;
+    }
+}
+
+export const createTask = async( newTask: NewTask): Promise< NewTask > => {
+    try {
+        const response = await api.post<NewTask>('/tasks', newTask);
+        return response.data;
+    }catch(error){
+        console.error("Error al crear la tarea:", error);
+        throw error;
+    }
+}
+
+
+export const updatedTask = async(taskId: string, task: Task) => {
+    try {
+        const response = await api.put(`/tasks/${taskId}`, task);
+        return response.data.task;
+    }catch(error){
+        console.error("Error al crear la tarea:", error);
         throw error;
     }
 }

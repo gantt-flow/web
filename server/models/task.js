@@ -8,12 +8,8 @@ const taskSchema = new Schema({
     },
     description: {
         type: String,
-        required: true
+        required: false
     },
-    /*typeTask: {
-        type: String,
-        required: true
-    },*/
     startDate: {
         type: Date,
         required: true
@@ -24,7 +20,6 @@ const taskSchema = new Schema({
     },
     endDate: {
         type: Date,
-        required: true
     },
     status: {
         type: String,
@@ -38,7 +33,8 @@ const taskSchema = new Schema({
     },
     assignedTo: {
         type: Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        required: true
     },
     projectId: {
         type: Schema.Types.ObjectId,
@@ -51,7 +47,6 @@ const taskSchema = new Schema({
     }],
     estimatedHours: {
         type: Number,
-        required: true
     },
     actualHours: {
         type: Number,
@@ -63,18 +58,14 @@ const taskSchema = new Schema({
         required: true
     },
     comments: [{
-        commentId: {
-            type: Schema.Types.ObjectId,
-            ref: 'Comment',
-            required: true
-        },
+        type: Schema.Types.ObjectId,
+        ref: 'Comment',
+        required: false
     }],
     attachments: [{
-        fileId: {
-            type: Schema.Types.ObjectId,
-            ref: 'Attachment',
-            required: true
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Attachment',
+        required: false
     }],
     tags: [{
         type: String,
@@ -83,10 +74,11 @@ const taskSchema = new Schema({
     type: {
         type: String,
         enum: ['Tarea', 'Milestone'],
-        default: 'Tarea'
+        default: 'Tarea',
+        required: false
     }
 }, {
-    timestamps:true
+    timestamps: true
 });
 
 const Task = mongoose.model('Task', taskSchema);

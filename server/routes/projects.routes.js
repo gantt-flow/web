@@ -1,6 +1,18 @@
 import express from "express";
 import auth from '../middleware/authMiddleware.js';
-import { createProject, getProjectById, updateProject, deleteProject, getAllProjects, getCurrentUserProjects, addMemberToProject, removeMemberFromProject, addProjectManagerToProject } from "../controllers/projects.controller.js";
+import {
+            createProject, 
+            getProjectById, 
+            updateProject, 
+            deleteProject, 
+            getAllProjects, 
+            getCurrentUserProjects, 
+            addMemberToProject, 
+            removeMemberFromProject, 
+            addProjectManagerToProject,
+            getTeamMembers,
+            getActiveProjectTasks
+        } from "../controllers/projects.controller.js";
 
 const router = express.Router();
 
@@ -22,5 +34,9 @@ router.post("/:projectId/members", auth, addMemberToProject);
 router.delete("/:projectId/members/:memberId", auth, removeMemberFromProject);
 // Route to add project to user
 router.post("/addProjectManagerToProject/:projectId", auth, addProjectManagerToProject)
+// Route to get team members of a project
+router.get("/getTeamMembers/:id", auth, getTeamMembers);
+// Route to get project tasks
+router.get("/getProjectTasks/:id", auth, getActiveProjectTasks);
 
 export default router;

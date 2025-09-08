@@ -1,21 +1,34 @@
 
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from 'next/navigation';
 import { Projects, getUserProjects } from "@/services/projectService"; 
 import { getCurrentUser } from '@/services/userService';
-import { getTasksByProject } from "@/services/taskService"; 
-import { Task } from "@/services/taskService";
+import { getTasksByProject, updatedTask } from "@/services/taskService"; 
+import { Task, NewTask, createTask } from "@/services/taskService";
 import GanttToolBar from "@/components/gantt/ganttToolBar";
 import GanttTaskListPanel from "@/components/gantt/ganttTaskListPanel";
 import TimelinePanel from "@/components/gantt/timelinePanel";
+import AddTaskModal from "@/components/gantt/addTaskModal";
+
+
+export type ViewMode = 'Día' | 'Semana' | 'Mes';
 
 
 export default function Gantt(){
 
     const [projects, setProjects] = useState<Projects[]>([]);
     const [selectedProject, setSelectedProject] = useState<string>('');
-    const [tasks, setTasks] = useState<Task[]>([])
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const router = useRouter();
+    const [viewMode, setViewMode] = useState<ViewMode>('Día');
+    const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+    
+
+
+    // Referencia para el scroll del timeline
+    const timelineRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function fetchProjects() {
@@ -74,6 +87,56 @@ export default function Gantt(){
     }));
   };
 
+    const handleViewModeChange = (mode: ViewMode) => {
+        setViewMode(mode);
+    };
+
+    const handleAddTask = async (newTask: NewTask) => {
+
+        try {
+            await createTask(newTask);
+            // Volvemos a obtener las tareas después de crear una tarea
+            if (selectedProject) {
+                const updatedTasks = await getTasksByProject(selectedProject);
+                setTasks(updatedTasks);
+            }
+        } catch(error) {
+            console.error(error);
+        }
+        setIsAddTaskModalOpen(false); // Cierra el modal
+    };
+
+    const handleGoToToday = () => {
+        // Lógica para hacer scroll (la implementaremos en el TimelinePanel)
+        // Por ahora, podemos emitir un evento o llamar a una función a través de la ref.
+        const event = new CustomEvent('scrollToToday');
+        window.dispatchEvent(event);
+    };
+
+    const handleSettingsClick = () => {
+        if (selectedProject) {
+            router.push(`/inicio/proyectos/informacionProyecto/${selectedProject}`);
+        }
+    };
+
+    const handleUpdateTask = async (taskId: string, updatedTaskData: Task) => {
+    try {
+        // 1. Llama al servicio para guardar en la BD
+        await updatedTask(taskId, updatedTaskData); // Asegúrate de importar 'updatedTask' del servicio
+
+        // 2. ACTUALIZA EL ESTADO LOCAL para ver los cambios al instante
+        setTasks(currentTasks => 
+            currentTasks.map(task => 
+                task._id === taskId ? updatedTaskData : task
+            )
+        );
+        
+        // No necesitas cerrar el modal desde aquí, eso lo hará el panel.
+    } catch (error) {
+        console.error("Error al actualizar la tarea:", error);
+    }
+};
+
 
     return(
         <div className="flex flex-1 flex-col h-full">
@@ -107,7 +170,14 @@ export default function Gantt(){
             <div className="flex flex-col flex-1">
 
                 <div className="h-12 mt-4">
-                    <GanttToolBar/>
+                    <GanttToolBar
+                        viewMode={viewMode}
+                        onViewModeChange={handleViewModeChange}
+                        onAddTaskClick={() => setIsAddTaskModalOpen(true)}
+                        onFilterClick={() => alert('Filtro clickeado!')}
+                        onGoToToday={handleGoToToday}
+                        onSettingsClick={handleSettingsClick}
+                    />
                 </div>
 
                 <div className="flex-1 grid grid-cols-[383px_1fr] overflow-y-auto mt-2 border-t border-gray-200">
@@ -116,16 +186,26 @@ export default function Gantt(){
                         <GanttTaskListPanel 
                             tasks={tasks}
                             onTaskStatusChange={handleStatusToggle}
+                            onTaskUpdate={handleUpdateTask}
                         />
                     </div>
                    
-                    <div className="overflow-x-auto">
-                        <TimelinePanel tasks={tasks} />
+                    <div className="overflow-x-auto" ref={timelineRef}>
+                        <TimelinePanel tasks={tasks} viewMode={viewMode}/>
                     </div>
                 </div>
 
             </div>
 
+            {/* Renderizado condicional del modal */}
+            {isAddTaskModalOpen && (
+                <AddTaskModal
+                    onClose={() => setIsAddTaskModalOpen(false)}
+                    onAddTask={handleAddTask}
+                    projectId={selectedProject}
+                />
+            )}
         </div>
     )
 }
+

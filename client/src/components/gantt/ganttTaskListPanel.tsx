@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { CircleUser, Flag, Circle, CircleCheckBig, CircleMinus, X } from "lucide-react";
-import { Task } from "@/services/taskService";
-import TaskModal from "./taskDetailsModal";
+import { Task, updatedTask } from "@/services/taskService";
+import EditTaskModal from "./editTaskModal";
 
 
 interface GanttTaskListPanelProps {
   tasks: Task[];
   onTaskStatusChange: (taskId: string) => void;
+  onTaskUpdate: (taskId: string, updatedTask: Task) => void | Promise<void>;
 }
 
 
-export default function GanttTaskListPanel({ tasks, onTaskStatusChange }: GanttTaskListPanelProps) {
+export default function GanttTaskListPanel({ tasks, onTaskStatusChange, onTaskUpdate }: GanttTaskListPanelProps) {
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
@@ -50,6 +51,15 @@ export default function GanttTaskListPanel({ tasks, onTaskStatusChange }: GanttT
   // Función para iterar sobre los status de una tarea cuando se hace click en el icono de estado
   const handleStatusToggle = (taskId: string) => {
     onTaskStatusChange(taskId);
+  };
+
+  const handleModalClose = () => {
+    setSelectedTask(null);
+  };
+  
+  const handleModalSubmit = async (taskId: string, updatedTaskData: Task) => {
+    await onTaskUpdate(taskId, updatedTaskData); // Llama a la función del padre
+    setSelectedTask(null); // Cierra el modal después de que la actualización se complete
   };
 
     return(
@@ -107,7 +117,11 @@ export default function GanttTaskListPanel({ tasks, onTaskStatusChange }: GanttT
                     </tbody>
                 </table>
             </div>
-            <TaskModal task={selectedTask} onClose={() => setSelectedTask(null)} />
+            <EditTaskModal 
+                task={selectedTask} 
+                onEditTask={handleModalSubmit} 
+                onClose={handleModalClose} 
+            />
         </div>
     );
 }

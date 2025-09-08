@@ -3,7 +3,7 @@ import { NewUser } from './userService';
 import { Task } from './taskService';
 
 export interface Comment {
-    userId: NewUser;
+    userId?: NewUser;
     comment: string;
-    relatedEntity: Task;   
+    relatedEntity?: Task;   
 }

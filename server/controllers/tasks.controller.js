@@ -3,35 +3,111 @@ import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
 import { handleError } from "../utils/errorHandler.js";
 import { generateAuditLog } from '../utils/auditService.js';
+import { createComment } from "./comments.controller.js";
 
 export const createTask = async (req, res) => {
-    try {
-        const { title, description, dueDate, assignedTo, projectId } = req.body;
+     try {
+        const { 
+            title, 
+            description, 
+            startDate, 
+            dueDate,
+            status, 
+            priority, 
+            assignedTo, 
+            projectId, 
+            dependencies, 
+            estimatedHours,
+            comments, 
+            attachments,  // TODO
+            tags, 
+            type 
+        } = req.body;
 
-        // Validate the required fields
-        if (!title || !dueDate || !assignedTo || !projectId) {
+        // Se obtiene el id de quien creo la tarea según quien este autenticado
+        const createdBy = req.user._id; 
+
+        // Validar los campos requeridos
+        if (!title || !startDate || !dueDate || !assignedTo || !projectId || !createdBy || !type) {
             return res.status(400).json({ message: 'Fill all the required fields' });
         }
 
-        // Validate ObjectIds
-        if (!isValidObjectId(assignedTo) || !isValidObjectId(projectId)) {
+        // Validar ObjectIds
+        if (!isValidObjectId(assignedTo) || !isValidObjectId(projectId) || !isValidObjectId(createdBy)) {
             return res.status(400).json({ message: 'Invalid user ID or project ID' });
         }
 
-        // Create a new task entry
+        // Crear la tarea
         const newTask = new Task({
             title,
             description,
+            startDate,
             dueDate,
+            status,
+            priority,
             assignedTo,
-            projectId
+            projectId,
+            dependencies,
+            estimatedHours,
+            createdBy,
+            tags,
+            type
         });
 
+        // Se guarda la tarea en la base de datos
         await newTask.save();
+        
+        // Si se mando un comentario, crearlo ahora que ya se tiene el id de la tareas
+        if (comments && typeof comments === 'string' && comments.trim() !== '') {
+            // Se hace una solicitud y respuesta simuladas para llamar a createComment
+            const mockReq = {
+                body: {
+                    userId: req.user, // El usuario autenticado
+                    comment: comments, // El texto del comentario
+                    relatedEntity: newTask._id,  // El ID de la tarea que se creo
+                },
+            };
 
-        await generateAuditLog(req, 'CREATE', 'Task', newTask._id, `Tarea creada: "${title}" - Asignada a: ${assignedTo} - Proyecto: ${projectId} - Fecha límite: ${dueDate}`);
+            // Se crea un objeto de respuesta simulado. Solo necesita tener los métodos que `createComment` pueda llamar.
+            const mockRes = {
+                // Se captura el resultado para poder obtener el ID del nuevo comentario
+                commentData: null,
+                statusCode: null,
+                status: function(code) {
+                    this.statusCode = code;
+                    return this; // Permitir encadenamiento como res.status(201).json(...)
+                },
+                json: function(data) {
+                    this.commentData = data.comment;
+                }
+            };
 
-        res.status(201).json({ message: 'Task created successfully', task: newTask });
+            try {
+                // Se llama la función del controlador de comentarios
+                await createComment(mockReq, mockRes);
+                
+                // Si el comentario se creó con éxito, se añade su ID a la tarea
+                if (mockRes.statusCode === 201 && mockRes.commentData) {
+                    newTask.comments.push(mockRes.commentData._id);
+                    await newTask.save(); // Se guarda la tarea con el id ya del comentario
+                }
+            } catch (commentError) {
+                // Si la creación del comentario falla,se registra pero no se detiene la respuesta principal,
+                // Solo se advierte, faltaría poner que hacer si no se crea el comentario - TODO
+                logger.warn(`Task ${newTask._id} created, but failed to add initial comment: ${commentError.message}`);
+            }
+        }
+
+        await generateAuditLog(req, 'CREATE', 'Task', newTask._id, `Tarea creada: "${title}"`);
+
+        // Se enviar la respuesta exitosa
+        // Poblamos los datos antes de enviarlos para una respuesta más completa
+        const populatedTask = await Task.findById(newTask._id)
+            .populate('assignedTo', 'name email')
+            .populate('createdBy', 'name email');
+
+        res.status(201).json({ message: 'Task created successfully', task: populatedTask });
+
     } catch (error) {
         logger.error(`Error creating task: ${error.message}`);
         handleError(res, error);
@@ -78,7 +154,8 @@ export const updateTask = async (req, res) => {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        await generateAuditLog(req, 'UPDATE', 'Task', taskId, `Tarea actualizada: "${currentTask.title}". Cambios: ${changes.join(', ')}`);
+        
+       // await generateAuditLog(req, 'UPDATE', 'Task', taskId, `Tarea actualizada: "${currentTask.title}". Cambios: ${changes.join(', ')}`);
 
         res.status(200).json({ message: 'Task updated successfully', task: updatedTask });
     } catch (error) {

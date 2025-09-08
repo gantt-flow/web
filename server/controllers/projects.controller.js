@@ -244,3 +244,59 @@ export const addProjectManagerToProject = async (req, res) => {
         res.status(500).json({ message: "Error interno del servidor"})
     }
 }
+
+export const getTeamMembers = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate the project ID
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ message: 'Invalid project ID' });
+        }
+
+        // Fetch the project by ID
+        const teamMembers = await Project.findById(id)
+            .select('teamMembers')
+            .populate('teamMembers', 'name email profilePicture');
+
+        if (!teamMembers) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        res.status(200).json(teamMembers);
+    } catch (error) {
+        logger.error(`Error fetching project by ID: ${error.message}`);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+export const getActiveProjectTasks = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate the project ID
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ message: 'Invalid project ID' });
+        }
+
+        // Fetch the project by ID
+        const projectTasks = await Project.findById(id)
+            .select('tasks')
+            .populate({
+                path: 'tasks',
+                select: 'title status',
+                match: { 
+                    status: { $in: ['Sin Iniciar', 'En progreso'] } 
+                }
+            });
+
+        if (!projectTasks) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        res.status(200).json(projectTasks);
+    } catch (error) {
+        logger.error(`Error fetching project by ID: ${error.message}`);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
