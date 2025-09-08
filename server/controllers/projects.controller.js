@@ -270,7 +270,7 @@ export const getTeamMembers = async (req, res) => {
     }
 }
 
-export const getActiveProjectTasks = async (req, res) => {
+export const getProjectTasks = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -279,24 +279,25 @@ export const getActiveProjectTasks = async (req, res) => {
             return res.status(400).json({ message: 'Invalid project ID' });
         }
 
-        // Fetch the project by ID
-        const projectTasks = await Project.findById(id)
+        // Fetch the project and populate all its tasks without filtering by status
+        const project = await Project.findById(id)
             .select('tasks')
             .populate({
                 path: 'tasks',
-                select: 'title status',
-                match: { 
-                    status: { $in: ['Sin Iniciar', 'En progreso'] } 
+                populate: {
+                    path: 'assignedTo',
+                    select: 'name email'
                 }
             });
 
-        if (!projectTasks) {
+        if (!project) {
             return res.status(404).json({ message: 'Project not found' });
         }
 
-        res.status(200).json(projectTasks);
+        // Return just the array of tasks directly
+        res.status(200).json(project.tasks);
     } catch (error) {
-        logger.error(`Error fetching project by ID: ${error.message}`);
-        res.status(500).json({ message: 'Internal server error' });
+        logger.error(`Error fetching project tasks: ${error.message}`);
+        handleError(res, error);
     }
 }

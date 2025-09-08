@@ -11,7 +11,7 @@ import {
             removeMemberFromProject, 
             addProjectManagerToProject,
             getTeamMembers,
-            getActiveProjectTasks
+            getProjectTasks
         } from "../controllers/projects.controller.js";
 
 const router = express.Router();
@@ -37,6 +37,6 @@ router.post("/addProjectManagerToProject/:projectId", auth, addProjectManagerToP
 // Route to get team members of a project
 router.get("/getTeamMembers/:id", auth, getTeamMembers);
 // Route to get project tasks
-router.get("/getProjectTasks/:id", auth, getActiveProjectTasks);
+router.get("/:id/tasks", auth, getProjectTasks);
 
 export default router;

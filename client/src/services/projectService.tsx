@@ -142,8 +142,8 @@ export const getTeamMembers = async (projectId: string) => {
 
 export const getProjectTasks = async (projectId: string) => {
     try {
-        const response = await api.get(`/projects/getProjectTasks/${projectId}`);
-        return response.data.tasks;
+        const response = await api.get(`/projects/${projectId}/tasks`);
+        return response.data;
     } catch (error) {
         console.error("Error al eliminar el proyecto:", error);
         throw error;

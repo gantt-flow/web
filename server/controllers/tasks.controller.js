@@ -1,4 +1,5 @@
 import Task from "../models/task.js";
+import Project from "../models/project.js";
 import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
 import { handleError } from "../utils/errorHandler.js";
@@ -55,7 +56,13 @@ export const createTask = async (req, res) => {
         });
 
         // Se guarda la tarea en la base de datos
-        await newTask.save();
+        const savedTask = await newTask.save();
+
+        await Project.findByIdAndUpdate(
+            projectId,
+            { $push: { tasks: savedTask._id } }, // Use $push to add the new task's ID to the array
+            { new: true }
+        );
         
         // Si se mando un comentario, crearlo ahora que ya se tiene el id de la tareas
         if (comments && typeof comments === 'string' && comments.trim() !== '') {
@@ -168,19 +175,24 @@ export const deleteTask = async (req, res) => {
     try {
         const { taskId } = req.params;
 
-        // Validate the task ID
         if (!isValidObjectId(taskId)) {
             return res.status(400).json({ message: 'Invalid task ID' });
         }
 
-        // Delete the task from the database
         const deletedTask = await Task.findByIdAndDelete(taskId);
 
         if (!deletedTask) {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        await generateAuditLog(req, 'DELETE', 'Task', taskId, `Tarea eliminada: "${Task.title}" - Proyecto: ${Task.projectId} - Asignada a: ${Task.assignedTo}`);
+        if (deletedTask.projectId) {
+            await Project.findByIdAndUpdate(
+                deletedTask.projectId,
+                { $pull: { tasks: deletedTask._id } } // Use $pull to remove the ID
+            );
+        }       
+
+        await generateAuditLog(req, 'DELETE', 'Task', taskId, `Tarea eliminada: "${deletedTask.title}"`);
 
         res.status(200).json({ message: 'Task deleted successfully' });
     } catch (error) {
