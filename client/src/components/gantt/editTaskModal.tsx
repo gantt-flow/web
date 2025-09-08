@@ -5,10 +5,9 @@ import { Task } from '@/services/taskService';
 import { getProjectTasks, getTeamMembers } from '@/services/projectService';
 import { User } from '@/services/userService';
 
-
 interface EditTaskModalProps {
     task: Task | null;
-    onEditTask: (taskId: string, updateTask: Task) => void | Promise<void> ;
+    onEditTask: (taskId: string, updateTask: Task) => void | Promise<void>;
     onClose: () => void;
 }
 
@@ -30,6 +29,9 @@ const formatDateForInput = (date: string | Date | undefined): string => {
 export default function EditTaskModal({ task, onEditTask, onClose }: EditTaskModalProps): React.ReactElement | null {
     if (!task) return null;
 
+    // --- 🚀 FIX #1: Obtener el projectId de forma segura ---
+    const projectId = typeof task.projectId === 'string' ? task.projectId : task.projectId?._id;
+
     const [editTask, setEditTask] = useState<Task>(task);
     const [currentTag, setCurrentTag] = useState('');
     const [teamMembers, setTeamMembers] = useState<User[]>([]);
@@ -45,36 +47,27 @@ export default function EditTaskModal({ task, onEditTask, onClose }: EditTaskMod
     }, [task]);
 
     useEffect(() => {
-        async function fetchTeamMembers() {
+        async function fetchTeamAndTaskData() {
+            if (!projectId) return; // Si no hay ID de proyecto, no hacer nada
+
             try {
-                if (task?.projectId?._id) {
-                    const team = await getTeamMembers(task.projectId._id);
-                    setTeamMembers(team);
-                }
+                // Obtener miembros del equipo
+                const team = await getTeamMembers(projectId);
+                setTeamMembers(team);
             } catch (error) {
                 console.log('Error al obtener los miembros del equipo:', error);
             }
-        };
-        fetchTeamMembers();
-    }, [task?.projectId?._id]);
 
-    useEffect(() => {
-    async function fetchProjectTasks() {
-        try {
-             if (task?.projectId?._id) {
-                const tasks = await getProjectTasks(task.projectId._id);
-                
-                // --- AÑADE ESTE CONSOLE.LOG ---
-                console.log('1. Tareas recibidas del servicio:', tasks);
-                
+            try {
+                // Obtener las tareas del proyecto
+                const tasks = await getProjectTasks(projectId);
                 setProjectTasks(tasks);
+            } catch (error) {
+                console.log('Error al obtener las tareas del proyecto:', error);
             }
-        } catch (error) {
-            console.log('Error al obtener las tareas del proyecto:', error);
         }
-    };
-    fetchProjectTasks();
-}, [task?.projectId?._id]);
+        fetchTeamAndTaskData();
+    }, [projectId]); // Depender del projectId seguro
     
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -102,8 +95,9 @@ export default function EditTaskModal({ task, onEditTask, onClose }: EditTaskMod
     };
     
     const addDependency = (taskId: string) => {
-        if (!(editTask.dependencies ?? []).includes(taskId)) {
-            setEditTask(prev => ({ ...prev, dependencies: [...(prev.dependencies ?? []), taskId] }));
+        const dependencies = editTask.dependencies ?? [];
+        if (!dependencies.includes(taskId)) {
+            setEditTask(prev => ({ ...prev, dependencies: [...dependencies, taskId] }));
         }
         setDependencySearchTerm('');
         setIsDependenciesOpen(false);
@@ -113,17 +107,19 @@ export default function EditTaskModal({ task, onEditTask, onClose }: EditTaskMod
         setEditTask(prev => ({ ...prev, dependencies: (prev.dependencies ?? []).filter(id => id !== taskId) }));
     };
     
+    // --- 🚀 FIX #2: Lógica de filtrado robusta ---
     const availableTasks = projectTasks.filter((pTask: Task) => 
-        pTask._id !== task._id && // <-- ASEGÚRATE DE QUE ESTA LÍNEA EXISTA
-        !(editTask.dependencies ?? []).includes(pTask._id) && 
+        pTask._id !== task._id && // Excluye la tarea actual que se está editando
+        !(editTask.dependencies ?? []).includes(pTask._id) && // Excluye las que ya son dependencias
         pTask.title.toLowerCase().includes(dependencySearchTerm.toLowerCase())
     );
 
     const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && currentTag.trim() !== '') {
             e.preventDefault();
-            if (!(editTask.tags ?? []).includes(currentTag.trim())) {
-                setEditTask(prev => ({ ...prev, tags: [...(prev.tags ?? []), currentTag.trim()] }));
+            const tags = editTask.tags ?? [];
+            if (!tags.includes(currentTag.trim())) {
+                setEditTask(prev => ({ ...prev, tags: [...tags, currentTag.trim()] }));
             }
             setCurrentTag('');
         }
@@ -156,7 +152,7 @@ export default function EditTaskModal({ task, onEditTask, onClose }: EditTaskMod
                         <textarea id="description" name="description" value={editTask.description} onChange={handleChange} rows={3} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500" />
                     </div>
 
-                    {/* --- SECCIÓN AÑADIDA: Fechas --- */}
+                    {/* Fechas */}
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                         <div>
                             <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
@@ -168,7 +164,7 @@ export default function EditTaskModal({ task, onEditTask, onClose }: EditTaskMod
                         </div>
                     </div>
 
-                    {/* --- SECCIÓN AÑADIDA: Estado y Prioridad --- */}
+                    {/* Estado y Prioridad */}
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                         <div>
                             <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
@@ -201,15 +197,15 @@ export default function EditTaskModal({ task, onEditTask, onClose }: EditTaskMod
                         </div>
                     </div>
 
-                    {/* --- SECCIÓN AÑADIDA: Horas --- */}
+                    {/* Horas */}
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                         <div>
                             <label htmlFor="estimatedHours" className="block text-sm font-medium text-gray-700 mb-1">Horas Estimadas</label>
-                            <input type="number" id="estimatedHours" name="estimatedHours" value={editTask.estimatedHours} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"/>
+                            <input type="number" id="estimatedHours" name="estimatedHours" value={editTask.estimatedHours || ''} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"/>
                         </div>
                         <div>
                             <label htmlFor="actualHours" className="block text-sm font-medium text-gray-700 mb-1">Horas Reales</label>
-                            <input type="number" id="actualHours" name="actualHours" value={editTask.actualHours} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"/>
+                            <input type="number" id="actualHours" name="actualHours" value={editTask.actualHours || ''} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"/>
                         </div>
                     </div>
                     

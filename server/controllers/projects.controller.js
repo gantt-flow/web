@@ -279,7 +279,7 @@ export const getProjectTasks = async (req, res) => {
             return res.status(400).json({ message: 'Invalid project ID' });
         }
 
-        // Fetch the project and populate all its tasks without filtering by status
+        // Fetch the project and populate all its tasks
         const project = await Project.findById(id)
             .select('tasks')
             .populate({

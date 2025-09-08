@@ -12,12 +12,11 @@ interface GanttToolBarProps {
     onSettingsClick: () => void;
 }
 
-const viewModes = [
+const viewModes: { label: ViewMode; borderClass: string }[] = [
     { label: 'Día', borderClass: 'rounded-l'},
-    { label: 'Semana' },
+    { label: 'Semana', borderClass: '' },
     { label: 'Mes', borderClass: 'rounded-r' }
 ]
-
 
 export default function GanttToolBar({ 
     viewMode, 
@@ -29,9 +28,8 @@ export default function GanttToolBar({
 }: GanttToolBarProps) {
     return(
         <div className="flex items-center justify-between h-full px-4 border-y border-gray-200">
-
             <div className="flex items-center gap-2">
-                <button onClick={onAddTaskClick} className="flex items-center gap-2 px-3 py-1.5 bg-green-500 text-white rounded-md hover:bg-blue-600">
+                <button onClick={onAddTaskClick} className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
                     <Plus size={16} /> Crear
                 </button>
                 <button onClick={onFilterClick} className="flex items-center gap-2 px-3 py-1.5 border rounded-md hover:bg-gray-100">
@@ -43,17 +41,32 @@ export default function GanttToolBar({
             </div>
 
             <div className="flex items-center">
-                <button onClick={onGoToToday} className="flex mr-4 items-center gap-2 text-green-500 px-3 py-1.5 border border-green-500 rounded-md hover:bg-gray-100">
+                <button onClick={onGoToToday} className="flex mr-4 items-center gap-2 text-indigo-600 px-3 py-1.5 border border-indigo-600 rounded-md hover:bg-gray-100">
                     <Calendar size={16} stroke="currentColor"/> Hoy
                 </button>
 
-                {viewModes.map(({label, borderClass}) => (
-                    <button key={label} className={`px-4 py-2 border border-green-500 text-green-500 ${borderClass} hover:bg-green-500 hover:text-white cursor-pointer`}>
-                        {label}
-                    </button>
-                ))}         
+                {/* --- 🚀 MEJORA: Lógica de botones de vista --- */}
+                <div className="flex items-center">
+                    {viewModes.map(({label, borderClass}) => (
+                        <button 
+                            key={label}
+                            onClick={() => onViewModeChange(label)}
+                            className={`
+                                px-4 py-1.5 border-y border-indigo-600 text-sm transition-colors
+                                ${borderClass}
+                                ${label === 'Día' ? 'border-l' : ''}
+                                ${label === 'Mes' ? 'border-r' : ''}
+                                ${viewMode === label 
+                                    ? 'bg-indigo-600 text-white' 
+                                    : 'bg-white text-indigo-600 hover:bg-indigo-50'
+                                }
+                            `}
+                        >
+                            {label}
+                        </button>
+                    ))}         
+                </div>
             </div>
         </div>
-        
     )
 }

@@ -67,15 +67,24 @@ export default function Gantt(){
 
     // Función para obtener las tareas del proyecto
     useEffect(() => {
-        async function fetchTasks() {
-            if(selectedProject){
+    async function fetchTasks() {
+        if (selectedProject) {
+            try {
                 const projectTasks = await getTasksByProject(selectedProject);
                 setTasks(projectTasks);
+            } catch (error) {
+                console.error("Error al cargar las tareas, el proyecto podría estar vacío o hubo un problema:", error);
+                // Limpia las tareas si hay un error para que la UI no muestre datos antiguos.
+                setTasks([]); 
             }
+        } else {
+            // Si no hay proyecto seleccionado, asegúrate de que no haya tareas
+            setTasks([]);
         }
+    }
 
-        fetchTasks();
-    },[selectedProject]);
+    fetchTasks();
+}, [selectedProject]);
 
     const handleStatusToggle = (taskId: string) => {
     setTasks(tasks.map(task => {
