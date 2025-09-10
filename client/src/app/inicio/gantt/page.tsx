@@ -10,6 +10,7 @@ import GanttToolBar from "@/components/gantt/ganttToolBar";
 import GanttTaskListPanel from "@/components/gantt/ganttTaskListPanel";
 import TimelinePanel from "@/components/gantt/timelinePanel";
 import AddTaskModal from "@/components/gantt/addTaskModal";
+import TaskCommentsModal from "@/components/gantt/tasksCommentsModal";
 
 
 export type ViewMode = 'Día' | 'Semana' | 'Mes';
@@ -23,9 +24,9 @@ export default function Gantt(){
     const router = useRouter();
     const [viewMode, setViewMode] = useState<ViewMode>('Día');
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+    const [selectedTaskForComments, setSelectedTaskForComments] = useState<Task | null>(null);
     
-    // Las funciones y useEffects no cambian...
-    // ... (todo el código de lógica que ya tienes)
+
     useEffect(() => {
         async function fetchProjects() {
             try {
@@ -119,10 +120,13 @@ export default function Gantt(){
         }
     };
 
-    // --- 🚀 FIX: Nueva estructura de layout ---
+    const handleTaskClickInTimeline = (task: Task) => {
+        setSelectedTaskForComments(task);
+    };
+
     return(
         // Contenedor principal que ocupa toda la pantalla y no permite scroll
-        <div className="flex flex-col h-screen p-4 pb-0">
+        <div className="flex flex-col p-4 pb-0">
 
             {/* --- ÁREA SUPERIOR FIJA (NO SE MUEVE) --- */}
             <div className="flex-shrink-0">
@@ -164,7 +168,12 @@ export default function Gantt(){
                         />
                     </div>
                     <div className="overflow-x-auto">
-                        <TimelinePanel tasks={tasks} viewMode={viewMode}/>
+                        <TimelinePanel 
+                            tasks={tasks} 
+                            viewMode={viewMode}
+                            onTaskClick={handleTaskClickInTimeline}
+                        />
+                            
                     </div>
                 </div>
             </div>
@@ -176,6 +185,14 @@ export default function Gantt(){
                     projectId={selectedProject}
                 />
             )}
+
+            {selectedTaskForComments && (
+                <TaskCommentsModal
+                    task={selectedTaskForComments}
+                    onClose={() => setSelectedTaskForComments(null)}
+                />
+            )}
+
         </div>
     )
 }

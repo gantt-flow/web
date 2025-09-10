@@ -10,6 +10,7 @@ const DAY_WIDTH = 35;
 interface TimelinePanelProps {
   tasks: Task[];
   viewMode: ViewMode;
+  onTaskClick: (task: Task) => void;
 }
 
 interface HeaderItem {
@@ -34,7 +35,7 @@ const getWeekNumber = (d: Date): number => {
     return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 }
 
-export default function TimelinePanel({ tasks, viewMode }: TimelinePanelProps) {
+export default function TimelinePanel({ tasks, viewMode, onTaskClick }: TimelinePanelProps) {
     const parentRef = useRef<HTMLDivElement>(null);
     const [todayOffset, setTodayOffset] = useState<number | null>(null);
     const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(null);
@@ -158,8 +159,8 @@ export default function TimelinePanel({ tasks, viewMode }: TimelinePanelProps) {
     }, [totalWidth]);
 
     return (
-        <div className="h-full w-full bg-white">
-            <div ref={parentRef} className="flex-1 overflow-auto relative">
+        <div className="w-full bg-white">
+            <div ref={parentRef} className="flex-1 overflow-x-auto relative">
                 <div style={{ width: `${totalWidth}px`, height: '100%' }}>
                     <div className="sticky top-0 z-20 bg-gray-50 border-b border-gray-200" style={{ height: '60px' }}>
                         {viewMode === 'Mes' ? (
@@ -218,9 +219,14 @@ export default function TimelinePanel({ tasks, viewMode }: TimelinePanelProps) {
                             const width = durationInDays * DAY_WIDTH - 4;
 
                             return (
-                                <div key={task._id} className="absolute bg-indigo-500 rounded text-white flex items-center shadow-sm hover:bg-indigo-600 transition-colors" style={{ top: `${index * ROW_HEIGHT + 10}px`, left: `${left}px`, width: `${width}px`, height: '30px', minWidth: '10px' }}>
-                                    <span className="px-2 text-xs font-semibold truncate">{task.title}</span>
-                                </div>
+                                <div 
+                                  key={task._id}
+                                  // --- 🚀 AÑADE ESTAS CLASES Y EL onClick ---
+                                  onClick={() => onTaskClick(task)}
+                                  className="absolute bg-indigo-500 rounded text-white flex items-center shadow-sm hover:bg-indigo-600 transition-colors cursor-pointer" 
+                                  style={{ top: `${index * ROW_HEIGHT + 10}px`, left: `${left}px`, width: `${width}px`, height: '30px', minWidth: '10px' }}>
+                                  <span className="px-2 text-xs font-semibold truncate">{task.title}</span>
+                              </div>
                             );
                         })}
                     </div>

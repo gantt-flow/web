@@ -1,11 +1,14 @@
 import Comment from "../models/comment.js";
+import Task from "../models/task.js";
 import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
 import { generateAuditLog } from '../utils/auditService.js';
 
 export const createComment = async (req, res) => {
     try {
-        const { userId, comment, relatedEntity } = req.body;
+        const { comment, relatedEntity } = req.body;
+
+        const userId = req.user._id;
 
         // Validate the userId and relatedEntity fields
         if (!isValidObjectId(userId) || !isValidObjectId(relatedEntity)) {
@@ -13,7 +16,7 @@ export const createComment = async (req, res) => {
         }
 
         // Validate the required fields
-        if (!comment || !userId || !relatedEntity) {
+        if (!comment || !userId || !relatedEntity ) {
             return res.status(400).json({ message: 'Fill all the required fields' });
         }
 
@@ -21,95 +24,115 @@ export const createComment = async (req, res) => {
         const newComment = new Comment({
             userId,
             comment,
-            relatedEntity
+            relatedEntity,
         });
 
         await newComment.save();
 
+        await Task.findByIdAndUpdate(
+            relatedEntity, // El ID de la tarea a actualizar
+            { $push: { comments: newComment._id } } // Agrega el ID del comentario al arreglo 'comments'
+        );
+
         await generateAuditLog(req,'CREATE','Comment', newComment._id, `Comentario creado por usuario ${userId} en entidad ${relatedEntity}`);
 
-        res.status(201).json({ message: 'Comment created successfully', comment: newComment });
+        const populatedComment = await Comment.findById(newComment._id)
+            .populate('userId', 'name email');
+
+        await generateAuditLog(req, 'CREATE', 'Comment', newComment._id, `Comentario creado en la entidad ${relatedEntity}`);
+        
+        res.status(201).json(populatedComment);
     } catch (error) {
         logger.error(`Error creating comment: ${error.message}`);
         res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-export const getCommentsByRelatedEntity = async (req, res) => {
+export const getCommentsByTask = async (req, res) => {
     try {
-        const { relatedEntity } = req.params;
+        const { taskId } = req.params;
 
-        // Validate the relatedEntity ID
-        if (!isValidObjectId(relatedEntity)) {
-            return res.status(400).json({ message: 'Invalid related entity ID' });
+        if (!isValidObjectId(taskId)) {
+            return res.status(400).json({ message: 'ID de Tarea no válido' });
         }
 
-        // Fetch comments related to the specified entity
-        const comments = await Comment.find({ relatedEntity }).populate('userId', 'name email');
-
-        if (comments.length === 0) {
-            return res.status(404).json({ message: 'No comments found for this entity' });
-        }
+        const comments = await Comment.find({ relatedEntity: taskId })
+            .populate('userId', 'name email') // Obtenemos nombre y email del autor
+            .sort({ createdAt: 'desc' }); // Mostramos los más recientes primero
 
         res.status(200).json(comments);
+
     } catch (error) {
-        logger.error(`Error fetching comments: ${error.message}`);
-        res.status(500).json({ message: 'Internal server error' });
+        // ...tu manejo de errores
     }
 }
 
-export const deleteComment = async (req, res) => {
-    try {
-        const { commentId } = req.params;
-
-        // Validate the comment ID
-        if (!isValidObjectId(commentId)) {
-            return res.status(400).json({ message: 'Invalid comment ID' });
-        }
-
-        // Find and delete the comment
-        const deletedComment = await Comment.findByIdAndDelete(commentId);
-
-        if (!deletedComment) {
-            return res.status(404).json({ message: 'Comment not found' });
-        }
-
-        await generateAuditLog(req, 'DELETE', 'Comment', commentId, `Comentario eliminado: "${commentId.comment.substring(0, 50)}${commentId.comment.length > 50 ? '...' : ''}"`);
-
-        res.status(200).json({ message: 'Comment deleted successfully', comment: deletedComment });
-    } catch (error) {
-        logger.error(`Error deleting comment: ${error.message}`);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-}
-
+// --- 🚀 FIX: Lógica de Actualización Segura ---
 export const updateComment = async (req, res) => {
     try {
         const { commentId } = req.params;
         const { comment } = req.body;
+        const userId = req.user._id;
 
-        // Validate the comment ID
         if (!isValidObjectId(commentId)) {
-            return res.status(400).json({ message: 'Invalid comment ID' });
+            return res.status(400).json({ message: 'ID de comentario no válido' });
         }
-
-        // Validate the comment field
         if (!comment) {
-            return res.status(400).json({ message: 'Comment cannot be empty' });
+            return res.status(400).json({ message: 'El comentario no puede estar vacío' });
         }
 
-        // Update the comment in the database
-        const updatedComment = await Comment.findByIdAndUpdate(commentId, { comment }, { new: true });
-
-        if (!updatedComment) {
-            return res.status(404).json({ message: 'Comment not found' });
+        const existingComment = await Comment.findById(commentId);
+        if (!existingComment) {
+            return res.status(404).json({ message: 'Comentario no encontrado' });
         }
 
-        await generateAuditLog(req,'UPDATE', 'Comment', commentId, `Comentario actualizado. Anterior: "${createComment.comment.substring(0, 50)}${createComment.comment.length > 50 ? '...' : ''}". Nuevo: "${comment.substring(0, 50)}${comment.length > 50 ? '...' : ''}"` );
+        // Comprobación de autorización: solo el autor puede editar
+        if (existingComment.userId.toString() !== userId.toString()) {
+            return res.status(403).json({ message: 'No autorizado para editar este comentario' });
+        }
 
-        res.status(200).json({ message: 'Comment updated successfully', comment: updatedComment });
+        existingComment.comment = comment;
+        await existingComment.save();
+        
+        const populatedComment = await Comment.findById(existingComment._id).populate('userId', 'name email');
+
+        res.status(200).json(populatedComment);
     } catch (error) {
-        logger.error(`Error updating comment: ${error.message}`);
-        res.status(500).json({ message: 'Internal server error' });
+        logger.error(`Error al actualizar el comentario: ${error.message}`);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
-}
+};
+
+// --- 🚀 FIX: Lógica de Eliminación Segura ---
+export const deleteComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const userId = req.user._id;
+
+        if (!isValidObjectId(commentId)) {
+            return res.status(400).json({ message: 'ID de comentario no válido' });
+        }
+
+        const commentToDelete = await Comment.findById(commentId);
+        if (!commentToDelete) {
+            return res.status(404).json({ message: 'Comentario no encontrado' });
+        }
+        
+        // Comprobación de autorización: solo el autor puede eliminar
+        if (commentToDelete.userId.toString() !== userId.toString()) {
+             return res.status(403).json({ message: 'No autorizado para eliminar este comentario' });
+        }
+
+        await Comment.findByIdAndDelete(commentId);
+
+        // También eliminamos la referencia del comentario en la tarea
+        await Task.findByIdAndUpdate(commentToDelete.relatedEntity, {
+            $pull: { comments: commentToDelete._id }
+        });
+
+        res.status(200).json({ message: 'Comentario eliminado exitosamente' });
+    } catch (error) {
+        logger.error(`Error al eliminar el comentario: ${error.message}`);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};

@@ -47,56 +47,62 @@ export default function Proyectos(){
     };
 
     return(
-        <div className="flex flex-row w-full">
+        <div className="flex flex-col w-full min-h-full p-4 sm:p-6 lg:p-8">
+            
+            {/* --- SECCIÓN DE CABECERA (Contenido Fijo) --- */}
+            {/* Esta parte se mantiene siempre visible en la parte superior del área de contenido. */}
+            <div className="flex-shrink-0">
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-800">Proyectos</h1>
+                <Button 
+                    text="Nuevo proyecto" 
+                    type="button" 
+                    className="mt-4 inline-block w-auto px-6 py-2 cursor-pointer rounded-lg bg-green-500 text-white font-semibold shadow-md hover:bg-green-600 transition-colors" 
+                    redirectTo="/inicio/proyectos/informacionProyecto"
+                />
+            </div>
 
-            <div className="flex flex-col flex-1 mx-2 mt-2">
-                <div>
-                    <h1 className="text-6xl">Proyectos</h1>
-                </div>
-
-                {isLoading && <p>Cargando proyectos...</p>}
-                {error && <p className="text-red-500">{error}</p>}
+            {/* --- SECCIÓN DE CONTENIDO (Lista de Proyectos) --- */}
+            {/* Este div simplemente contiene la lógica de renderizado. Ya no necesita `flex-1` ni `overflow`. */}
+            <div className="mt-8">
+                {isLoading && <p className="text-center text-gray-500">Cargando proyectos...</p>}
+                {error && <p className="text-center text-red-500">{error}</p>}
                 
                 {!isLoading && !error && projects.length === 0 && (
-                    <div className="flex flex-col flex-1 justify-center">
-                        <h2 className="text-2xl text-center">¡No hay proyectos por mostrar!</h2>
+                    <div className="text-center py-16">
+                        <h2 className="text-2xl font-semibold text-gray-700">¡No hay proyectos por mostrar!</h2>
                         <Button 
-                            text="Nuevo proyecto" 
+                            text="Crear mi primer proyecto" 
                             type="button" 
-                            className="w-44 p-2 self-center mt-8 cursor-pointer rounded-lg bg-green-500 border border-gray-200 hover:bg-gray-100 hover:text-green-500" 
+                            className="mt-6 inline-block w-auto px-6 py-2 cursor-pointer rounded-lg bg-green-500 text-white font-semibold shadow-md hover:bg-green-600 transition-colors" 
                             redirectTo="/inicio/proyectos/informacionProyecto"
                         />
                     </div>
                 )}
 
                 {!isLoading && !error && projects.length > 0 && (
-                    <div className="mt-6">
-                        <Button 
-                            text="Nuevo proyecto" 
-                            type="button" 
-                            className="w-44 p-2 self-center mb-4 cursor-pointer rounded-lg bg-green-500 border border-gray-200 hover:bg-gray-100 hover:text-green-500" 
-                            redirectTo="/inicio/proyectos/informacionProyecto"
-                        />
+                    <div className="space-y-4">
                         {projects.map(project => (
-                            <div key={project._id} className="p-4 mb-4 border border-blue-300 rounded-lg shadow-md bg-emerald-500/20">
-
-                                <div className="flex flex-row">
-                                    <h3 className="text-2xl flex-1 font-bold">{project.name}</h3>
+                            <div key={project._id} className="p-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50 hover:shadow-md transition-shadow">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                    <h3 className="text-2xl font-bold text-gray-900">{project.name}</h3>
                                     <button 
                                         onClick={() => handleDetailsClick(project._id)}
-                                        className="cursor-pointer w-44 rounded-lg bg-sky-300 hover:bg-sky-400 hover:text-gray-100 border-gray-200">Detalles    
+                                        className="mt-3 sm:mt-0 px-5 py-2 rounded-lg bg-sky-500 text-white font-medium hover:bg-sky-600 transition-colors self-start sm:self-center">
+                                        Detalles    
                                     </button>
                                 </div>
  
-                                <p className="text-gray-600">{project.description}</p>
+                                <p className="mt-2 text-gray-600">{project.description}</p>
 
-                                <div className="flex flex-row text-center mt-6">
-                                    <p className="text-3xl flex-1/2">Miembros del equipo</p>
-                                    <p className="text-3xl flex-1/2">Estado</p>
-                                </div>
-                                <div className="flex flex-row text-center">
-                                    <p className="text-xl flex-1/2">{project.teamMembers.length}</p>
-                                    <p className="text-lg flex-1/2">{project.status}</p>
+                                <div className="flex text-center mt-6 border-t pt-4">
+                                    <div className="w-1/2">
+                                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Miembros</p>
+                                        <p className="text-2xl font-semibold text-gray-800">{project.teamMembers.length}</p>
+                                    </div>
+                                    <div className="w-1/2">
+                                         <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Estado</p>
+                                         <p className="text-lg font-semibold text-gray-800">{project.status}</p>
+                                    </div>
                                 </div>
                             </div>
                         ))}
