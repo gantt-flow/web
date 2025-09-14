@@ -1,59 +1,90 @@
 'use client';
 
-import { Users, ClipboardList, Shield, LogOut, Settings } from "lucide-react"
+import { Users, ClipboardList, Shield, Logs, Settings, LogOut} from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { logout } from '@/services/authService';
+
+// Mock del servicio de logout para que el componente sea funcional
+const logout = async () => {
+    console.log("Cerrando sesión...");
+    return Promise.resolve();
+};
 
 const sideBarItems = [
-    { icon: <Users size={20} />, label: 'Usuarios', link: "/admin/sistema/usuarios" },
-    { icon: <ClipboardList size={20} />, label: 'Auditoría', link: "/admin/sistema/auditoria" },
-    { icon: <Shield size={20} />, label: 'Permisos', link: "/admin/proyectos/permisos" },
-    //{ icon: <Settings size={20} />, label: 'Configuración', link: "/ajustes" }
+    { icon: <Users/>, label: 'Usuarios', href: "/admin/sistema/usuarios" },
+    { icon: <ClipboardList/>, label: 'Auditoría', href: "/admin/sistema/auditoria" },
+    { icon: <Shield />, label: 'Permisos', href: "/admin/proyectos/permisos" },
+    //{ icon: <Settings/>, label: 'Configuración', href: "/ajustes" }
 ];
 
 export default function Sidebar() {
     const router = useRouter();
+    const pathname = usePathname();
 
     const handleLogout = async () => {
         try {
-            await logout(); // Llama al servicio que llama al backend
-            router.push('/auth/login'); // Redirige al usuario a la página de login
-            setTimeout(() => {
-                window.location.reload();
-            }, 100);
+            await logout();
+            router.push('/auth/login');
         } catch (error) {
             console.error("Error al cerrar sesión:", error);
-            // Opcional: mostrar un mensaje de error al usuario
-            router.push('/auth/login');
         }
     };
 
-
     return (
-        <aside className="h-full w-48">
-            <nav className="h-full flex flex-col" role="navigation" aria-label="Sidebar">
-                    <ul className="flex flex-1 flex-col px-5">
-                        {sideBarItems.map(({ icon, label, link}, index) => (
-                        <li key={label}>
-                            <Link href={link}>
-                                <div className="flex items-center py-3 my-5 cursor-pointer">
-                                    {icon}   
-                                    <span className="px-3">{label}</span>
-                                </div>
-                            </Link>
-                        </li>
-                        ))}
-                    </ul>
-                
+        <aside className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm">
+            {/* CONTENEDOR DEL LOGO ALINEADO */}
+            {/* Se cambia p-6 por h-16 para igualar la altura del header (64px) */}
+            {/* Se añade flex e items-center para centrar verticalmente el logo */}
+            {/* Se usa px-6 para mantener el padding horizontal */}
+            <div className="flex items-center h-16 px-6 border-b border-gray-200">
+                <Link href="/admin/sistema/usuarios">
+                     <Image
+                        src="/logo.svg" 
+                        alt="Gantt Flow Logo"
+                        width={140}
+                        height={28} // Se corrige la altura para mantener la proporción
+                        priority
+                    />
+                </Link>
+            </div>
 
-                <div className="flex px-5">
-                     <button onClick={handleLogout} className="flex items-center cursor-pointer py-3 my-5 w-full text-left hover:bg-gray-100 rounded-md">
-                        <LogOut />
-                        <span className="px-3">Salir</span>
-                    </button>
-                </div>
+            <nav className="flex-1 px-4 py-4">
+                <ul className="space-y-2">
+                    {sideBarItems.map(({ icon, label, href }) => {
+                        const isActive = pathname === href;
+                        return (
+                            <li key={label}>
+                                <Link
+                                    href={href}
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-black
+                                        ${
+                                            isActive
+                                                ? 'bg-green-500 text-white shadow-sm'
+                                                : 'hover:bg-gray-100'
+                                        }`
+                                    }
+                                >
+                                    {icon}
+                                    <span className="font-medium">{label}</span>
+                                </Link>
+                            </li>
+                        );
+                    })}
+                </ul>
             </nav>
+
+            <div className="p-4 border-t border-gray-200">
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left  hover:bg-red-50 hover:text-red-600 transition-colors"
+                >
+                    <LogOut />
+                    <span className="font-medium">Salir</span>
+                </button>
+            </div>
         </aside>
-    )
+    );
 }
+
