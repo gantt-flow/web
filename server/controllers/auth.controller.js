@@ -34,7 +34,7 @@ export const login = async (req, res) => {
         // Create the payload for the JWT, containing non-sensitive user data.
         const payload = {
             user: {
-                _id: user.id,
+                _id: user._id,
                 email: user.email,
                 name: user.name,
                 role: user.role
@@ -131,5 +131,45 @@ export const logout = async (req, res) => {
         // Log and send a generic server error if anything goes wrong.
         console.error(err.message);
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+// @route   POST /api/auth/change-password
+// @desc    Permite a un usuario autenticado cambiar su propia contraseña
+// @access  Privado
+export const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user._id; // Obtenido del middleware 'auth'
+
+    try {
+        // 1. Validar input
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Todos los campos son requeridos.' });
+        }
+
+        // 2. Obtener el usuario de la BD
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        // 3. Verificar la contraseña actual
+        const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'La contraseña actual es incorrecta.' });
+        }
+
+        // 4. Hashear y guardar la nueva contraseña
+        const salt = await bcrypt.genSalt(10);
+        user.passwordHash = await bcrypt.hash(newPassword, salt);
+        
+        await user.save();
+
+        res.status(200).json({ message: 'Contraseña actualizada exitosamente.' });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Error de servidor' });
     }
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { CircleUser, Flag, Circle, CircleCheckBig, CircleMinus } from "lucide-react";
+import { CircleUser, Flag, Circle, CircleCheckBig, CircleMinus, CircleDashed } from "lucide-react";
 import { Task } from "@/services/taskService";
 import EditTaskModal from "./editTaskModal";
 
@@ -38,6 +38,7 @@ export default function GanttTaskListPanel({ tasks, onTaskStatusChange, onTaskUp
       case 'Completada': return <CircleCheckBig className="text-green-500" stroke="currentColor" />;
       case 'En progreso': return <CircleMinus className="text-blue-500" stroke="currentColor" />;
       case 'Sin iniciar': return <Circle className="text-gray-400" />;
+      case 'En espera': return <CircleDashed className="text-red-400" />;
       default: return <Circle className="text-gray-400" />;
     }
   };

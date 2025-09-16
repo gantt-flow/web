@@ -193,3 +193,21 @@ export const deleteUser = async (userId: string): Promise<void> => {
     throw error;
   }
 };
+
+
+/**
+ * Obtiene todos los datos de un usuario por su ID
+ * @param userId El ID del usuario
+ * @returns El objeto completo del usuario
+ */
+export const getUserById = async (userId: string): Promise<User> => {
+  try {
+    const response = await api.get<User>(`/users/${userId}`);
+    // Normalizamos los permisos al cargar
+    response.data.permisions = normalizePermissionsToMap(response.data.permisions);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al obtener el usuario ${userId}:`, error);
+    throw error;
+  }
+};

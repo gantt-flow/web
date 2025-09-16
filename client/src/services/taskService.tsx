@@ -43,6 +43,7 @@ export interface NewTask {
 }
 
 
+
 export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
     try {
         const response = await api.get<Task[]>(`/tasks/${projectId}`)

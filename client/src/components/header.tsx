@@ -3,15 +3,22 @@
 import Link from "next/link";
 import { useRef, useState, useEffect, MutableRefObject } from "react";
 import { Bell, Search, User, Settings, CircleUserRound } from 'lucide-react';
-import { getNotificationsByUser, updateNotificationStatus } from "@/services/notificationsService";
+// Importamos tus servicios de notificaciones reales
+import { getNotificationsByUser, updateNotificationStatus, markAllNotificationsAsRead } from "@/services/notificationsService";
 
 // --- Definición de Tipos para TypeScript ---
+// Esta interfaz debe coincidir con la que te proporcioné en la respuesta anterior
+// (basada en tu servicio corregido)
 interface Notification {
     _id: string;
+    recipientId: string | { _id: string; name: string; email: string }; // Puede ser string o poblado
     title: string;
     message: string;
     isRead: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
+
 
 // --- Hook personalizado con tipos explícitos ---
 const useClickOutside = (
@@ -34,14 +41,17 @@ const useClickOutside = (
     }, [ref, handler]);
 };
 
+// --- CAMBIO PRINCIPAL AQUÍ ---
+// Corregimos las rutas para que apunten dentro del layout /inicio
+// y estandarizamos el tamaño del icono a 20px.
 const profileDropdownItems = [
-    { label: "Perfil", link: "/perfil", icon: <User size={25} /> },
-    { label: "Ajustes", link: "/ajustes", icon: <Settings size={25} /> }
+    { label: "Perfil", link: "/inicio/perfil", icon: <User size={20} /> },
+    { label: "Ajustes", link: "/inicio/ajustes", icon: <Settings size={20} /> }
 ];
+// --- FIN DEL CAMBIO ---
 
 
 export default function Header() {
-    // Se añade el tipo 'Notification[]' al estado
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -56,20 +66,24 @@ export default function Header() {
     useEffect(() => {
         async function fetchNotifications() {
             try {
+                // Esta es la llamada a tu servicio REAL. No hay datos simulados.
                 const notificationsData = await getNotificationsByUser();
                 setNotifications(notificationsData);
                 setUnreadCount(notificationsData.filter(n => !n.isRead).length);
             } catch(err) {
-                console.error("Error al obtener notificaciones", err);
+                console.error("Error al obtener notificaciones:", err);
+                // Si el servicio falla (ej. 404 porque no hay notificaciones), nos aseguramos de que los estados queden limpios.
+                setNotifications([]);
+                setUnreadCount(0);
             }
         }
         fetchNotifications();
     }, []);
 
-    // Se añade el tipo 'Notification' al parámetro
     const handleUpdateNotificationStatus = async (notification: Notification) => {
         if (notification.isRead) return;
         try {
+            // Llamada al servicio REAL
             await updateNotificationStatus(notification._id);
             const updatedNotifications = notifications.map(n => 
                 n._id === notification._id ? { ...n, isRead: true } : n
@@ -78,6 +92,22 @@ export default function Header() {
             setUnreadCount(updatedNotifications.filter(n => !n.isRead).length);
         } catch (error) {
             console.error("Failed to update notification status", error);
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
+        if (unreadCount === 0) return; 
+
+        try {
+            // Llamada al servicio REAL
+            await markAllNotificationsAsRead();
+            
+            const allRead = notifications.map(n => ({ ...n, isRead: true }));
+            setNotifications(allRead);
+            setUnreadCount(0);
+
+        } catch (error) {
+            console.error("Falló al marcar todas como leídas", error);
         }
     };
 
@@ -100,10 +130,7 @@ export default function Header() {
             </div>
 
             {/* Columna Derecha (Iconos de Usuario y Notificaciones) */}
-            {/* 'items-center' asegura la alineación vertical de los iconos */}
-
-
-            <div className="flex justify-end gap-5">
+            <div className="flex justify-end items-center gap-5">
                 <div ref={bellDropdownRef} className="relative">
                     <button onClick={() => { setIsBellDropdownOpen(!isBellDropdownOpen); setIsProfileDropdownOpen(false); }} className="relative hover:text-green-500 transition-colors">
                         <Bell size={28} />
@@ -114,9 +141,18 @@ export default function Header() {
                         )}
                     </button>
                     {isBellDropdownOpen && (
-                        // Se aumenta el z-index a 50 para asegurar que esté por encima de todo
                         <div className="absolute right-0 mt-3 w-80 bg-white rounded-lg shadow-xl border z-50">
-                            <div className="p-4 font-semibold border-b">Notificaciones</div>
+                            <div className="p-4 font-semibold border-b flex justify-between items-center">
+                                <span>Notificaciones</span>
+                                {unreadCount > 0 && (
+                                    <button
+                                        onClick={handleMarkAllAsRead}
+                                        className="text-sm font-normal text-blue-600 hover:text-blue-800 hover:underline focus:outline-none"
+                                    >
+                                        Marcar todas como leídas
+                                    </button>
+                                )}
+                            </div>
                             <ul className="py-2 max-h-80 overflow-y-auto">
                                 {notifications.length > 0 ? notifications.map(notification => (
                                     <li key={notification._id} className={`px-4 py-2 cursor-pointer transition-colors ${!notification.isRead ? 'bg-blue-50' : 'bg-white'} hover:bg-gray-100`} onClick={() => handleUpdateNotificationStatus(notification)}>
@@ -134,13 +170,16 @@ export default function Header() {
                          <CircleUserRound size={30} />
                     </button>
                     {isProfileDropdownOpen && (
-                        // Se aumenta el z-index a 50
                         <div className="absolute right-0 mt-3 w-48 bg-white rounded-lg shadow-xl border z-50">
                             <ul className="py-2 text-sm text-gray-700">
                                 {profileDropdownItems.map(({ label, link, icon }) => (
                                     <li key={label}>
                                         <Link href={link} className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100">
-                                            {icon} {label}
+                                            {/* Contenedor para asegurar alineación y tamaño de icono */}
+                                            <div className="w-[20px] h-[20px] flex items-center justify-center">
+                                                {icon}
+                                            </div>
+                                            <span>{label}</span>
                                         </Link>
                                     </li>
                                 ))}

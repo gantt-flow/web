@@ -1,6 +1,6 @@
 'use client';
 
-import { House, ChartGantt, FolderKanban, Logs, LogOut } from "lucide-react";
+import { House, ChartGantt, FolderKanban, LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
@@ -16,7 +16,6 @@ const sideBarItems = [
     { icon: <House />, label: 'Inicio', href: "/inicio" },
     { icon: <ChartGantt />, label: 'Gantt', href: "/inicio/gantt" },
     { icon: <FolderKanban />, label: 'Proyectos', href: "/inicio/proyectos" },
-    { icon: <Logs />, label: 'Logs', href: "/inicio/logs" }
 ];
 
 export default function Sidebar() {

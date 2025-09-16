@@ -1,4 +1,5 @@
 import api from '@/services/api';
+import { jwtDecode } from 'jwt-decode';
 
 // Definimos una interfaz para las credenciales de inicio de sesión
 export interface LoginCredentials {
@@ -12,6 +13,11 @@ export interface SignUpData {
   name: string;
   role: string;
   projectId?: string;
+}
+
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
 }
 
 
@@ -56,3 +62,17 @@ export const logout = async () => {
   await api.post('/auth/logout');
 };
 
+
+/**
+ * Realiza una petición segura de cambio de contraseña
+ * @param data Objeto con la contraseña actual y la nueva
+ */
+export const changePassword = async (data: ChangePasswordData) => {
+    try {
+        const response = await api.post('/auth/change-password', data);
+        return response.data;
+    } catch (error) {
+        // Lanza el error para que el componente de la UI pueda atraparlo
+        throw error;
+    }
+};

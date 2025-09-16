@@ -4,7 +4,7 @@ import { logger } from '../utils/logger.js';
 import { handleError } from '../utils/errorHandler.js';
 import { generateAuditLog } from '../utils/auditService.js';
 import { hashPassword } from '../utils/passwordUtils.js';
-
+import jwt from 'jsonwebtoken';
 
 export const getCurrentUser = async (req, res) => {
     try {
@@ -20,7 +20,7 @@ export const getCurrentUser = async (req, res) => {
 
 export const getUserWithId = async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = req.params._id;
 
         // Validate the user ID
         if (!isValidObjectId(userId)) {
@@ -128,24 +128,54 @@ export const updateUser = async (req, res) => {
         const userId = req.params.id;
         const updateData = req.body;
 
-        // Validate the user ID
+        // Seguridad: Nunca permitir que esta ruta actualice el hash de la contraseña directamente
+        delete updateData.passwordHash;
+        delete updateData.role; // Opcional: solo los administradores deberían cambiar roles.
+
         if (!isValidObjectId(userId)) {
             return res.status(400).json({ message: 'Invalid user ID' });
         }
 
-        // Update the user in the database
+        // 1. Actualizar al usuario en la BD
         const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select('-passwordHash');
 
         if (!updatedUser) {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        // 2. Generar el log de auditoría (como ya lo tenías)
         await generateAuditLog(req, 'UPDATE', 'User', userId, `Usuario actualizado: Campos modificados: ${Object.keys(updateData).join(', ')}`);
 
+        // 3. Crear un NUEVO payload de JWT con los datos actualizados
+        const payload = {
+            user: {
+                _id: updatedUser._id,
+                email: updatedUser.email,
+                name: updatedUser.name,
+                role: updatedUser.role
+            }
+        };
+
+        // 4. Firmar el nuevo token (de forma síncrona, ya que no pasamos callback)
+        const token = jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        // 5. Volver a establecer la cookie httpOnly con el token actualizado
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
+
+        // 6. Enviar la respuesta
         res.status(200).json(updatedUser);
+
     } catch (error) {
         logger.error(`Error updating user: ${error.message}`);
-        handleError(res, error);
+        res.status(500).json({ message: 'Server error' });
     }
 }
 

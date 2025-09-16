@@ -6,7 +6,7 @@ import { getProjectTasks, getTeamMembers } from '@/services/projectService';
 
 interface AddTaskModalProps {
     onClose: () => void;
-    onAddTask: (task: NewTask) => void | Promise<void>;
+    onAddTask: (task: NewTask | any) => void | Promise<void>; // Lo cambiamos a 'any' temporalmente para permitir nuestro objeto Date
     projectId: string;
 }
 
@@ -28,8 +28,8 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
     const [newTask, setNewTask] = useState<NewTask>({
         title: '',
         description: '',
-        startDate: new Date().toISOString().slice(0, 10),
-        dueDate: new Date().toISOString().slice(0, 10),
+        startDate: new Date().toISOString().slice(0, 10), // Sigue siendo 'YYYY-MM-DD'
+        dueDate: new Date().toISOString().slice(0, 10),   // Sigue siendo 'YYYY-MM-DD'
         status: 'Sin iniciar',
         priority: 'Baja',
         assignedTo: '',
@@ -46,7 +46,6 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
     const [projectTasks, setProjectTasks] = useState<Task[]>([]);
 
-    // --- LÓGICA PARA NUEVO SELECTOR DE DEPENDENCIAS ---
     const [isDependenciesOpen, setIsDependenciesOpen] = useState(false);
     const [dependencySearchTerm, setDependencySearchTerm] = useState('');
     const dependenciesRef = useRef<HTMLDivElement>(null);
@@ -78,7 +77,6 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
         fetchProjectTasks();
     }, [projectId]);
     
-    // Click outside handler para cerrar el dropdown de dependencias
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dependenciesRef.current && !dependenciesRef.current.contains(event.target as Node)) {
@@ -96,7 +94,6 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
         setNewTask(prev => ({ ...prev, [name]: value }));
     }
     
-    // --- FUNCIONES PARA NUEVO SELECTOR DE DEPENDENCIAS ---
     const addDependency = (taskId: string) => {
         if (!newTask.dependencies.includes(taskId)) {
             setNewTask(prev => ({ ...prev, dependencies: [...prev.dependencies, taskId] }));
@@ -128,14 +125,38 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
         setNewTask(prev => ({ ...prev, tags: prev.tags.filter(tag => tag !== tagToRemove) }));
     }
 
+    // --- CAMBIO PRINCIPAL AQUÍ ---
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onAddTask(newTask);
+
+        // El estado 'newTask' todavía tiene las fechas como strings "YYYY-MM-DD".
+        // El input <input type="date"> se basa en la zona horaria LOCAL del usuario.
+        // JS interpreta "YYYY-MM-DD" como medianoche UTC (T00:00:00Z).
+        // Necesitamos forzar a JS a que interprete "YYYY-MM-DD" como medianoche LOCAL.
+        // Al añadir "T00:00:00" (sin la 'Z'), new Date() lo interpreta en la zona horaria local.
+        
+        const taskDataWithLocalDates = {
+            ...newTask,
+            // Esto crea un objeto Date en la medianoche LOCAL del usuario
+            startDate: new Date(newTask.startDate + 'T00:00:00'),
+            dueDate: new Date(newTask.dueDate + 'T00:00:00')
+        };
+
+        // Al enviar esto, JSON.stringify() lo convertirá a la cadena ISO UTC correcta 
+        // (ej: 2025-09-16T06:00:00Z si estás en UTC-6), que es lo que Mongoose espera.
+        onAddTask(taskDataWithLocalDates);
     }
+    // --- FIN DEL CAMBIO ---
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 transition-opacity duration-300">
-            <div className="bg-gray-50 p-8 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div 
+            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 transition-opacity duration-300"
+            onClick={onClose}
+        >
+            <div 
+                className="bg-gray-50 p-8 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+                onClick={e => e.stopPropagation()}
+            >
                 <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Agregar Nueva Tarea</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -194,7 +215,6 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                         </div>
                     </div>
                     
-                    {/* FIX 2: Nuevo componente para seleccionar dependencias */}
                     <div className="relative" ref={dependenciesRef}>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Dependencias</label>
                         <div className="mt-1 flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md shadow-sm min-h-[42px] bg-white">
@@ -251,4 +271,3 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
         </div>
     );
 }
-

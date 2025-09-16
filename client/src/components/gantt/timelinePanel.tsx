@@ -58,7 +58,6 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
         initialScrollDone.current = false;
     }, [tasks]);
 
-    // --- 🚀 FIX: Lógica de useMemo reescrita para ser más clara y evitar errores ---
     const { headers, subHeaders, totalWidth } = useMemo(() => {
         if (!dateRange) return { headers: [], subHeaders: [], totalWidth: 0 };
 
@@ -67,7 +66,6 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
         
         let monthIterator = new Date(dateRange.start.getFullYear(), dateRange.start.getMonth(), 1);
 
-        // Primero, generamos SIEMPRE la cabecera de meses. Sirve como base para todo.
         while(monthIterator <= dateRange.end) {
             const year = monthIterator.getFullYear();
             const month = monthIterator.getMonth();
@@ -80,7 +78,6 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
             monthIterator.setMonth(monthIterator.getMonth() + 1);
         }
 
-        // Ahora, generamos las sub-cabeceras específicas de la vista
         if (viewMode === 'Día') {
             let dayIterator = new Date(dateRange.start);
             while(dayIterator <= dateRange.end) {
@@ -105,7 +102,6 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
             }
         }
         
-        // El ancho total se basa en la cabecera de meses, que es la escala continua.
         const calculatedTotalWidth = primaryHeaders.reduce((acc, h) => acc + h.width, 0);
 
         return { headers: primaryHeaders, subHeaders: secondaryHeaders, totalWidth: calculatedTotalWidth };
@@ -164,7 +160,7 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
                 <div style={{ width: `${totalWidth}px`, height: '100%' }}>
                     <div className="sticky top-0 z-20 bg-gray-50 border-b border-gray-200" style={{ height: '60px' }}>
                         {viewMode === 'Mes' ? (
-                            <div className="relative flex h-full">
+                             <div className="relative flex h-full">
                                 {headers.map(header => (
                                     <div key={header.key} className="flex-shrink-0 flex items-center justify-center border-r font-semibold text-gray-700" style={{ width: `${header.width}px` }}>
                                         {header.label.charAt(0).toUpperCase() + header.label.slice(1)}
@@ -172,7 +168,7 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
                                 ))}
                             </div>
                         ) : (
-                            <>
+                             <>
                                 <div className="relative flex h-[30px]">
                                     {headers.map(header => (
                                         <div key={header.key} className="flex-shrink-0 text-center border-r font-semibold text-gray-700 py-1" style={{ width: `${header.width}px` }}>
@@ -211,23 +207,47 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
                         {tasks.map((task, index) => {
                             if (!dateRange) return null;
                             const taskStart = new Date(task.startDate);
-                            const taskEnd = new Date(task.dueDate);
-                            if (isNaN(taskStart.getTime()) || isNaN(taskEnd.getTime())) return null;
-
+                            if (isNaN(taskStart.getTime())) return null;
                             const left = getDaysDiff(dateRange.start, taskStart) * DAY_WIDTH;
-                            const durationInDays = getDaysDiff(taskStart, taskEnd) + 1;
-                            const width = durationInDays * DAY_WIDTH - 4;
 
-                            return (
-                                <div 
-                                  key={task._id}
-                                  // --- 🚀 AÑADE ESTAS CLASES Y EL onClick ---
-                                  onClick={() => onTaskClick(task)}
-                                  className="absolute bg-indigo-500 rounded text-white flex items-center shadow-sm hover:bg-indigo-600 transition-colors cursor-pointer" 
-                                  style={{ top: `${index * ROW_HEIGHT + 10}px`, left: `${left}px`, width: `${width}px`, height: '30px', minWidth: '10px' }}>
-                                  <span className="px-2 text-xs font-semibold truncate">{task.title}</span>
-                              </div>
-                            );
+                            if (task.type === 'Milestone') {
+                                const milestoneSize = 24; 
+                                const milestoneLeft = left + (DAY_WIDTH / 2) - (milestoneSize / 2);
+                                const milestoneTop = index * ROW_HEIGHT + (ROW_HEIGHT - milestoneSize) / 2;
+                                
+                                return (
+                                    <div
+                                        key={task._id}
+                                        onClick={() => onTaskClick(task)}
+                                        className="absolute cursor-pointer group"
+                                        style={{
+                                            top: `${milestoneTop}px`,
+                                            left: `${milestoneLeft}px`,
+                                            width: `${milestoneSize}px`,
+                                            height: `${milestoneSize}px`,
+                                        }}
+                                        title={`${task.title} (Hito)`}
+                                    >
+                                        <div className="w-full h-full bg-orange-500 transform rotate-45 rounded-sm group-hover:bg-orange-600 transition-colors shadow-md"></div>
+                                    </div>
+                                );
+
+                            } else {
+                                const taskEnd = new Date(task.dueDate);
+                                if (isNaN(taskEnd.getTime())) return null;
+                                const durationInDays = getDaysDiff(taskStart, taskEnd) + 1;
+                                const width = durationInDays * DAY_WIDTH - 4;
+
+                                return (
+                                    <div
+                                        key={task._id}
+                                        onClick={() => onTaskClick(task)}
+                                        className="absolute bg-indigo-500 rounded text-white flex items-center shadow-sm hover:bg-indigo-600 transition-colors cursor-pointer" 
+                                        style={{ top: `${index * ROW_HEIGHT + 10}px`, left: `${left}px`, width: `${width}px`, height: '30px', minWidth: '10px' }}>
+                                        <span className="px-2 text-xs font-semibold truncate">{task.title}</span>
+                                    </div>
+                                );
+                            }
                         })}
                     </div>
                 </div>

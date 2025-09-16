@@ -1,6 +1,6 @@
 import express from "express";
 import auth from '../middleware/authMiddleware.js';
-import { createNotification, getAllNotificationsByUser, updateNotificationStatus } from "../controllers/notifications.controller.js";
+import { createNotification, getAllNotificationsByUser, updateNotificationStatus, markAllAsRead } from "../controllers/notifications.controller.js";
 
 const router = express.Router();
 
@@ -10,5 +10,6 @@ router.post("/", auth, createNotification);
 router.get("/", auth, getAllNotificationsByUser);
 // Route to update notification status
 router.put("/:notificationId/read", auth, updateNotificationStatus);
+router.put("/read-all", auth, markAllAsRead);
 
 export default router;
