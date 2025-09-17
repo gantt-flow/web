@@ -21,16 +21,3 @@ def predict():
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-def predict_batch():
-    """Controlador para realizar predicciones por lotes"""
-    data = request.get_json()
-    
-    if not data or 'texts' not in data or not isinstance(data['texts'], list):
-        return jsonify({"error": "Se requiere campo 'texts' con una lista de textos"}), 400
-    
-    try:
-        results = ml_service.get_batch_predictions(data['texts'])
-        return jsonify({"results": results})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500

@@ -4,6 +4,7 @@ import { NewProject } from './projectService';
 import { Comment } from './commentsService';
 
 export interface Task {
+    typeTask: string;
     _id: string;
     title: string;
     description: string;
@@ -40,6 +41,7 @@ export interface NewTask {
     attachments?: string[];
     tags: string[];
     type: string;
+    typeTask: string;
 }
 
 

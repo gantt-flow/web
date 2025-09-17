@@ -49,22 +49,6 @@ class MLService:
         except Exception as e:
             raise Exception(f"Error durante la predicción: {str(e)}")
     
-    def get_batch_predictions(self, texts):
-        """Obtener predicciones para múltiples textos"""
-        results = []
-        for text in texts:
-            try:
-                result = self.get_prediction(text)
-                result["text"] = text
-                results.append(result)
-            except Exception as e:
-                results.append({
-                    "text": text,
-                    "error": str(e)
-                })
-        
-        return results
-    
     def health_check(self):
         """Verificar el estado del servicio"""
         return {

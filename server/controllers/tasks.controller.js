@@ -23,13 +23,14 @@ export const createTask = async (req, res) => {
             estimatedHours,
             comments, 
             attachments,
-            tags, 
-            type 
+            tags,
+            type, 
+            typeTask
         } = req.body;
 
         const createdBy = req.user._id; 
 
-        if (!title || !startDate || !dueDate || !assignedTo || !projectId || !createdBy || !type) {
+        if (!title || !startDate || !dueDate || !assignedTo || !projectId || !createdBy || !typeTask  || !type) {
             return res.status(400).json({ message: 'Fill all the required fields' });
         }
 
@@ -50,7 +51,8 @@ export const createTask = async (req, res) => {
             estimatedHours,
             createdBy,
             tags,
-            type
+            type,
+            typeTask  
         });
 
         const savedTask = await newTask.save();

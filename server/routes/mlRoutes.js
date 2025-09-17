@@ -33,34 +33,6 @@ router.post('/predict', async (req, res) => {
 });
 
 /**
- * Ruta para obtener predicciones por lotes
- */
-router.post('/predict/batch', async (req, res) => {
-    try {
-        const { texts } = req.body;
-
-        if (!texts || !Array.isArray(texts)) {
-            return res.status(400).json({
-                success: false,
-                error: 'El campo "texts" es requerido y debe ser un array'
-            });
-        }
-
-        const predictions = await MLController.getBatchPredictions(texts);
-        res.json({
-            success: true,
-            data: predictions
-        });
-    } catch (error) {
-        console.error('Error en ruta /predict/batch:', error.message);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-/**
  * Ruta para verificar el estado del servicio de ML
  */
 router.get('/health', async (req, res) => {
