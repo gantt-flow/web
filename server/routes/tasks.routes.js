@@ -2,6 +2,7 @@ import express from "express";
 import auth from '../middleware/authMiddleware.js';
 import { createTask, getTasksByProject, updateTask, deleteTask } from "../controllers/tasks.controller.js";
 
+
 const router = express.Router();
 
 // Route to create a new task
@@ -12,5 +13,6 @@ router.get("/:projectId", auth, getTasksByProject);
 router.put("/:taskId", auth, updateTask);
 // Route to delete a task by ID
 router.delete("/:taskId", auth, deleteTask);
+
 
 export default router;

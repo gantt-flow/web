@@ -76,7 +76,11 @@ const taskSchema = new Schema({
         enum: ['Tarea', 'Milestone'],
         default: 'Tarea',
         required: false
-    }
+    },
+    typeTask: {
+        type: String,
+        default: "General"
+    },
 }, {
     timestamps: true
 });

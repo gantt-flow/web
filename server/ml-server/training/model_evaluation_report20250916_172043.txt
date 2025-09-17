@@ -1,0 +1,43 @@
+EVALUACIÓN DEL MODELO DE CLASIFICACIÓN DE TAREAS (DATASET MEJORADO)
+==================================================================
+
+Fecha de evaluación: 2025-09-16 17:20:43
+Modelo: naive_bayes_task_model.pkl
+
+MÉTRICAS PRINCIPALES:
+---------------------
+Exactitud (Accuracy): 0.9838
+Precisión (Precision): 0.9839
+Sensibilidad (Recall): 0.9838
+Puntuación F1 (F1-score): 0.9837
+AUC-ROC: 0.9997
+Validación Cruzada (5-fold): 0.9113 (±0.0174)
+
+MEJORES PARÁMETROS:
+-------------------
+clf__alpha: 0.01
+
+REPORTE DE CLASIFICACIÓN:
+-------------------------
+               precision    recall  f1-score   support
+
+   Desarrollo       1.00      1.00      1.00       100
+   Despliegue       0.97      1.00      0.99       100
+       Diseño       1.00      1.00      1.00       100
+Documentación       0.98      0.94      0.96       100
+Planificación       0.99      0.97      0.98       100
+      Reunión       0.98      1.00      0.99       100
+     Revisión       0.95      0.97      0.96       100
+      Testing       1.00      0.99      0.99       100
+
+     accuracy                           0.98       800
+    macro avg       0.98      0.98      0.98       800
+ weighted avg       0.98      0.98      0.98       800
+
+PUNTUACIONES DE VALIDACIÓN CRUZADA:
+-----------------------------------
+Fold 1: 0.9000
+Fold 2: 0.8875
+Fold 3: 0.9313
+Fold 4: 0.9313
+Fold 5: 0.9062

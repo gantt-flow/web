@@ -15,6 +15,7 @@ import projectsRoutes from './routes/projects.routes.js';
 import remindersRoutes from './routes/reminders.routes.js';
 import tasksRoutes from './routes/tasks.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import mlRoutes from './routes/mlRoutes.js';
 
 
 dotenv.config(); // Load environment variables from .env file
@@ -44,6 +45,7 @@ app.use('/projects', projectsRoutes);
 app.use('/reminders', remindersRoutes);
 app.use('/tasks', tasksRoutes);
 app.use('/auth', authRoutes);
+app.use('/api/ml', mlRoutes);
 
 
 app.listen(PORT, () => {
