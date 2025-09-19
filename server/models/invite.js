@@ -5,7 +5,6 @@ const InviteSchema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true
     },
     invitedBy: {
         type: Schema.Types.ObjectId,
@@ -19,8 +18,8 @@ const InviteSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'user'],
-        default: 'user'
+        enum: ['Administrador de proyectos','Miembro de equipo','Colaborador', 'Cliente'],
+        required: true
     },
     token: {
         type: String,
@@ -43,6 +42,9 @@ const InviteSchema = new Schema({
 }, {
     timestamps:true
 });
+
+// Índice compuesto para evitar invitaciones duplicadas al mismo proyecto
+InviteSchema.index({ email: 1, projectId: 1 }, { unique: true });
 
 const Invite = mongoose.model('Invite', InviteSchema);
 export default Invite;
