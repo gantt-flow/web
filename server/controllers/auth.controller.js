@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.js'; 
 import { comparePassword } from '../utils/passwordUtils.js';
 import crypto from 'crypto';
-import { sendEmail } from '../utils/email.js'; 
+import { sendEmail, generatePasswordResetEmailHTML } from '../utils/email.js'; 
 
 
 /**
@@ -206,17 +206,13 @@ export const forgotPassword = async (req, res) => {
         // 4. Crear la URL de restablecimiento
         const resetUrl = `${process.env.FRONTEND_URL}/auth/restablecer-contrasena/${resetToken}`;
 
-        // 5. Enviar el email
-        const message = `
-            Has solicitado restablecer tu contraseña. Por favor, haz clic en el siguiente enlace para continuar. El enlace es válido por 1 hora.\n\n
-            ${resetUrl}\n\n
-            Si no solicitaste esto, por favor ignora este correo.
-        `;
+        const emailHtml = generatePasswordResetEmailHTML({ resetUrl });
 
+        // 5. Enviar el email
         await sendEmail({
             to: user.email,
             subject: 'Restablecimiento de Contraseña - GanttFlow',
-            text: message,
+            html: emailHtml,
         });
         
         res.status(200).json({ message: 'Si existe una cuenta con este correo, se ha enviado un enlace para restablecer la contraseña.' });
@@ -270,7 +266,8 @@ export const resetPassword = async (req, res) => {
             await sendEmail({
                 to: user.email,
                 subject: 'Tu contraseña ha sido cambiada',
-                text: `Hola ${user.name},\n\nTe confirmamos que la contraseña de tu cuenta ha sido cambiada exitosamente.\n\nSi no realizaste este cambio, por favor contacta a nuestro soporte inmediatamente.`
+                title: 'Contraseña Actualizada Exitosamente',
+                content: `Hola ${user.name},<br><br>Te confirmamos que la contraseña de tu cuenta en GanttFlow ha sido cambiada.<br><br>Si no realizaste este cambio, por favor contacta a nuestro soporte inmediatamente.`
             });
         } catch (emailError) {
             console.error("No se pudo enviar el email de confirmación, pero la contraseña fue cambiada:", emailError);

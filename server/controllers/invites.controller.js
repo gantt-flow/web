@@ -3,7 +3,7 @@ import Project from "../models/project.js";
 import User from "../models/user.js";
 import { isValidObjectId } from "mongoose";
 import { logger } from "../utils/logger.js";
-import { sendEmail } from "../utils/email.js";
+import { sendEmail, generateInvitationEmailHTML } from "../utils/email.js";
 import crypto from "crypto";
 
 export const createInvite = async (req, res) => {
@@ -81,99 +81,17 @@ export const createInvite = async (req, res) => {
 
         // Enviar correo de invitación
         const invitationLink = `${process.env.FRONTEND_URL}/accept-invite?token=${inviteToUse.token}`;
-        const emailSubject = `Invitación para unirte al proyecto ${project.name}`;
-        const emailHtml = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Invitación a GanttFlow</title>
-                </head>
-                <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f7fafc;">
-                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f7fafc; padding: 40px 0;">
-                        <tr>
-                            <td align="center">
-                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                                    <!-- Header -->
-                                    <tr>
-                                        <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center;">
-                                            <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">GanttFlow</h1>
-                                            <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0; font-size: 16px;">Gestión de Proyectos Inteligente</p>
-                                        </td>
-                                    </tr>
-                                    
-                                    <!-- Content -->
-                                    <tr>
-                                        <td style="padding: 40px 30px;">
-                                            <h2 style="color: #1f2937; margin-top: 0; font-size: 24px; font-weight: 600;">¡Te han invitado a unirte a un proyecto!</h2>
-                                            
-                                            <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
-                                                Has recibido una invitación para unirte al proyecto:
-                                            </p>
-                                            
-                                            <div style="background-color: #f3f4f6; border-left: 4px solid #10b981; padding: 16px; margin: 20px 0; border-radius: 4px;">
-                                                <p style="color: #1f2937; margin: 0; font-size: 18px; font-weight: 500;">
-                                                    ${project.name}
-                                                </p>
-                                            </div>
-                                            
-                                            <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
-                                                GanttFlow es una plataforma de gestión de proyectos que te ayudará a organizar tareas, 
-                                                colaborar con tu equipo y seguir el progreso de tus proyectos de manera eficiente.
-                                            </p>
-                                            
-                                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
-                                                <tr>
-                                                    <td align="center">
-                                                        <a href="${invitationLink}" style="display: inline-block; padding: 16px 32px; background-color: #10b981; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: all 0.3s ease;">
-                                                            Aceptar Invitación
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                            
-                                            <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin-top: 30px;">
-                                                Si tienes problemas con el botón, copia y pega la siguiente URL en tu navegador:
-                                            </p>
-                                            
-                                            <p style="color: #3b82f6; font-size: 14px; word-break: break-all; background-color: #f9fafb; padding: 12px; border-radius: 4px;">
-                                                ${invitationLink}
-                                            </p>
-                                            
-                                            <div style="border-top: 1px solid #e5e7eb; margin-top: 30px; padding-top: 20px;">
-                                                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                                                    <strong>Nota:</strong> Este enlace expirará en 7 días. Si no aceptas la invitación 
-                                                    antes de esa fecha, deberás solicitar una nueva invitación.
-                                                </p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    
-                                    <!-- Footer -->
-                                    <tr>
-                                        <td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-                                            <p style="color: #6b7280; font-size: 12px; margin: 0;">
-                                                © ${new Date().getFullYear()} GanttFlow. Todos los derechos reservados.
-                                            </p>
-                                            <p style="color: #6b7280; font-size: 12px; margin: 10px 0 0;">
-                                                Si recibiste este correo por error, puedes ignorarlo de manera segura.
-                                            </p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                </body>
-                </html>
-                `;
+        const emailHtml = generateInvitationEmailHTML({
+            projectName: project.name,
+            invitationLink: invitationLink,
+        });
 
         await sendEmail({
             to: email,
-            subject: emailSubject,
+            subject: `Invitación para unirte al proyecto ${project.name}`,
             html: emailHtml
         });
+
 
         res.status(isNewInvite ? 201 : 200).json({ 
             message: isNewInvite ? 'Invitación enviada con éxito' : 'Invitación actualizada y reenviada con éxito', 
