@@ -74,7 +74,9 @@ const userSchema = new Schema({
             canDeleteTask: false,
             canViewTask: true
         }
-    }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
 }, {
     timestamps:true
 });

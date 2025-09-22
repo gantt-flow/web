@@ -46,7 +46,7 @@ export default function Login() {
                         <button type="submit" className="bg-green-500 text-white p-2 h-12 rounded-lg hover:bg-green-600">Iniciar Sesión</button>
                     </form>
                 </div>
-                <p className="mt-8 text-center"><Link href="/auth/olvide-contraseña" className="hover:underline">¿Olvidaste tu contraseña?</Link></p>
+                <p className="mt-8 text-center"><Link href="/auth/olvide-contrasena" className="hover:underline">¿Olvidaste tu contraseña?</Link></p>
                 <p className="mt-4 text-center">¿No tienes cuenta? <Link href="/auth/signUp" className="hover:underline">Regístrate aquí</Link></p>
             </div>
 

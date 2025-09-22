@@ -124,7 +124,7 @@ export default function SignUpPage() {
                 </div>
                 <p className="mt-8 text-center">
                     {/* NOTA: Este enlace apunta a la misma página de registro, quizás debería ir a una página de "recuperar contraseña" */}
-                    <Link href="/auth/olvide-contraseña" className="hover:underline">¿Olvidaste tu contraseña?</Link>
+                    <Link href="/auth/olvide-contrasena" className="hover:underline">¿Olvidaste tu contraseña?</Link>
                 </p>
                 <p className="mt-4 text-center">
                     ¿Ya tienes una cuenta? <Link href="/auth/login" className="hover:underline">Inicia sesión aquí</Link>

@@ -1,7 +1,10 @@
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js'; 
 import { comparePassword } from '../utils/passwordUtils.js';
+import crypto from 'crypto';
+import { sendEmail } from '../utils/email.js'; 
 
 
 /**
@@ -171,5 +174,112 @@ export const changePassword = async (req, res) => {
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: 'Error de servidor' });
+    }
+};
+
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            // Por seguridad, no revelamos si el email existe o no.
+            return res.status(200).json({ message: 'Si existe una cuenta con este correo, se ha enviado un enlace para restablecer la contraseña.' });
+        }
+
+        // 1. Generar un token aleatorio y seguro
+        const resetToken = crypto.randomBytes(20).toString('hex');
+
+        // 2. Hashear el token y guardarlo en la base de datos
+        // (Hashear es opcional pero una buena práctica de seguridad)
+        user.resetPasswordToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex');
+        
+        // 3. Establecer una expiración de 1 hora
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hora en milisegundos
+
+        await user.save();
+
+        // 4. Crear la URL de restablecimiento
+        const resetUrl = `${process.env.FRONTEND_URL}/auth/restablecer-contrasena/${resetToken}`;
+
+        // 5. Enviar el email
+        const message = `
+            Has solicitado restablecer tu contraseña. Por favor, haz clic en el siguiente enlace para continuar. El enlace es válido por 1 hora.\n\n
+            ${resetUrl}\n\n
+            Si no solicitaste esto, por favor ignora este correo.
+        `;
+
+        await sendEmail({
+            to: user.email,
+            subject: 'Restablecimiento de Contraseña - GanttFlow',
+            text: message,
+        });
+        
+        res.status(200).json({ message: 'Si existe una cuenta con este correo, se ha enviado un enlace para restablecer la contraseña.' });
+
+    } catch (error) {
+        console.error('Error en forgotPassword:', error);
+        // Limpiamos el token si algo falla para que el usuario pueda intentarlo de nuevo
+        if (req.body.email) {
+            const user = await User.findOne({ email: req.body.email });
+            if (user) {
+                user.resetPasswordToken = undefined;
+                user.resetPasswordExpires = undefined;
+                await user.save();
+            }
+        }
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    try {
+        // 1. Hashear el token que viene del parámetro de la URL
+        const hashedToken = crypto
+            .createHash('sha256')
+            .update(req.params.token)
+            .digest('hex');
+
+        // 2. Buscar al usuario por el token hasheado y que no haya expirado
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() }, // $gt es "greater than" (mayor que)
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'El token es inválido o ha expirado. Por favor, solicita un nuevo enlace.' });
+        }
+
+        // Generamos un 'salt' para la encriptación
+        const salt = await bcrypt.genSalt(10);
+        // Encriptamos (hasheamos) la nueva contraseña explícitamente
+        user.passwordHash = await bcrypt.hash(req.body.password, salt);
+        // Limpiar los campos del token para que no se pueda volver a usar
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        // El 'pre-save hook' en tu modelo de User se encargará de hashear la nueva contraseña
+        await user.save();
+
+        // 4. Opcional: Enviar un email de confirmación
+        try {
+            await sendEmail({
+                to: user.email,
+                subject: 'Tu contraseña ha sido cambiada',
+                text: `Hola ${user.name},\n\nTe confirmamos que la contraseña de tu cuenta ha sido cambiada exitosamente.\n\nSi no realizaste este cambio, por favor contacta a nuestro soporte inmediatamente.`
+            });
+        } catch (emailError) {
+            console.error("No se pudo enviar el email de confirmación, pero la contraseña fue cambiada:", emailError);
+        }
+
+        res.status(200).json({ message: 'Contraseña restablecida exitosamente.' });
+
+    } catch (error) {
+        console.error('Error en resetPassword:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 };

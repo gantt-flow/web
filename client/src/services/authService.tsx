@@ -20,6 +20,11 @@ export interface ChangePasswordData {
   newPassword: string;
 }
 
+interface ResetPasswordData {
+    token: string;
+    password: string;
+}
+
 
 /**
  * Realiza una petición de login al backend.
@@ -74,5 +79,31 @@ export const changePassword = async (data: ChangePasswordData) => {
     } catch (error) {
         // Lanza el error para que el componente de la UI pueda atraparlo
         throw error;
+    }
+};
+
+
+export const forgotPassword = async (email: string): Promise<{ message: string }> => {
+    try {
+        const response = await api.post('/auth/forgot-password', { email });
+        return response.data;
+    } catch (error: any) {
+        // Manejo de errores para que el componente pueda reaccionar
+        if (error.response) {
+            throw new Error(error.response.data.message || 'Error al solicitar el restablecimiento');
+        }
+        throw new Error('No se pudo conectar al servidor');
+    }
+};
+
+export const resetPassword = async ({ token, password }: ResetPasswordData): Promise<{ message: string }> => {
+    try {
+        const response = await api.post(`/auth/reset-password/${token}`, { password });
+        return response.data;
+    } catch (error: any) {
+        if (error.response) {
+            throw new Error(error.response.data.message || 'Error al restablecer la contraseña');
+        }
+        throw new Error('No se pudo conectar al servidor');
     }
 };
