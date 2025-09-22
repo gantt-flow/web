@@ -43,7 +43,7 @@ export default async function DashboardLayout({
             {/* El área de <main> sigue siendo la única con scroll.
                 Ahora funcionará correctamente porque su padre (`div` de arriba)
                 tiene una altura y anchura bien definidas. */}
-            <main className="flex-1 overflow-y-auto">
+            <main className=" overflow-y-auto">
                 {children} 
             </main>
         </div>

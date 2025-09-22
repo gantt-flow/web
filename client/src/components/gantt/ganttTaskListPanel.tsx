@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { CircleUser, Flag, Circle, CircleCheckBig, CircleMinus, CircleDashed } from "lucide-react";
+import { CircleUser, Flag, Circle, CircleCheckBig, CircleMinus, CircleDashed, Trash2 } from "lucide-react";
 import { Task } from "@/services/taskService";
 import EditTaskModal from "./editTaskModal";
 
@@ -9,9 +9,10 @@ interface GanttTaskListPanelProps {
   tasks: Task[];
   onTaskStatusChange: (taskId: string) => void;
   onTaskUpdate: (taskId: string, updatedTask: Task) => void | Promise<void>;
+  onInitiateDelete: (task: Task) => void;
 }
 
-export default function GanttTaskListPanel({ tasks, onTaskStatusChange, onTaskUpdate }: GanttTaskListPanelProps) {
+export default function GanttTaskListPanel({ tasks, onTaskStatusChange, onTaskUpdate, onInitiateDelete }: GanttTaskListPanelProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
@@ -53,7 +54,6 @@ export default function GanttTaskListPanel({ tasks, onTaskStatusChange, onTaskUp
     setSelectedTask(null);
   };
 
-  // --- 🚀 FIX: Estructura simplificada sin scroll interno ---
   return(
     <div className="w-full">
         <table className="w-full text-sm border-collapse table-fixed">
@@ -69,7 +69,7 @@ export default function GanttTaskListPanel({ tasks, onTaskStatusChange, onTaskUp
             {tasks.map((task) => (
               <tr 
                 key={task._id} 
-                className="border-b border-gray-200 hover:bg-gray-50"
+                className="border-b border-gray-200 hover:bg-gray-50 group"
                 style={{ height: '50px' }}
               >
                 <td className="px-2 w-12 text-center">
@@ -98,6 +98,7 @@ export default function GanttTaskListPanel({ tasks, onTaskStatusChange, onTaskUp
                 <td className="px-3 w-24">
                   <Flag className={getPriorityColor(task.priority)} />
                 </td>
+                
               </tr>
             ))}
           </tbody>
@@ -105,7 +106,14 @@ export default function GanttTaskListPanel({ tasks, onTaskStatusChange, onTaskUp
         <EditTaskModal 
             task={selectedTask} 
             onEditTask={handleModalSubmit} 
-            onClose={handleModalClose} 
+            onClose={handleModalClose}
+            onInitiateDelete={() => {
+              if (selectedTask) {
+                  // Llama a la función que pasaremos desde la página principal
+                  onInitiateDelete(selectedTask); 
+                  handleModalClose(); // Cierra el modal de edición
+              }
+            }} 
         />
     </div>
   );

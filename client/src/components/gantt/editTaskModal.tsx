@@ -10,6 +10,7 @@ interface EditTaskModalProps {
     task: Task | null;
     onEditTask: (taskId: string, updateTask: Task) => void | Promise<void>;
     onClose: () => void;
+    onInitiateDelete: () => void;
 }
 
 // --- CONSTANTS ---
@@ -27,7 +28,7 @@ const formatDateForInput = (date: string | Date | undefined): string => {
     return `${year}-${month}-${day}`;
 };
 
-export default function EditTaskModal({ task, onEditTask, onClose }: EditTaskModalProps): React.ReactElement | null {
+export default function EditTaskModal({ task, onEditTask, onClose, onInitiateDelete }: EditTaskModalProps): React.ReactElement | null {
     if (!task) return null;
 
     // --- 🚀 FIX #1: Obtener el projectId de forma segura ---
@@ -373,10 +374,34 @@ export default function EditTaskModal({ task, onEditTask, onClose }: EditTaskMod
                     </div>
                     
                     {/* Botones */}
-                    <div className="flex justify-end gap-4 mt-8 pt-4 border-t">
-                        <button type="button" onClick={onClose} className="px-4 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Cancelar</button>
-                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Guardar Cambios</button>
+                    <div className="flex justify-between items-center mt-8 pt-4 border-t">
+                        {/* Grupo 1: Botón de Eliminar (Alineado a la izquierda) */}
+                        <button
+                            type="button"
+                            onClick={onInitiateDelete}
+                            className="text-sm font-medium text-red-600 hover:text-red-800 transition-colors"
+                        >
+                            Eliminar Tarea
+                        </button>
+
+                        {/* Grupo 2: Botones de Acción (Alineados a la derecha) */}
+                        <div className="flex gap-4">
+                            <button 
+                                type="button" 
+                                onClick={onClose} 
+                                className="px-4 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                type="submit" 
+                                className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                Guardar Cambios
+                            </button>
+                        </div>
                     </div>
+                    
                 </form>
             </div>
         </div>

@@ -35,7 +35,7 @@ export default function TerminosYCondicionesPage() {
             Términos y Condiciones del Servicio
           </h1>
           <p className="text-lg text-gray-700 dark:text-gray-300 mt-4 max-w-2xl mx-auto">
-            Última actualización: [16 de Septiembre, 2025]
+            Última actualización: 16 de Septiembre, 2025.
           </p>
         </div>
       </header>
@@ -128,7 +128,7 @@ export default function TerminosYCondicionesPage() {
 
         <SectionTitle>7. Ley Aplicable</SectionTitle>
         <P>
-          Estos Términos se regirán e interpretarán de acuerdo con las leyes de [Tu País o Estado], sin tener en cuenta sus disposiciones sobre conflicto de leyes.
+          Estos Términos se regirán e interpretarán de acuerdo con las leyes de Jalisco, México, sin tener en cuenta sus disposiciones sobre conflicto de leyes.
         </P>
 
         <SectionTitle>8. Contacto</SectionTitle>
@@ -139,7 +139,7 @@ export default function TerminosYCondicionesPage() {
               {" "}página de contacto
             </span>
           </Link>
-          {" "}o escribiéndonos a [tu-email-de-soporte@ganttflow.com].
+          {" "}o escribiéndonos a ganttflowteam@gmail.com.
         </P>
       </main>
     </div>

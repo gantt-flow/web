@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import { Fira_Sans } from "next/font/google";
 import "./globals.css";
 
-import Header from "@/components/mainLayout/header";
-import Footer from "@/components/mainLayout/footer";
-
 const firaSans = Fira_Sans({
   weight: ["500", "800"],
   style: "normal",
@@ -29,13 +26,9 @@ export default function RootLayout({
       <body
         className={`${firaSans.className} antialiased bg-white dark:bg-gray-900 flex flex-col min-h-screen`}
       >
-        <Header />
-
         <main className="flex-grow">
           {children}
         </main>
-
-        <Footer />
       </body>
     </html>
   );

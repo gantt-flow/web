@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Filter, Settings, Calendar } from "lucide-react";
+import { Plus, Filter, Settings, Calendar, ArrowUpDown } from "lucide-react";
 import { ViewMode } from "@/app/inicio/gantt/page";
 
 interface GanttToolBarProps {
@@ -8,6 +8,7 @@ interface GanttToolBarProps {
     onViewModeChange: (mode: ViewMode) => void;
     onAddTaskClick: () => void;
     onFilterClick: () => void;
+    onSortClick: () => void;
     onGoToToday: () => void;
     onSettingsClick: () => void;
 }
@@ -23,6 +24,7 @@ export default function GanttToolBar({
     onViewModeChange, 
     onAddTaskClick, 
     onFilterClick,
+    onSortClick,
     onGoToToday,
     onSettingsClick 
 }: GanttToolBarProps) {
@@ -34,6 +36,9 @@ export default function GanttToolBar({
                 </button>
                 <button onClick={onFilterClick} className="flex items-center gap-2 px-3 py-1.5 border rounded-md hover:bg-gray-100">
                     <Filter size={16} /> Filtro
+                </button>
+                <button onClick={onSortClick} className="flex items-center gap-2 px-3 py-1.5 border rounded-md hover:bg-gray-100">
+                    <ArrowUpDown size={16} /> Ordenar
                 </button>
                 <button onClick={onSettingsClick} className="flex items-center gap-2 px-3 py-1.5 border rounded-md hover:bg-gray-100">
                     <Settings size={16} /> Configuración

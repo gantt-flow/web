@@ -35,7 +35,7 @@ export default function PoliticaPrivacidadPage() {
             Política de Privacidad
           </h1>
           <p className="text-lg text-gray-700 dark:text-gray-300 mt-4 max-w-2xl mx-auto">
-            Última actualización: [16 de Septiembre, 2025]
+            Última actualización: 16 de Septiembre, 2025.
           </p>
         </div>
       </header>
@@ -134,7 +134,7 @@ export default function PoliticaPrivacidadPage() {
               {" "}página de contacto
             </span>
           </Link>
-          {" "}o escribiéndonos a [tu-email-de-soporte@ganttflow.com].
+          {" "}o escribiéndonos a ganttflowteam@gmail.com.
         </p>
       </main>
     </div>

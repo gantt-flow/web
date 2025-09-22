@@ -76,3 +76,12 @@ export const updatedTask = async(taskId: string, task: Task) => {
         throw error;
     }
 }
+
+export const deleteTask = async (taskId: string): Promise<void> => {
+    try {
+        await api.delete(`/tasks/${taskId}`);
+    } catch (error) {
+        console.error("Error al eliminar la tarea:", error);
+        throw error;
+    }
+};

@@ -42,7 +42,7 @@ export default function SobreNosotrosPage() {
           <h2 className="text-3xl font-semibold mb-4">Nuestra Misión</h2>
           <p className="text-lg text-gray-700 dark:text-gray-300">
             {/* Reemplaza este texto */}
-            "Nuestra misión es [tu misión principal, ej: simplificar la gestión de proyectos para equipos creativos] a través de [tu método o tecnología], ofreciendo siempre [tu valor diferencial, ej: un servicio al cliente excepcional]."
+            "Nuestra misión es simplificar la gestión de proyectos para equipos creativos a través del uso del herramientas funcionales combinadas con tecnología, ofreciendo siempre satisfacción en los usuarios."
           </p>
         </section>
 
@@ -54,11 +54,7 @@ export default function SobreNosotrosPage() {
           <div className="text-gray-700 dark:text-gray-300 space-y-4">
             <p>
               {/* Reemplaza este texto */}
-              Fundada en [Año], [Nombre de tu Empresa] comenzó como una idea simple: [la idea original]. Nuestros fundadores, [Nombres de Fundadores], vieron una oportunidad en [tu industria] y decidieron construir una solución desde cero.
-            </p>
-            <p>
-              {/* Reemplaza este texto */}
-              Lo que empezó en [lugar, ej: un pequeño garaje], se ha transformado en una plataforma que hoy ayuda a [número] de usuarios. A lo largo del camino, hemos [logro importante] y [otro hito], pero nuestros valores fundamentales permanecen intactos.
+              La ideas surgión en 2024, GanttFlow comenzó como una idea simple: ofrecer una forma de gestionar tareas de forma simple y funcional. Las personas detras, Diego y Jose Luis, vieron una oportunidad y decidieron construir una solución desde cero.
             </p>
           </div>
         </section>
@@ -85,10 +81,10 @@ export default function SobreNosotrosPage() {
                 */}
                 <Users className="w-16 h-16 text-gray-500" />
               </div>
-              <h3 className="text-xl font-semibold">[Nombre del Miembro]</h3>
-              <p className="text-indigo-600 dark:text-indigo-400">[Cargo/Rol]</p>
+              <h3 className="text-xl font-semibold">Diego Salinas</h3>
+              <p className="text-indigo-600 dark:text-indigo-400">Desarrollador</p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                "Pequeña biografía o cita inspiradora sobre su trabajo."
+                "Apasionado por la tecnología y el aprendizaje continuo. Apasionado por la música, los idiomas y el deporte."
               </p>
             </div>
             {/* --- Fin del Perfil --- */}
@@ -98,21 +94,10 @@ export default function SobreNosotrosPage() {
               <div className="w-32 h-32 rounded-full bg-gray-300 dark:bg-gray-600 mx-auto mb-4 flex items-center justify-center">
                 <Users className="w-16 h-16 text-gray-500" />
               </div>
-              <h3 className="text-xl font-semibold">[Nombre del Miembro]</h3>
-              <p className="text-indigo-600 dark:text-indigo-400">[Cargo/Rol]</p>
+              <h3 className="text-xl font-semibold">José Luis</h3>
+              <p className="text-indigo-600 dark:text-indigo-400">Desarrollador</p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                 "Experto en [habilidad], apasionado por [interés]."
-              </p>
-            </div>
-
-            <div className="text-center bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="w-32 h-32 rounded-full bg-gray-300 dark:bg-gray-600 mx-auto mb-4 flex items-center justify-center">
-                <Users className="w-16 h-16 text-gray-500" />
-              </div>
-              <h3 className="text-xl font-semibold">[Nombre del Miembro]</h3>
-              <p className="text-indigo-600 dark:text-indigo-400">[Cargo/Rol]</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                "Impulsando el crecimiento y la estrategia de la empresa."
               </p>
             </div>
             

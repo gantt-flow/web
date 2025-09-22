@@ -78,12 +78,6 @@ export default function FaqPage() {
             </p>
           </FaqItem>
 
-          <FaqItem question="¿Ofrecen un plan gratuito o un período de prueba?">
-            <p>
-              ¡Sí! Ofrecemos un plan gratuito con funciones esenciales para equipos pequeños, así como un período de prueba en nuestros planes premium para que puedas explorar todas las características avanzadas.
-            </p>
-          </FaqItem>
-
           <FaqItem question="¿Para qué tipo de equipos es ideal GanttFlow?">
             <p>
               GanttFlow es ideal para cualquier equipo que necesite gestionar proyectos con plazos definidos, como equipos de desarrollo de software, agencias de marketing, organizadores de eventos, equipos de construcción y más.
@@ -117,37 +111,6 @@ export default function FaqPage() {
 
         </div>
 
-        {/* --- Sección: Seguridad y Cuenta --- */}
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100">
-          Seguridad y Cuenta
-        </h2>
-        <div className="space-y-4">
-          
-          <FaqItem question="¿Mi información está segura en GanttFlow?">
-            <p>
-              La seguridad es nuestra máxima prioridad. Usamos encriptación robusta para tus datos y ofrecemos funciones de seguridad avanzadas como la Autenticación de Dos Factores (2FA) y Logs de Auditoría para que tengas un control total sobre tu cuenta.
-            </p>
-          </FaqItem>
-          
-          <FaqItem question="¿Qué es la Autenticación de Dos Factores (2FA)?">
-            <p>
-              Es una capa extra de seguridad. Además de tu contraseña, se te pedirá un segundo código (generalmente desde una app en tu teléfono) para verificar tu identidad. Recomendamos a todos los usuarios activarla desde su página de Ajustes.
-            </p>
-          </FaqItem>
-
-          <FaqItem question="¿Cómo puedo cambiar mi contraseña?">
-            <p>
-              Puedes cambiar tu contraseña en cualquier momento. Simplemente ve a la sección de "Ajustes" en tu perfil, y encontrarás la opción en la pestaña de "Seguridad".
-            </p>
-          </FaqItem>
-
-          <FaqItem question="¿Cómo personalizo mi tema (modo claro/oscuro)?">
-            <p>
-              En la página de "Ajustes", en la pestaña de "Apariencia", puedes elegir entre el tema claro, oscuro, o "Predeterminado del Sistema", que se adaptará automáticamente a la configuración de tu sistema operativo.
-            </p>
-          </FaqItem>
-
-        </div>
       </main>
     </div>
   );

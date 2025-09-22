@@ -1,10 +1,16 @@
 'use client'; 
 
 import Link from "next/link";
-import { useRef, useState, useEffect, MutableRefObject } from "react";
+import { useRef, useState, useEffect, MutableRefObject, useCallback } from "react";
+import { useRouter } from 'next/navigation'; 
 import { Bell, Search, User, Settings, CircleUserRound } from 'lucide-react';
 // Importamos tus servicios de notificaciones reales
 import { getNotificationsByUser, updateNotificationStatus, markAllNotificationsAsRead } from "@/services/notificationsService";
+import { searchApi, SearchResult } from "@/services/searchService";
+import debounce from 'lodash.debounce';
+
+
+
 
 // --- Definición de Tipos para TypeScript ---
 // Esta interfaz debe coincidir con la que te proporcioné en la respuesta anterior
@@ -52,16 +58,27 @@ const profileDropdownItems = [
 
 
 export default function Header() {
+    // Estados para notificaciones
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
     const [isBellDropdownOpen, setIsBellDropdownOpen] = useState(false);
 
+    // Referencias para detectar clics fuera de los dropdowns
     const profileDropdownRef = useRef<HTMLDivElement>(null);
     const bellDropdownRef = useRef<HTMLDivElement>(null);
 
+    // Búsqueda
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
+    const [isSearchLoading, setIsSearchLoading] = useState(false);
+    const [isSearchResultsOpen, setIsSearchResultsOpen] = useState(false);
+    const searchDropdownRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
+
     useClickOutside(profileDropdownRef, () => setIsProfileDropdownOpen(false));
     useClickOutside(bellDropdownRef, () => setIsBellDropdownOpen(false));
+    useClickOutside(searchDropdownRef, () => setIsSearchResultsOpen(false));
     
     useEffect(() => {
         async function fetchNotifications() {
@@ -111,13 +128,50 @@ export default function Header() {
         }
     };
 
+    // Lógica de búsqueda
+    const debouncedSearch = useCallback(
+        debounce(async (query: string) => {
+            if (query.length > 2) {
+                setIsSearchLoading(true);
+                try {
+                    const results = await searchApi.search(query);
+                    setSearchResults(results);
+                    setIsSearchResultsOpen(true);
+                } catch (error) {
+                    console.error("Error al buscar:", error);
+                    setSearchResults(null);
+                } finally {
+                    setIsSearchLoading(false);
+                }
+            } else {
+                setSearchResults(null);
+                setIsSearchResultsOpen(false);
+            }
+        }, 500), // Espera 500ms después de que el usuario deja de escribir
+        []
+    );
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        debouncedSearch(query);
+    };
+
+
+    const handleResultClick = (url: string) => {
+        setSearchQuery(""); // Limpia la búsqueda
+        setSearchResults(null); // Cierra los resultados
+        setIsSearchResultsOpen(false); // Cierra el dropdown
+        router.push(url); // Navega a la nueva URL
+    };
+
     return (
         <header className="grid grid-cols-3 items-center w-full h-16 px-6 bg-white border-b border-gray-200 relative z-30">
             {/* Columna Izquierda (Vacía para empujar el centro) */}
             <div></div>
 
             {/* Columna Central (Barra de Búsqueda) */}
-            <div className="flex justify-center">
+            <div className="flex justify-center" ref={searchDropdownRef}>
                 <div className="relative w-full max-w-lg">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                     <input
@@ -125,7 +179,79 @@ export default function Header() {
                         placeholder="Buscar proyectos, tareas..."
                         className="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                         autoComplete="off"
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onFocus={() => {
+                            if (searchResults) setIsSearchResultsOpen(true);
+                        }}
                     />
+
+                    {/* --- Dropdown de Resultados de Búsqueda --- */}
+                    {isSearchResultsOpen && (
+                        <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border z-50">
+                            {isSearchLoading ? (
+                                <div className="p-4 text-center text-gray-500">Buscando...</div>
+                            ) : (
+                                searchResults && (
+                                <ul className="py-2 max-h-96 overflow-y-auto">
+                                    {/* Proyectos */}
+                                    {searchResults.projects.length > 0 && (
+                                        <>
+                                            <li className="px-4 py-2 text-xs font-bold text-gray-500 uppercase">Proyectos</li>
+                                            {searchResults.projects.map(p => (
+                                                <li key={`proj-${p._id}`} className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleResultClick(`/inicio/proyectos/${p._id}`)}>
+                                                    <span className="text-sm text-gray-800">{p.name}</span>
+                                                </li>
+                                            ))}
+                                        </>
+                                    )}
+                                    {/* Tareas */}
+                                    {searchResults.tasks.length > 0 && (
+                                        <>
+                                            <li className="px-4 pt-4 pb-2 text-xs font-bold text-gray-500 uppercase">Tareas</li>
+                                            {searchResults.tasks.map(t => {
+                                                // Construimos la URL para la página de Gantt
+                                                const ganttUrl = `/inicio/gantt?proyecto=${t.projectId}`;
+                                                return (
+                                                    <li key={`task-${t._id}`} className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleResultClick(ganttUrl)}>
+                                                        <span className="text-sm text-gray-800">{t.title}</span>
+                                                    </li>
+                                                );
+                                            })}
+                                        </>
+                                    )}
+                                    {/* Comentarios */}
+                                    {searchResults.comments.length > 0 && (
+                                        <>
+                                            <li className="px-4 pt-4 pb-2 text-xs font-bold text-gray-500 uppercase">Comentarios</li>
+                                            {searchResults.comments.map(c => {
+                                                // Extraemos la tarea poblada (relatedEntity)
+                                                const task = c.relatedEntity as any;
+                                                if (!task || !task.projectId) return null; // Seguridad por si algo falla
+                                                
+                                                // Construimos la URL para Gantt, añadiendo el ID de la tarea para abrir sus comentarios
+                                                const ganttUrlWithComments = `/inicio/gantt?proyecto=${task.projectId}&comentarios=${task._id}`;
+                                                
+                                                return (
+                                                    <li key={`comm-${c._id}`} className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={() => handleResultClick(ganttUrlWithComments)}>
+                                                        <p className="text-sm text-gray-800 truncate">{c.comment}</p>
+                                                        <p className="text-xs text-gray-500">
+                                                            En la tarea: {task.title}
+                                                        </p>
+                                                    </li>
+                                                );
+                                            })}
+                                        </>
+                                    )}
+
+                                        {searchResults.projects.length === 0 && searchResults.tasks.length === 0 && searchResults.comments.length === 0 && (
+                                            <li className="px-4 py-8 text-center text-sm text-gray-500">No se encontraron resultados</li>
+                                        )}
+                                    </ul>
+                                )
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
