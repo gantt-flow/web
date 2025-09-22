@@ -177,8 +177,12 @@ export default function ProjectDetailsPage() {
 
             {isModalOpen && (
                 <AddMemberModal 
-                    onClose={() => setIsModalOpen(false)}
-                    onAddMember={handleAddMember}
+                onClose={() => setIsModalOpen(false)}
+                projectId={projectId as string}
+                projectName={project.name}
+                onInvitationSent={() => {
+                    console.log('Invitación enviada con éxito');
+                }}
                 />
             )}
         </div>

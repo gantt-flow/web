@@ -1,7 +1,7 @@
 //Probar Conexión con el microservicio Flask
 import fetch from 'node-fetch';
 
-const FLASK_SERVER_URL = process.env.FLASK_SERVER_URL;
+const FLASK_SERVER_URL = '127.0.0.1:5001';
 
 async function testConnection() {
     try {

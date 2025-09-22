@@ -1,13 +1,14 @@
 // web/server/routes/mlRoutes.js
 import express from 'express';
 import MLController from '../controllers/mlController.js';
+import auth from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 /**
  * Ruta para obtener predicción de un texto
  */
-router.post('/predict', async (req, res) => {
+router.post('/predict', auth, async (req, res) => {
     try {
         const { text } = req.body;
 
@@ -35,7 +36,7 @@ router.post('/predict', async (req, res) => {
 /**
  * Ruta para verificar el estado del servicio de ML
  */
-router.get('/health', async (req, res) => {
+router.get('/health', auth, async (req, res) => {
     try {
         const isHealthy = await MLController.checkHealth();
         res.json({
