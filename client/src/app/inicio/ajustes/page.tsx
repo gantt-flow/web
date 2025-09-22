@@ -1,57 +1,69 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Importamos los servicios del frontend que definimos/actualizamos en pasos anteriores
 import { getCurrentUser, updateUser, getUserById, AuthenticatedUser, User } from '@/services/userService'; 
 import { changePassword } from '@/services/authService'; 
-import { ShieldCheck } from 'lucide-react'; // Icono para 2FA
+import { ShieldCheck } from 'lucide-react';
 
 type CurrentUser = AuthenticatedUser['user'];
 
-// Interfaz para el estado de los ajustes (basado en el modelo user.js)
 interface UserSettings {
    theme: string;
    notifications: boolean;
-   twoFactorEnabled: boolean; // Campo real de tu modelo
+   twoFactorEnabled: boolean;
 }
 
 export default function AjustesPage() {
     const [user, setUser] = useState<CurrentUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     
-    // Estado para el formulario de ajustes generales
     const [settings, setSettings] = useState<UserSettings>({
         theme: 'system',
         notifications: true,
         twoFactorEnabled: false,
     });
     
-    // Estado para el formulario de contraseña
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
     });
 
-    // Mensajes de estado separados para cada formulario
     const [settingsMessage, setSettingsMessage] = useState({ text: '', isError: false });
     const [passwordMessage, setPasswordMessage] = useState({ text: '', isError: false });
+
+    // --- MEJORA 1: EFECTO PARA APLICAR EL TEMA VISUALMENTE ---
+    // Este useEffect se ejecutará cada vez que el tema en el estado 'settings' cambie.
+    useEffect(() => {
+        const root = window.document.documentElement; // La etiqueta <html>
+        const currentTheme = settings.theme;
+
+        // Limpiamos clases de tema anteriores
+        root.classList.remove('light', 'dark');
+
+        if (currentTheme === 'system') {
+            // Si es 'system', usamos la preferencia del sistema operativo
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            root.classList.add(systemTheme);
+        } else {
+            // Si es 'light' o 'dark', aplicamos esa clase directamente
+            root.classList.add(currentTheme);
+        }
+    }, [settings.theme]); // Se dispara al cargar y cada vez que settings.theme cambia
 
     // Carga los datos reales del usuario al montar la página
     useEffect(() => {
         const fetchFullUser = async () => {
             try {
-                // 1. Obtenemos el ID del usuario desde el token
                 const authData = await getCurrentUser();
                 if (authData.authenticated) {
                     const basicUser = authData.user;
                     setUser(basicUser);
                     
-                    // 2. Usamos ese ID para obtener el objeto COMPLETO del usuario desde la BD
-                    // (Esta es la función que añadimos al userService.tsx)
+                    // Esta es la lógica CORRECTA: obtenemos el ID del token y luego los datos FRESCOS de la BD.
                     const fullUserData = await getUserById(basicUser._id);
                     
-                    // 3. Poblamos el estado de los ajustes con los datos REALES de la BD
+                    // Poblamos el estado de los ajustes con los datos REALES de la BD
                     setSettings({
                         theme: fullUserData.theme || 'system',
                         notifications: fullUserData.notifications !== undefined ? fullUserData.notifications : true,
@@ -68,10 +80,9 @@ export default function AjustesPage() {
         fetchFullUser();
     }, []);
 
-    // Manejador genérico para todos los selects/toggles de ajustes
+    // Manejador para los selects/toggles
     const handleSettingsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
-        // Convertir strings 'true'/'false' a booleanos reales
         const processedValue = value === 'true' ? true : value === 'false' ? false : value;
         
         setSettings(prev => ({ 
@@ -85,26 +96,38 @@ export default function AjustesPage() {
         setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
     };
 
-    // Envía el formulario de AJUSTES GENERALES
+    // --- MEJORA 2: ACTUALIZAR EL ESTADO LOCAL TRAS GUARDAR ---
     const handleSettingsSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSettingsMessage({ text: 'Guardando...', isError: false });
         if (!user) return;
         
         try {
-            // Llama a la API REAL: updateUser con los campos de configuración
-            await updateUser(user._id, { 
+            // Llama a la API y recibe el usuario actualizado
+            const updatedUserData = await updateUser(user._id, { 
                 theme: settings.theme, 
                 notifications: settings.notifications,
                 twoFactorEnabled: settings.twoFactorEnabled
             });
+
+            // Actualiza el estado local con los datos FRESCOS del servidor.
+            // Esto asegura que la UI refleje el estado real de la BD sin necesidad de refrescar.
+            setUser(updatedUserData); 
+            setSettings({
+                theme: updatedUserData.theme || 'system',
+                notifications: updatedUserData.notifications !== undefined ? updatedUserData.notifications : true,
+                twoFactorEnabled: updatedUserData.twoFactorEnabled || false,
+            });
+            
             setSettingsMessage({ text: 'Ajustes guardados correctamente.', isError: false });
+            // El mensaje desaparecerá después de 3 segundos
+            setTimeout(() => setSettingsMessage({ text: '', isError: false }), 3000);
+
         } catch (error) {
             setSettingsMessage({ text: 'Error al guardar ajustes.', isError: true });
         }
     };
 
-    // Envía el formulario de CAMBIO DE CONTRASEÑA
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setPasswordMessage({ text: '', isError: false });
@@ -122,24 +145,22 @@ export default function AjustesPage() {
         try {
             setPasswordMessage({ text: 'Actualizando...', isError: false });
             
-            // Llama al servicio de API REAL (POST /auth/change-password)
             await changePassword({
                 currentPassword: passwordData.currentPassword,
                 newPassword: passwordData.newPassword
             });
             
             setPasswordMessage({ text: 'Contraseña actualizada exitosamente.', isError: false });
-            // Limpia los campos de contraseña por seguridad
             setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+             // El mensaje desaparecerá después de 3 segundos
+            setTimeout(() => setPasswordMessage({ text: '', isError: false }), 3000);
 
         } catch (error: any) {
-            // Captura el mensaje de error específico del backend (ej. "Contraseña actual incorrecta")
             const message = error.response?.data?.message || 'Error al cambiar contraseña.';
             setPasswordMessage({ text: message, isError: true });
         }
     };
 
-    // Mensaje de estado para formularios (reutilizable)
     const FormStatusMessage = ({ message }: { message: { text: string, isError: boolean }}) => {
         if (!message.text) return null;
         const textColor = message.isError ? 'text-red-600' : 'text-green-600';
@@ -158,22 +179,22 @@ export default function AjustesPage() {
     }
 
     return (
-        <div className="flex-1 p-8 bg-gray-50 w-full space-y-8">
-            <h1 className="text-3xl font-bold text-gray-800">Ajustes de Cuenta</h1>
+        <div className="flex-1 p-8 bg-gray-50 dark:bg-gray-900 w-full space-y-8">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Ajustes de Cuenta</h1>
 
-            {/* --- SECCIÓN DE AJUSTES GENERALES (Funcional) --- */}
-            <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+            {/* --- SECCIÓN DE AJUSTES GENERALES --- */}
+            <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <form onSubmit={handleSettingsSubmit} className="space-y-6">
-                    <h2 className="text-xl font-semibold text-gray-900 border-b pb-4">Apariencia y Notificaciones</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b dark:border-gray-600 pb-4">Apariencia y Notificaciones</h2>
                     
                     <div>
-                        <label htmlFor="theme" className="block text-sm font-medium text-gray-700 mb-1">Tema</label>
+                        <label htmlFor="theme" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tema</label>
                         <select
                             id="theme"
                             name="theme"
-                            value={settings.theme} // Controlado por el estado cargado
+                            value={settings.theme}
                             onChange={handleSettingsChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             <option value="system">Predeterminado del Sistema</option>
                             <option value="light">Claro</option>
@@ -182,20 +203,20 @@ export default function AjustesPage() {
                     </div>
 
                     <div>
-                        <label htmlFor="notifications" className="block text-sm font-medium text-gray-700 mb-1">Activar Notificaciones</label>
+                        <label htmlFor="notifications" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activar Notificaciones</label>
                         <select
                             id="notifications"
                             name="notifications"
-                            value={String(settings.notifications)} // Controlado por el estado cargado
+                            value={String(settings.notifications)}
                             onChange={handleSettingsChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             <option value="true">Activadas</option>
                             <option value="false">Desactivadas</option>
                         </select>
                     </div>
                     
-                     <div className="flex justify-end items-center gap-4 border-t pt-6">
+                     <div className="flex justify-end items-center gap-4 border-t dark:border-gray-600 pt-6">
                         <FormStatusMessage message={settingsMessage} />
                         <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700">
                             Guardar Ajustes
@@ -204,25 +225,25 @@ export default function AjustesPage() {
                 </form>
             </div>
 
-            {/* --- SECCIÓN DE SEGURIDAD (Funcional) --- */}
-            <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+            {/* --- SECCIÓN DE SEGURIDAD --- */}
+            <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <form onSubmit={handlePasswordSubmit} className="space-y-6">
-                    <h2 className="text-xl font-semibold text-gray-900 border-b pb-4">Seguridad y Contraseña</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b dark:border-gray-600 pb-4">Seguridad y Contraseña</h2>
                     
                     <div>
-                        <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">Contraseña Actual</label>
-                        <input required type="password" name="currentPassword" id="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
+                        <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña Actual</label>
+                        <input required type="password" name="currentPassword" id="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} className="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md shadow-sm py-2 px-3" />
                     </div>
                     <div>
-                        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">Nueva Contraseña</label>
-                        <input required type="password" name="newPassword" id="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
+                        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nueva Contraseña</label>
+                        <input required type="password" name="newPassword" id="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} className="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md shadow-sm py-2 px-3" />
                     </div>
                     <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirmar Nueva Contraseña</label>
-                        <input required type="password" name="confirmPassword" id="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirmar Nueva Contraseña</label>
+                        <input required type="password" name="confirmPassword" id="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} className="mt-1 block w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md shadow-sm py-2 px-3" />
                     </div>
 
-                    <div className="flex justify-end items-center gap-4 border-t pt-6">
+                    <div className="flex justify-end items-center gap-4 border-t dark:border-gray-600 pt-6">
                         <FormStatusMessage message={passwordMessage} />
                         <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700">
                             Cambiar Contraseña
@@ -231,28 +252,28 @@ export default function AjustesPage() {
                 </form>
             </div>
 
-            {/* --- SECCIÓN 2FA (Funcional) --- */}
-            <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+            {/* --- SECCIÓN 2FA --- */}
+            <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <form onSubmit={handleSettingsSubmit} className="space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900 border-b pb-4">Autenticación de Dos Factores (2FA)</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b dark:border-gray-600 pb-4">Autenticación de Dos Factores (2FA)</h2>
                     <div className="flex items-start gap-4">
                         <ShieldCheck className="w-10 h-10 text-gray-400 flex-shrink-0 mt-1" />
                         <div>
-                            <label htmlFor="twoFactorEnabled" className="block text-sm font-medium text-gray-700">Estado de 2FA</label>
-                            <p className="text-sm text-gray-500 mb-2">Añade una capa extra de seguridad a tu cuenta.</p>
+                            <label htmlFor="twoFactorEnabled" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado de 2FA</label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Añade una capa extra de seguridad a tu cuenta.</p>
                             <select
                                 id="twoFactorEnabled"
                                 name="twoFactorEnabled"
-                                value={String(settings.twoFactorEnabled)} // Controlado por el estado cargado
+                                value={String(settings.twoFactorEnabled)}
                                 onChange={handleSettingsChange}
-                                className="mt-1 block w-full max-w-xs border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="mt-1 block w-full max-w-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
                             >
                                 <option value="true">Habilitado</option>
                                 <option value="false">Deshabilitado</option>
                             </select>
                         </div>
                     </div>
-                     <div className="flex justify-end items-center gap-4 border-t pt-6">
+                     <div className="flex justify-end items-center gap-4 border-t dark:border-gray-600 pt-6">
                         <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700">
                             Guardar Ajuste de 2FA
                         </button>
