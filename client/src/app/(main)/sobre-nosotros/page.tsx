@@ -94,10 +94,10 @@ export default function SobreNosotrosPage() {
               <div className="w-32 h-32 rounded-full bg-gray-300 dark:bg-gray-600 mx-auto mb-4 flex items-center justify-center">
                 <Users className="w-16 h-16 text-gray-500" />
               </div>
-              <h3 className="text-xl font-semibold">José Luis</h3>
+              <h3 className="text-xl font-semibold">José Camarena</h3>
               <p className="text-indigo-600 dark:text-indigo-400">Desarrollador</p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                "Experto en [habilidad], apasionado por [interés]."
+                "Vivo entre líneas de código y nuevas ideas tecnológicas. Cuando no estoy programando, probablemente estoy viendo un partido de fútbol o una función de lucha libre."
               </p>
             </div>
             
