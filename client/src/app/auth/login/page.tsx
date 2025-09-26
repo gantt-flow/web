@@ -19,9 +19,21 @@ export default function Login() {
     setError('');
 
     try {
-        await login({ email, password });
+        const response = await login({ email, password });
         // Si llegamos aquí, el login en el backend fue exitoso.
-        router.push('/inicio');
+        const userRole = response.user?.role;
+        
+        // Redirigir según el rol
+        switch (userRole) {
+            case 'Administrador de sistema':
+            router.push('/admin/sistema/usuarios');
+            break;
+            case 'Auditor':
+            router.push('/admin/sistema/auditoria');
+            break;
+            default:
+            router.push('/inicio');
+        }
 
     } catch (err) {
         // Si algo sale mal en la llamada a `login()`, se ejecutará esto.
