@@ -142,27 +142,6 @@ export const createUser = async (newUser: NewUser): Promise<User> => {
   }
 };
 
-export const createUserAdmin = async (newUser: NewUser): Promise<User> => {
-  try {
-    const response = await api.post<User>('/admin', newUser);
-    return response.data;
-  } catch (error) {
-    console.error("Error al crear el usuario:", error);
-    throw error;
-  }
-};
-
-//Admin interface getUsers
-export const getAllUsers = async (): Promise<User[]> => {
-  try {
-    const response = await api.get<User[]>('/users');
-    return response.data;
-  } catch (error) {
-    console.error("Error al obtener los usuarios:", error);
-    throw error;
-  }
-};
-
 export const updateUser = async (userId: string, userData: Partial<User>): Promise<User> => {
   try {
     // Convertir Map a objeto antes de enviar

@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { DataTable } from '@/components/ui/DataTable';
 import EditUserModal from '@/components/admin/EditUserModal';
 import CreateUserModal from '@/components/admin/CreateUserModal';
-import { User, getAllUsers, deleteUser, updateUser, createUserAdmin } from '@/services/userService';
+import { User, deleteUser, updateUser } from '@/services/userService';
+import { createUserAdmin, getAllUsers} from '@/services/adminService';
 
 interface NewUser {
   name: string;

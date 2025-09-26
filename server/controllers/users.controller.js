@@ -41,49 +41,6 @@ export const getUserWithId = async (req, res) => {
     }
 }
 
-
-export const getAllUsers = async (req, res) => {
-  try {
-    // Destructure query parameters from the request URL (e.g., /api/users?page=2&role=admin).
-    // Set default values for pagination: page 1 and a limit of 10 items per page.
-    // 'role' will be undefined if not provided in the URL.
-    const { page = 1, limit = 10, role } = req.query;
-
-    // Create a filter object for the database query.
-    // This is a conditional (ternary) operator. If a 'role' was provided in the query,
-    // the filter will be { role: role }. Otherwise, it's an empty object {},
-    // which tells Mongoose to match all documents.
-    const filter = role ? { role } : {};
-
-    // Execute the database query using the 'User' Mongoose model.
-    // 'await' pauses the function until the database returns the results.
-    const users = await User
-      .find(filter) // 1. Find all user documents that match the filter object.
-
-      // 2. Select specific fields to return, excluding sensitive data like passwords.
-      // This is also known as a "projection".
-      .select('name email role isActive createdAt updatedAt permisions')
-
-      // 3. Skip a number of documents for pagination.
-      // Example: For page 2 with a limit of 10, it skips (2-1)*10 = 10 documents.
-      .skip((page - 1) * limit)
-
-      // 4. Limit the number of documents returned in this batch to the specified 'limit'.
-      // We ensure 'limit' is a number, as query parameters are strings.
-      .limit(Number(limit));
-
-    // If the query is successful, send a 200 OK status code along with the
-    // array of user objects in JSON format as the response.
-    res.status(200).json(users);
-
-  } catch (error) {
-    logger.error(`Error fetching users: ${error.message}`);
-    // Call a centralized error handling function to send a standardized
-    // error response (e.g., a 500 Internal Server Error) to the client.
-    handleError(res, error);
-  }
-};
-
 export const createUser = async (req, res) => {
     try {
         const userData = req.body;
@@ -128,9 +85,8 @@ export const updateUser = async (req, res) => {
         const userId = req.params.id;
         const updateData = req.body;
 
-        // Seguridad: Nunca permitir que esta ruta actualice el hash de la contraseña directamente
+
         delete updateData.passwordHash;
-        delete updateData.role; // Opcional: solo los administradores deberían cambiar roles.
 
         if (!isValidObjectId(userId)) {
             return res.status(400).json({ message: 'Invalid user ID' });
@@ -143,41 +99,45 @@ export const updateUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // 2. Generar el log de auditoría (como ya lo tenías)
+        // 2. Generar el log de auditoría
         await generateAuditLog(req, 'UPDATE', 'User', userId, `Usuario actualizado: Campos modificados: ${Object.keys(updateData).join(', ')}`);
 
-        // 3. Crear un NUEVO payload de JWT con los datos actualizados
-        const payload = {
-            user: {
-                _id: updatedUser._id,
-                email: updatedUser.email,
-                name: updatedUser.name,
-                role: updatedUser.role
-            }
-        };
+        // 3. Solo regenerar el token si el usuario editado es el mismo que está logueado
+        const isEditingOwnProfile = req.user._id.toString() === userId.toString();
+        
+        if (isEditingOwnProfile) {
+            // Solo regenerar token si el usuario está editando su propio perfil
+            const payload = {
+                user: {
+                    _id: req.user._id,   
+                    email: req.user.email,   
+                    name: updateData.name || req.user.name,
+                    role: req.user.role       
+                }
+            };
 
-        // 4. Firmar el nuevo token (de forma síncrona, ya que no pasamos callback)
-        const token = jwt.sign(
-            payload,
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
+            // 4. Establecer nueva cookie SOLO si es el propio usuario
+            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3h' });
 
-        // 5. Volver a establecer la cookie httpOnly con el token actualizado
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
+            // 5. Volver a establecer la cookie httpOnly con el token actualizado
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
+        }
+
+        // 6. Enviar la respuesta 
+        res.status(200).json({
+            user: updatedUser,
+            tokenRegenerated: isEditingOwnProfile // Informar si se regeneró el token
         });
-
-        // 6. Enviar la respuesta
-        res.status(200).json(updatedUser);
 
     } catch (error) {
         logger.error(`Error updating user: ${error.message}`);
         res.status(500).json({ message: 'Server error' });
     }
-}
+};
 
 
 export const deleteUser = async (req, res) => {

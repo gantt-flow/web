@@ -1,7 +1,7 @@
 // components/admin/CreateUserModal.tsx
 'use client';
 import { useState } from 'react';
-import { User } from '@/services/userService';
+import { User } from '@/services/adminService';
 
 interface CreateUserModalProps {
   onClose: () => void;
