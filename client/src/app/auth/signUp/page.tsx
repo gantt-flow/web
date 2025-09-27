@@ -3,16 +3,12 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { registerAndLogin } from '@/services/authService';
-import Image from "next/image";
-import Link from 'next/link';
 
-// Roles
 const userRoles = ['Administrador de proyectos', 'Miembro de equipo', 'Colaborador', 'Cliente', 'Auditor'];
 
 export default function SignUpPage() {
     const [step, setStep] = useState(1);
     
-    // Estado para los campos controlados
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -27,7 +23,6 @@ export default function SignUpPage() {
 
     const { email, password, passwordConfirm, name, role, projectId } = formData;
 
-    // Maneja los cambios de los inputs de texto y el select
     const handleControlledChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -59,8 +54,6 @@ export default function SignUpPage() {
         }
 
         try {
-            // El servicio de autenticación necesitará ser modificado para manejar archivos
-            // Por ahora, solo pasamos los datos del formulario, excluyendo la foto
             await registerAndLogin({ email, password, name, role, projectId });
             router.push('/inicio');
         } catch (err: any) {
@@ -73,78 +66,71 @@ export default function SignUpPage() {
     const renderForm = () => {
         if (step === 1) {
             return (
-                <form className="flex flex-col mt-6" onSubmit={handleNextStep}>
-                    {error && <p className="text-red-500 mb-6">{error}</p>}
-                    <label htmlFor="email">Correo</label>
-                    <input type="email" name="email" value={email || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-4" required />
+                <form className="flex flex-col mt-8" onSubmit={handleNextStep}>
+                    {error && <p className="text-red-500 dark:text-red-400 mb-4 text-center">{error}</p>}
+                    <label htmlFor="email" className="text-gray-700 dark:text-gray-300 mb-2">Correo</label>
+                    <input type="email" name="email" value={email || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent" required />
 
-                    <label htmlFor="password">Contraseña</label>
-                    <input type="password" name="password" value={password || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-4" required /> 
+                    <label htmlFor="password"  className="text-gray-700 dark:text-gray-300 mb-2 mt-4">Contraseña</label>
+                    <input type="password" name="password" value={password || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent" required /> 
 
-                    <label htmlFor="passwordConfirm">Confirmar Contraseña</label>
-                    <input type="password" name="passwordConfirm" value={passwordConfirm || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-8" required />
+                    <label htmlFor="passwordConfirm"  className="text-gray-700 dark:text-gray-300 mb-2 mt-4">Confirmar Contraseña</label>
+                    <input type="password" name="passwordConfirm" value={passwordConfirm || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-8 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent" required />
 
-                    <button type="submit" className="bg-green-500 text-white p-2 h-12 rounded-lg hover:bg-green-600">Siguiente</button>
+                    <button type="submit" className="bg-green-500 text-white p-3 h-12 rounded-lg font-semibold hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors">Siguiente</button>
                 </form>
             );
         } else {
             return (
-                <form className="flex flex-col mt-6" onSubmit={handleSubmit}>
-                    {error && <p className="text-red-500 mb-6">{error}</p>}
-                    <label htmlFor="name">Nombre</label>
-                    <input type="text" name="name" value={name || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-4" required /> 
+                <form className="flex flex-col mt-8" onSubmit={handleSubmit}>
+                    {error && <p className="text-red-500 dark:text-red-400 mb-4 text-center">{error}</p>}
+                    <label htmlFor="name" className="text-gray-700 dark:text-gray-300 mb-2">Nombre</label>
+                    <input type="text" name="name" value={name || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent" required /> 
 
-                    <label htmlFor="role">Tipo de Usuario</label>
-                    <select name="role" value={role || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-4" required> 
-                        <option value=''>Selecciona un rol</option>
+                    <label htmlFor="role" className="text-gray-700 dark:text-gray-300 mb-2 mt-4">Tipo de Usuario</label>
+                    <select name="role" value={role || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent" required> 
+                        <option value='' className="text-gray-500">Selecciona un rol</option>
                         {userRoles.map(r => (
-                            <option key={r} value={r}>{r}</option>
+                            <option key={r} value={r} className="dark:bg-gray-800">{r}</option>
                         ))}
                     </select>
                     
-                    <label htmlFor="projectId">Código de Invitación (opcional)</label>
-                    <input type="text" name="projectId" value={projectId || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-8" /> 
+                    <label htmlFor="projectId" className="text-gray-700 dark:text-gray-300 mb-2 mt-4">Código de Invitación (opcional)</label>
+                    <input type="text" name="projectId" value={projectId || ''} onChange={handleControlledChange} className="border border-gray-300 rounded-lg p-3 mb-8 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent" /> 
 
-                    <button type="submit" className="bg-green-500 text-white p-2 h-12 rounded-lg hover:bg-green-600">Registrarme</button>
+                    <button type="submit" className="bg-green-500 text-white p-3 h-12 rounded-lg font-semibold hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors">Registrarme</button>
                 </form>
             );
         }
     };
 
-
     return (
-        <div className="flex flex-row h-screen">
-
-            <div className="flex flex-col basis-1/2">
-                <div className="flex flex-col w-2/3 self-center mt-30">
-                    <h1 className="text-[36px]">
+        <div className="flex flex-row min-h-screen bg-white dark:bg-gray-900">
+            <div className="w-full md:w-1/2 flex flex-col justify-center p-8 md:p-16">
+                <div className="mx-auto w-full max-w-md">
+                    <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100">
                         {step === 1 ? 'Crea tus credenciales' : 'Completa tu perfil'}
                     </h1>
                     {renderForm()}
+                    <div className="text-center mt-6 text-sm text-gray-600 dark:text-gray-400">
+                        <a href="/auth/olvide-contrasena" className="hover:underline font-semibold text-green-600 dark:text-green-400">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    <div className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+                        ¿Ya tienes una cuenta? <a href="/auth/login" className="hover:underline font-semibold text-green-600 dark:text-green-400">Inicia sesión aquí</a>
+                    </div>
                 </div>
-                <p className="mt-8 text-center">
-                    {/* NOTA: Este enlace apunta a la misma página de registro, quizás debería ir a una página de "recuperar contraseña" */}
-                    <Link href="/auth/olvide-contrasena" className="hover:underline">¿Olvidaste tu contraseña?</Link>
-                </p>
-                <p className="mt-4 text-center">
-                    ¿Ya tienes una cuenta? <Link href="/auth/login" className="hover:underline">Inicia sesión aquí</Link>
-                </p>
             </div>
 
-            <div className="flex flex-col basis-1/2 bg-green-500">
-                <div className="flex flex-col self-center mt-30">
-                    <Link href="/">
-                        <Image
-                            className="dark:invert"
-                            src="/ganttFlowWhite.svg"
-                            alt="Gantt Logo"
-                            width={346}
-                            height={77}
-                            priority
-                        />
-                    </Link>
-                </div>
-                <p className="mt-30 text-center text-white text-[30px] w-2/3 self-center">La solución que necesitas para tu proyecto</p>
+            <div className="hidden md:flex flex-col w-1/2 bg-green-600 justify-center items-center p-12 text-white text-center">
+                <a href="/">
+                    <img
+                        src="/ganttFlowWhite.svg"
+                        alt="Gantt Logo"
+                        width={346}
+                        height={77}
+                    />
+                </a>
+                <p className="mt-12 text-3xl font-medium max-w-md">La solución que necesitas para tu proyecto</p>
             </div>
         </div>
     );

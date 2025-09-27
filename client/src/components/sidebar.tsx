@@ -1,12 +1,9 @@
 'use client';
 
 import { House, ChartGantt, FolderKanban, LogOut } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
-// Mock del servicio de logout para que el componente sea funcional
 const logout = async () => {
     console.log("Cerrando sesión...");
     return Promise.resolve();
@@ -32,21 +29,17 @@ export default function Sidebar() {
     };
 
     return (
-        <aside className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm">
-            {/* CONTENEDOR DEL LOGO ALINEADO */}
-            {/* Se cambia p-6 por h-16 para igualar la altura del header (64px) */}
-            {/* Se añade flex e items-center para centrar verticalmente el logo */}
-            {/* Se usa px-6 para mantener el padding horizontal */}
-            <div className="flex items-center h-16 px-6 border-b border-gray-200">
-                <Link href="/inicio">
-                     <Image
+        <aside className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm dark:bg-gray-800 dark:border-gray-700">
+            <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700">
+                <a href="/inicio">
+                     <img
+                        className="dark:invert"
                         src="/logo.svg" 
                         alt="Gantt Flow Logo"
                         width={140}
-                        height={28} // Se corrige la altura para mantener la proporción
-                        priority
+                        height={28}
                     />
-                </Link>
+                </a>
             </div>
 
             <nav className="flex-1 px-4 py-4">
@@ -55,29 +48,29 @@ export default function Sidebar() {
                         const isActive = pathname === href;
                         return (
                             <li key={label}>
-                                <Link
+                                <a
                                     href={href}
                                     className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors
                                         ${
                                             isActive
                                                 ? 'bg-green-500 text-white shadow-sm'
-                                                : 'hover:bg-gray-100'
+                                                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                                         }`
                                     }
                                 >
                                     {icon}
                                     <span className="font-medium">{label}</span>
-                                </Link>
+                                </a>
                             </li>
                         );
                     })}
                 </ul>
             </nav>
 
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left  hover:bg-red-50 hover:text-red-600 transition-colors"
+                    className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/50 dark:hover:text-red-400 transition-colors"
                 >
                     <LogOut />
                     <span className="font-medium">Salir</span>

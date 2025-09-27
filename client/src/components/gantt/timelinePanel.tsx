@@ -19,6 +19,71 @@ interface HeaderItem {
     width: number;
 }
 
+// --- Componente para dibujar las flechas de dependencia ---
+const DependencyArrows = ({ tasks, taskPositions, totalWidth }: { tasks: Task[], taskPositions: Map<string, any>, totalWidth: number }) => {
+    if (!taskPositions || taskPositions.size === 0) return null;
+
+    const totalHeight = tasks.length * ROW_HEIGHT;
+
+    return (
+        <svg
+            className="absolute top-0 left-0 pointer-events-none"
+            width={totalWidth}
+            height={totalHeight}
+            style={{ zIndex: 15 }}
+        >
+            <defs>
+                <marker
+                    id="arrowhead"
+                    viewBox="0 0 10 10"
+                    refX="8"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                >
+                    <path d="M 0 0 L 10 5 L 0 10 z" className="fill-gray-400 dark:fill-gray-500" />
+                </marker>
+            </defs>
+            <g>
+                {tasks.map(targetTask => {
+                    const targetPos = taskPositions.get(targetTask._id);
+                    if (!targetTask.dependencies || !targetPos) return null;
+
+                    return targetTask.dependencies.map(sourceTaskId => {
+                        const sourcePos = taskPositions.get(sourceTaskId);
+                        if (!sourcePos) return null;
+                        
+                        const sourceX = sourcePos.type === 'Milestone'
+                            ? sourcePos.x + (DAY_WIDTH / 2)
+                            : sourcePos.x + sourcePos.width + 4;
+                        const sourceY = sourcePos.y + ROW_HEIGHT / 2;
+
+                        const targetX = targetPos.type === 'Milestone'
+                            ? targetPos.x + (DAY_WIDTH / 2)
+                            : targetPos.x;
+                        const targetY = targetPos.y + ROW_HEIGHT / 2;
+
+                        const pathD = `M ${sourceX} ${sourceY} L ${sourceX + 15} ${sourceY} L ${sourceX + 15} ${targetY} L ${targetX} ${targetY}`;
+                        
+                        return (
+                            <path
+                                key={`${sourceTaskId}-${targetTask._id}`}
+                                d={pathD}
+                                className="stroke-gray-400 dark:stroke-gray-500"
+                                strokeWidth="2"
+                                fill="none"
+                                markerEnd="url(#arrowhead)"
+                            />
+                        );
+                    });
+                })}
+            </g>
+        </svg>
+    );
+};
+
+
 const getDaysDiff = (date1: Date, date2: Date): number => {
     const d1 = new Date(date1);
     const d2 = new Date(date2);
@@ -49,7 +114,8 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
             rangeStart = new Date(today.getFullYear(), today.getMonth() - 6, 1);
             rangeEnd = new Date(today.getFullYear(), today.getMonth() + 7, 0);
         } else {
-            const minDate = new Date(Math.min(...tasks.map(t => new Date(t.startDate).getTime())));
+            const taskDates = tasks.map(t => new Date(t.startDate).getTime()).filter(t => !isNaN(t));
+            const minDate = new Date(Math.min(...taskDates));
             const maxDate = new Date(Math.max(...tasks.map(t => new Date(t.dueDate).getTime())));
             rangeStart = new Date(minDate.getFullYear(), minDate.getMonth() - 3, 1);
             rangeEnd = new Date(maxDate.getFullYear(), maxDate.getMonth() + 4, 0);
@@ -63,7 +129,6 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
 
         const primaryHeaders: HeaderItem[] = [];
         const secondaryHeaders: HeaderItem[] = [];
-        
         let monthIterator = new Date(dateRange.start.getFullYear(), dateRange.start.getMonth(), 1);
 
         while(monthIterator <= dateRange.end) {
@@ -103,9 +168,32 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
         }
         
         const calculatedTotalWidth = primaryHeaders.reduce((acc, h) => acc + h.width, 0);
-
         return { headers: primaryHeaders, subHeaders: secondaryHeaders, totalWidth: calculatedTotalWidth };
     }, [dateRange, viewMode]);
+
+    const taskPositions = useMemo(() => {
+        if (!dateRange || tasks.length === 0) return new Map();
+        
+        const positions = new Map<string, { x: number; y: number; width: number; type: string }>();
+        tasks.forEach((task, index) => {
+            const taskStart = new Date(task.startDate);
+            if (isNaN(taskStart.getTime())) return;
+            
+            const x = getDaysDiff(dateRange.start, taskStart) * DAY_WIDTH;
+            const y = index * ROW_HEIGHT;
+            let width = DAY_WIDTH;
+
+            if (task.type !== 'Milestone') {
+                 const taskEnd = new Date(task.dueDate);
+                 if (!isNaN(taskEnd.getTime())) {
+                    const durationInDays = getDaysDiff(taskStart, taskEnd) + 1;
+                    width = durationInDays * DAY_WIDTH - 4;
+                 }
+            }
+            positions.set(task._id, { x, y, width, type: task.type });
+        });
+        return positions;
+    }, [tasks, dateRange]);
 
     useEffect(() => {
         const container = parentRef.current;
@@ -155,14 +243,14 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
     }, [totalWidth]);
 
     return (
-        <div className="w-full bg-white">
+        <div className="w-full bg-white dark:bg-gray-900">
             <div ref={parentRef} className="flex-1 overflow-x-auto relative">
                 <div style={{ width: `${totalWidth}px`, height: '100%' }}>
-                    <div className="sticky top-0 z-20 bg-gray-50 border-b border-gray-200" style={{ height: '60px' }}>
+                    <div className="sticky top-0 z-20 bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700" style={{ height: '60px' }}>
                         {viewMode === 'Mes' ? (
                              <div className="relative flex h-full">
                                 {headers.map(header => (
-                                    <div key={header.key} className="flex-shrink-0 flex items-center justify-center border-r font-semibold text-gray-700" style={{ width: `${header.width}px` }}>
+                                    <div key={header.key} className="flex-shrink-0 flex items-center justify-center border-r border-gray-200 dark:border-gray-700 font-semibold text-gray-700 dark:text-gray-300" style={{ width: `${header.width}px` }}>
                                         {header.label.charAt(0).toUpperCase() + header.label.slice(1)}
                                     </div>
                                 ))}
@@ -171,15 +259,15 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
                              <>
                                 <div className="relative flex h-[30px]">
                                     {headers.map(header => (
-                                        <div key={header.key} className="flex-shrink-0 text-center border-r font-semibold text-gray-700 py-1" style={{ width: `${header.width}px` }}>
+                                        <div key={header.key} className="flex-shrink-0 text-center border-r border-gray-200 dark:border-gray-700 font-semibold text-gray-700 dark:text-gray-300 py-1" style={{ width: `${header.width}px` }}>
                                             {header.label.charAt(0).toUpperCase() + header.label.slice(1)}
                                         </div>
                                     ))}
                                 </div>
                                 <div className="relative flex h-[30px]">
                                     {subHeaders.map(subHeader => (
-                                        <div key={subHeader.key} className={`flex-shrink-0 text-center border-r pt-1 ${viewMode === 'Semana' ? 'border-t border-gray-200' : ''}`} style={{ width: `${subHeader.width}px` }}>
-                                            <div className="text-xs text-gray-800">{subHeader.label}</div>
+                                        <div key={subHeader.key} className={`flex-shrink-0 text-center border-r border-gray-200 dark:border-gray-700 pt-1 ${viewMode === 'Semana' ? 'border-t border-gray-200 dark:border-gray-700' : ''}`} style={{ width: `${subHeader.width}px` }}>
+                                            <div className="text-xs text-gray-800 dark:text-gray-300">{subHeader.label}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -192,7 +280,7 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
                              const bottomHeaders = subHeaders.length > 0 ? subHeaders : headers;
                              const accumulatedWidth = bottomHeaders.slice(0, i + 1).reduce((acc, h) => acc + h.width, 0);
                              return (
-                                <div key={`grid-${i}`} className="absolute top-0 bottom-0 border-r border-gray-100" style={{ top: '60px', left: `${accumulatedWidth}px`}}></div>
+                                <div key={`grid-${i}`} className="absolute top-0 bottom-0 border-r border-gray-100 dark:border-gray-800" style={{ top: '60px', left: `${accumulatedWidth}px`}}></div>
                              )
                          })}
                     </div>
@@ -205,50 +293,30 @@ export default function TimelinePanel({ tasks, viewMode, onTaskClick }: Timeline
                         )}
                         
                         {tasks.map((task, index) => {
-                            if (!dateRange) return null;
-                            const taskStart = new Date(task.startDate);
-                            if (isNaN(taskStart.getTime())) return null;
-                            const left = getDaysDiff(dateRange.start, taskStart) * DAY_WIDTH;
+                            const pos = taskPositions.get(task._id);
+                            if (!pos) return null;
 
-                            if (task.type === 'Milestone') {
+                            const { x, y, width, type } = pos;
+
+                            if (type === 'Milestone') {
                                 const milestoneSize = 24; 
-                                const milestoneLeft = left + (DAY_WIDTH / 2) - (milestoneSize / 2);
-                                const milestoneTop = index * ROW_HEIGHT + (ROW_HEIGHT - milestoneSize) / 2;
+                                const milestoneLeft = x + (DAY_WIDTH / 2) - (milestoneSize / 2);
+                                const milestoneTop = y + (ROW_HEIGHT - milestoneSize) / 2;
                                 
                                 return (
-                                    <div
-                                        key={task._id}
-                                        onClick={() => onTaskClick(task)}
-                                        className="absolute cursor-pointer group"
-                                        style={{
-                                            top: `${milestoneTop}px`,
-                                            left: `${milestoneLeft}px`,
-                                            width: `${milestoneSize}px`,
-                                            height: `${milestoneSize}px`,
-                                        }}
-                                        title={`${task.title} (Hito)`}
-                                    >
-                                        <div className="w-full h-full bg-orange-500 transform rotate-45 rounded-sm group-hover:bg-orange-600 transition-colors shadow-md"></div>
+                                    <div key={task._id} onClick={() => onTaskClick(task)} className="absolute cursor-pointer group" style={{top: `${milestoneTop}px`, left: `${milestoneLeft}px`, width: `${milestoneSize}px`, height: `${milestoneSize}px`}} title={`${task.title} (Hito)`}>
+                                        <div className="w-full h-full bg-orange-500 dark:bg-orange-600 transform rotate-45 rounded-sm group-hover:bg-orange-600 dark:group-hover:bg-orange-500 transition-colors shadow-md"></div>
                                     </div>
                                 );
-
                             } else {
-                                const taskEnd = new Date(task.dueDate);
-                                if (isNaN(taskEnd.getTime())) return null;
-                                const durationInDays = getDaysDiff(taskStart, taskEnd) + 1;
-                                const width = durationInDays * DAY_WIDTH - 4;
-
                                 return (
-                                    <div
-                                        key={task._id}
-                                        onClick={() => onTaskClick(task)}
-                                        className="absolute bg-indigo-500 rounded text-white flex items-center shadow-sm hover:bg-indigo-600 transition-colors cursor-pointer" 
-                                        style={{ top: `${index * ROW_HEIGHT + 10}px`, left: `${left}px`, width: `${width}px`, height: '30px', minWidth: '10px' }}>
+                                    <div key={task._id} onClick={() => onTaskClick(task)} className="absolute bg-indigo-500 rounded text-white flex items-center shadow-sm hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-500 transition-colors cursor-pointer" style={{ top: `${y + 10}px`, left: `${x}px`, width: `${width}px`, height: '30px', minWidth: '10px' }}>
                                         <span className="px-2 text-xs font-semibold truncate">{task.title}</span>
                                     </div>
                                 );
                             }
                         })}
+                        <DependencyArrows tasks={tasks} taskPositions={taskPositions} totalWidth={totalWidth} />
                     </div>
                 </div>
             </div>

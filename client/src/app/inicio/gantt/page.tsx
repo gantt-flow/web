@@ -11,22 +11,19 @@ import TimelinePanel from "@/components/gantt/timelinePanel";
 import AddTaskModal from "@/components/gantt/addTaskModal";
 import TaskCommentsModal from "@/components/gantt/tasksCommentsModal";
 import FilterModal, { ActiveFilters } from "@/components/gantt/filterPanel";
-import { Users, Plus } from "lucide-react";
+import { Users, Plus, LayoutDashboard } from "lucide-react";
 import ConfirmDeleteModal from "@/components/gantt/confirmDeleteTask";
 import SortModal, { SortOptions } from "@/components/gantt/sortModal";
-
-// --- TIPOS Y ESTADOS ---
+import Button from "@/components/ui/button";
 
 export type ViewMode = 'Día' | 'Semana' | 'Mes';
 type CurrentUser = AuthenticatedUser['user'];
 type Assignee = { _id: string; name: string };
 
 export default function Gantt() {
-    // Hooks de Next.js para routing y parámetros
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    // Estados principales del componente
     const [projects, setProjects] = useState<Projects[]>([]);
     const [selectedProject, setSelectedProject] = useState<string>('');
     const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
@@ -34,10 +31,9 @@ export default function Gantt() {
     const [projectMembers, setProjectMembers] = useState<Assignee[]>([]);
     const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
     
-    // Estados de UI
     const [isLoadingProjectData, setIsLoadingProjectData] = useState(true);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
-    const [taskForComments, setTaskForComments] = useState<Task | null>(null); // Estado unificado para modal de comentarios
+    const [taskForComments, setTaskForComments] = useState<Task | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('Día');
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
     const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
@@ -46,26 +42,20 @@ export default function Gantt() {
         time: 'all',
         dateRange: { start: '', end: '' },
         priority: 'all',
+        hideCompleted: false,
     });
 
-    // Estados para el orden
     const [isSortModalOpen, setIsSortModalOpen] = useState(false);
     const [sortOptions, setSortOptions] = useState<SortOptions>({
-        sortBy: 'createdAt', // Orden por defecto
+        sortBy: 'createdAt',
         order: 'asc',
     });
 
-
-    // --- EFECTOS PARA CARGA DE DATOS ---
-
-    // 1. Obtener el usuario actual al montar el componente
     useEffect(() => {
         async function fetchCurrentUser() {
             try {
                 const authData = await getCurrentUser(); 
-                if (authData.authenticated) {
-                    setCurrentUser(authData.user); 
-                }
+                if (authData.authenticated) setCurrentUser(authData.user); 
             } catch(err) {
                 console.error("Error fetching current user:", err);
             }
@@ -73,7 +63,6 @@ export default function Gantt() {
         fetchCurrentUser();
     }, []); 
 
-    // 2. Obtener proyectos del usuario y seleccionar el proyecto basado en la URL
     useEffect(() => {
         async function fetchProjects() {
             if (currentUser?._id) { 
@@ -97,7 +86,6 @@ export default function Gantt() {
         fetchProjects();
     }, [currentUser, searchParams]); 
 
-    // 3. Obtener tareas y miembros cada vez que el proyecto seleccionado cambie
     useEffect(() => {
         async function fetchProjectData() {
             if (!selectedProject) {
@@ -124,72 +112,60 @@ export default function Gantt() {
         }
         fetchProjectData();
     }, [selectedProject]);
-
-    const handleDeleteTask = async (taskId: string) => {
-        // Pedimos confirmación al usuario para evitar borrados accidentales
-        if (window.confirm("¿Estás seguro de que quieres eliminar esta tarea?")) {
-            try {
-                await deleteTask(taskId);
-                // Actualizamos el estado local para reflejar el cambio inmediatamente
-                setAllTasks(currentTasks => currentTasks.filter(task => task._id !== taskId));
-            } catch (error) {
-                console.error(`Error al eliminar la tarea ${taskId}:`, error);
-                // Opcional: Mostrar una notificación de error al usuario
-            }
-        }
-    };
     
-
-    // 4. Abrir el modal de comentarios si la URL lo indica, después de que las tareas se hayan cargado
     useEffect(() => {
         const commentTaskIdFromUrl = searchParams.get('comentarios');
         
         if (allTasks.length > 0 && commentTaskIdFromUrl && !taskForComments) {
             const taskToOpen = allTasks.find(task => task._id === commentTaskIdFromUrl);
-            
-            if (taskToOpen) {
-                setTaskForComments(taskToOpen);
-            }
+            if (taskToOpen) setTaskForComments(taskToOpen);
         }
-    }, [allTasks, searchParams]);
-
-
-    // --- MEMOS Y MANEJADORES DE EVENTOS ---
+    }, [allTasks, searchParams, taskForComments]);
 
     const sortedAndFilteredTasks = useMemo(() => {
-        // 1. Filtra primero (tu lógica de 'filteredTasks' se mueve aquí)
-
         let tasks = allTasks.filter(task => {
-            if (activeFilters.status !== 'all' && task.status !== activeFilters.status && activeFilters.status !== 'open' && activeFilters.status !== 'closed') return false;
+            const now = new Date();
+            const dueDate = new Date(task.dueDate);
+            now.setHours(0,0,0,0);
+
+            if (activeFilters.hideCompleted && task.status === 'Completada') return false;
+            if (activeFilters.status !== 'all' && task.status !== activeFilters.status) return false;
+            if (activeFilters.assignee === 'me' && task.assignedTo?._id !== currentUser?._id) return false;
+            if (activeFilters.assignee !== 'all' && activeFilters.assignee !== 'me' && task.assignedTo?._id !== activeFilters.assignee) return false;
+            if (activeFilters.priority !== 'all' && task.priority !== activeFilters.priority) return false;
+            if (activeFilters.time === 'overdue' && (dueDate >= now || task.status === 'Completada')) return false;
+            if (activeFilters.time === 'today' && dueDate.toDateString() !== now.toDateString()) return false;
+            if (activeFilters.time === 'week') {
+                const oneWeekFromNow = new Date();
+                oneWeekFromNow.setDate(now.getDate() + 7);
+                if (dueDate < now || dueDate > oneWeekFromNow) return false;
+            }
+            if (activeFilters.dateRange.start && new Date(activeFilters.dateRange.start) > dueDate) return false;
+            if (activeFilters.dateRange.end && new Date(activeFilters.dateRange.end) < dueDate) return false;
+
             return true;
         });
 
-        // 2. Ordena después
-        tasks.sort((a, b) => {
+        return tasks.sort((a, b) => {
             const orderMultiplier = sortOptions.order === 'asc' ? 1 : -1;
-
             switch (sortOptions.sortBy) {
                 case 'title':
                     return a.title.localeCompare(b.title) * orderMultiplier;
                 case 'dueDate':
                     return (new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()) * orderMultiplier;
                 case 'createdAt':
-                    // Asumimos que la API devuelve 'createdAt' en la tarea, si no, hay que añadirlo al modelo y servicio.
-                    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                    // Fallback to sorting by dueDate if createdAt does not exist
+                    // TODO
+                    const dateA = new Date(a.dueDate).getTime();
+                    const dateB = new Date(b.dueDate).getTime();
                     return (dateA - dateB) * orderMultiplier;
                 default:
                     return 0;
             }
         });
-
-        return tasks;
     }, [allTasks, activeFilters, currentUser, sortOptions]);
 
-    // Manejadores de eventos
-    const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedProject(e.target.value);
-    };
+    const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => setSelectedProject(e.target.value);
 
     const handleAddTask = async (newTask: NewTask) => {
         try {
@@ -206,12 +182,8 @@ export default function Gantt() {
     
     const handleUpdateTask = async (taskId: string, updatedTaskData: Task) => {
         try {
-            await updatedTask(taskId, updatedTaskData);
-            setAllTasks(currentTasks => 
-                currentTasks.map(task => 
-                    task._id === taskId ? updatedTaskData : task
-                )
-            );
+            const updatedTaskFromServer = await updatedTask(taskId, updatedTaskData);
+            setAllTasks(currentTasks => currentTasks.map(task => task._id === taskId ? updatedTaskFromServer : task));
         } catch (error) {
             console.error("Error al actualizar la tarea:", error);
         }
@@ -228,20 +200,14 @@ export default function Gantt() {
 
         try {
             const updatedTaskFromServer = await updatedTask(taskId, taskPayload);
-            setAllTasks(prevTasks =>
-                prevTasks.map(task =>
-                    task._id === taskId ? updatedTaskFromServer : task
-                )
-            );
+            setAllTasks(prevTasks => prevTasks.map(task => task._id === taskId ? updatedTaskFromServer : task));
         } catch (error) {
             console.error("Error al actualizar el estado de la tarea:", error);
         }
     };
 
     const handleSettingsClick = () => {
-        if (selectedProject) {
-            router.push(`/inicio/proyectos/${selectedProject}`);
-        }
+        if (selectedProject) router.push(`/inicio/proyectos/${selectedProject}`);
     };
     
     const handleToolbarAddTaskClick = () => {
@@ -252,20 +218,15 @@ export default function Gantt() {
         setIsAddTaskModalOpen(true);
     };
 
-    const handleGoToToday = () => {
-        window.dispatchEvent(new CustomEvent('scrollToToday'));
-    };
-
-    const handleInitiateDelete = (task: Task) => {
-        setTaskToDelete(task);
-    };
+    const handleGoToToday = () => window.dispatchEvent(new CustomEvent('scrollToToday'));
+    const handleInitiateDelete = (task: Task) => setTaskToDelete(task);
 
     const handleConfirmDelete = async () => {
         if (!taskToDelete) return;
         try {
             await deleteTask(taskToDelete._id);
             setAllTasks(current => current.filter(t => t._id !== taskToDelete._id));
-            setTaskToDelete(null); // Cierra el modal de confirmación
+            setTaskToDelete(null);
         } catch (error) {
             console.error(`Error al eliminar la tarea ${taskToDelete._id}:`, error);
         }
@@ -275,45 +236,66 @@ export default function Gantt() {
         setSortOptions(options);
         setIsSortModalOpen(false);
     };
-
-    // --- COMPONENTES DE UI INTERNOS ---
     
     const NoMembersEmptyState = () => (
-        <div className="flex flex-col items-center justify-center w-full p-10 bg-white text-center border-t border-gray-200" style={{ height: 'calc(100vh - 14rem)' }}>
-             <Users className="w-16 h-16 text-gray-400 mb-4" />
-             <h2 className="text-xl font-semibold text-gray-800">Este proyecto no tiene miembros</h2>
-             <p className="text-gray-500 max-w-md mt-2 mb-6">
+        <div className="flex flex-col items-center justify-center w-full p-10 bg-white dark:bg-gray-800 text-center border-t border-gray-200 dark:border-gray-700" style={{ height: 'calc(100vh - 14rem)' }}>
+             <Users className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" />
+             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Este proyecto no tiene miembros</h2>
+             <p className="text-gray-500 dark:text-gray-400 max-w-md mt-2 mb-6">
                 Para poder crear y asignar tareas, primero debes invitar personas a tu proyecto.
              </p>
              <button 
                 onClick={handleSettingsClick}
-                className="flex items-center gap-2 px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-colors"
+                className="flex items-center gap-2 px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
              >
                 <Plus size={18} />
                 Agregar Personas al Proyecto
              </button>
         </div>
     );
+    
+    if (isLoadingProjectData && projects.length === 0) {
+        return (
+            <div className="flex items-center justify-center w-full h-full p-10 bg-gray-50 dark:bg-gray-900">
+                <p className="text-gray-500 dark:text-gray-400">Cargando tus proyectos...</p>
+            </div>
+        );
+    }
 
-    // --- RENDERIZADO DEL COMPONENTE ---
+    if (!isLoadingProjectData && projects.length === 0) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 w-full h-full bg-gray-50 dark:bg-gray-900">
+                <LayoutDashboard size={64} className="text-gray-400 dark:text-gray-500 mb-4" />
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+                    Bienvenido a tu Vista de Gantt
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+                    Para empezar a visualizar tus tareas, primero necesitas crear un proyecto.
+                </p>
+                <Button 
+                    text="Crear un Proyecto" 
+                    type="button" 
+                    className="mt-6 inline-block w-auto px-6 py-3 cursor-pointer rounded-lg bg-green-500 text-white font-semibold shadow-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors" 
+                    redirectTo="/inicio/proyectos/nuevo"
+                />
+            </div>
+        )
+    }
 
     return (
-        <div className="flex flex-col p-4 pb-0 h-full"> 
-            {/* Área superior fija */}
+        <div className="flex flex-col p-4 pb-0 h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-200"> 
             <div className="flex-shrink-0">
                 <div className="h-12">
-                    {projects.length > 0 && (
-                        <select 
-                            name="project"
-                            value={selectedProject}
-                            onChange={handleProjectChange}
-                            className="rounded block w-1/2 max-w-md px-4 py-3 pr-8 bg-white border border-solid border-gray-300 transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-                        >
-                            {projects.map(project => (
-                                <option key={project._id} value={project._id}>{project.name}</option>
-                            ))}
-                        </select>
-                    )}
+                    <select 
+                        name="project"
+                        value={selectedProject}
+                        onChange={handleProjectChange}
+                        className="rounded block w-1/2 max-w-md px-4 py-3 pr-8 bg-white dark:bg-gray-700 border border-solid border-gray-300 dark:border-gray-600 transition ease-in-out m-0 focus:text-gray-700 dark:focus:text-gray-200 focus:bg-white dark:focus:bg-gray-600 focus:border-blue-600 focus:outline-none"
+                    >
+                        {projects.map(project => (
+                            <option key={project._id} value={project._id} className="dark:bg-gray-700">{project.name}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="h-12 mt-4">
                     <GanttToolBar
@@ -328,18 +310,17 @@ export default function Gantt() {
                 </div>
             </div>
 
-            {/* Área de Gantt condicional */}
             <div className="flex-1 mt-2">
                 {isLoadingProjectData ? (
-                    <div className="flex items-center justify-center w-full h-full p-10 border-t border-gray-200">
-                        <p className="text-gray-500">Cargando datos del proyecto...</p>
+                    <div className="flex items-center justify-center w-full h-full p-10 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-gray-500 dark:text-gray-400">Cargando datos del proyecto...</p>
                     </div>
                 ) : projectMembers.length === 0 ? (
                     <NoMembersEmptyState />
                 ) : (
-                    <div className="overflow-y-auto border-t border-gray-200" style={{ height: 'calc(100vh - 14rem)' }}>
+                    <div className="overflow-y-auto border-t border-gray-200 dark:border-gray-700" style={{ height: 'calc(100vh - 14rem)' }}>
                         <div className="grid grid-cols-[383px_1fr]">
-                            <div className="border-r border-gray-200 bg-white">
+                            <div className="border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                                 <GanttTaskListPanel 
                                     tasks={sortedAndFilteredTasks} 
                                     onTaskStatusChange={handleTaskStatusChange}
@@ -351,7 +332,7 @@ export default function Gantt() {
                                 <TimelinePanel 
                                     tasks={sortedAndFilteredTasks} 
                                     viewMode={viewMode}
-                                    onTaskClick={setTaskForComments} // Unificado para abrir modal
+                                    onTaskClick={setTaskForComments}
                                 />
                             </div>
                         </div>
@@ -359,58 +340,27 @@ export default function Gantt() {
                 )}
             </div>
 
-            {/* Modales */}
             {isAddTaskModalOpen && (
-                <AddTaskModal
-                    onClose={() => setIsAddTaskModalOpen(false)}
-                    onAddTask={handleAddTask}
-                    projectId={selectedProject}
-                />
+                <AddTaskModal onClose={() => setIsAddTaskModalOpen(false)} onAddTask={handleAddTask} projectId={selectedProject} />
             )}
-
             {taskForComments && (
                 <TaskCommentsModal
                     task={taskForComments}
                     onClose={() => {
-                        // 1. Limpiamos el estado para cerrar el modal
                         setTaskForComments(null);
-                        
-                        // 2. Construimos la nueva URL SIN el parámetro 'comentarios'
                         const newUrl = `/inicio/gantt?proyecto=${selectedProject}`;
-                        
-                        // 3. Reemplazamos la URL en el historial del navegador sin recargar la página
                         router.replace(newUrl, { scroll: false });
                     }}
                 />
             )}
-
             {isFilterModalOpen && (
-                <FilterModal
-                    isOpen={isFilterModalOpen}
-                    onClose={() => setIsFilterModalOpen(false)}
-                    onApplyFilters={setActiveFilters}
-                    currentFilters={activeFilters} 
-                    projectMembers={projectMembers}
-                    currentUserId={currentUser?._id} 
-                />
+                <FilterModal isOpen={isFilterModalOpen} onClose={() => setIsFilterModalOpen(false)} onApplyFilters={setActiveFilters} currentFilters={activeFilters} projectMembers={projectMembers} currentUserId={currentUser?._id} />
             )}
-
             {taskToDelete && (
-                <ConfirmDeleteModal
-                    isOpen={!!taskToDelete}
-                    onClose={() => setTaskToDelete(null)}
-                    onConfirm={handleConfirmDelete}
-                    taskTitle={taskToDelete.title}
-                />
+                <ConfirmDeleteModal isOpen={!!taskToDelete} onClose={() => setTaskToDelete(null)} onConfirm={handleConfirmDelete} taskTitle={taskToDelete.title} />
             )}
-
             {isSortModalOpen && (
-                <SortModal
-                    isOpen={isSortModalOpen}
-                    onClose={() => setIsSortModalOpen(false)}
-                    onApplySort={handleApplySort}
-                    currentSort={sortOptions}
-                />
+                <SortModal isOpen={isSortModalOpen} onClose={() => setIsSortModalOpen(false)} onApplySort={handleApplySort} currentSort={sortOptions} />
             )}
         </div>
     );

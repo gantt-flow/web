@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 import { getCurrentUser, updateUser, getUserById, AuthenticatedUser, User } from '@/services/userService'; 
 import { changePassword } from '@/services/authService'; 
 import { ShieldCheck } from 'lucide-react';
@@ -14,6 +15,7 @@ interface UserSettings {
 }
 
 export default function AjustesPage() {
+    const { setTheme } = useTheme();
     const [user, setUser] = useState<CurrentUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     
@@ -32,26 +34,7 @@ export default function AjustesPage() {
     const [settingsMessage, setSettingsMessage] = useState({ text: '', isError: false });
     const [passwordMessage, setPasswordMessage] = useState({ text: '', isError: false });
 
-    // --- MEJORA 1: EFECTO PARA APLICAR EL TEMA VISUALMENTE ---
-    // Este useEffect se ejecutará cada vez que el tema en el estado 'settings' cambie.
-    useEffect(() => {
-        const root = window.document.documentElement; // La etiqueta <html>
-        const currentTheme = settings.theme;
-
-        // Limpiamos clases de tema anteriores
-        root.classList.remove('light', 'dark');
-
-        if (currentTheme === 'system') {
-            // Si es 'system', usamos la preferencia del sistema operativo
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            root.classList.add(systemTheme);
-        } else {
-            // Si es 'light' o 'dark', aplicamos esa clase directamente
-            root.classList.add(currentTheme);
-        }
-    }, [settings.theme]); // Se dispara al cargar y cada vez que settings.theme cambia
-
-    // Carga los datos reales del usuario al montar la página
+    // Carga los datos del usuario al montar la página
     useEffect(() => {
         const fetchFullUser = async () => {
             try {
@@ -60,10 +43,8 @@ export default function AjustesPage() {
                     const basicUser = authData.user;
                     setUser(basicUser);
                     
-                    // Esta es la lógica CORRECTA: obtenemos el ID del token y luego los datos FRESCOS de la BD.
                     const fullUserData = await getUserById(basicUser._id);
                     
-                    // Poblamos el estado de los ajustes con los datos REALES de la BD
                     setSettings({
                         theme: fullUserData.theme || 'system',
                         notifications: fullUserData.notifications !== undefined ? fullUserData.notifications : true,
@@ -80,7 +61,12 @@ export default function AjustesPage() {
         fetchFullUser();
     }, []);
 
-    // Manejador para los selects/toggles
+    // Sincroniza el tema visual cada vez que el estado 'settings.theme' cambia
+    useEffect(() => {
+        setTheme(settings.theme);
+    }, [settings.theme, setTheme]);
+
+
     const handleSettingsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
         const processedValue = value === 'true' ? true : value === 'false' ? false : value;
@@ -91,36 +77,31 @@ export default function AjustesPage() {
         }));
     };
 
-    // Manejador para los inputs de contraseña
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
     };
 
-    // --- MEJORA 2: ACTUALIZAR EL ESTADO LOCAL TRAS GUARDAR ---
     const handleSettingsSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSettingsMessage({ text: 'Guardando...', isError: false });
         if (!user) return;
         
         try {
-            // Llama a la API y recibe el usuario actualizado
             const updatedUserData = await updateUser(user._id, { 
                 theme: settings.theme, 
                 notifications: settings.notifications,
                 twoFactorEnabled: settings.twoFactorEnabled
             });
 
-            // Actualiza el estado local con los datos FRESCOS del servidor.
-            // Esto asegura que la UI refleje el estado real de la BD sin necesidad de refrescar.
             setUser(updatedUserData); 
+            const userTheme = updatedUserData.theme || 'system';
             setSettings({
-                theme: updatedUserData.theme || 'system',
+                theme: userTheme,
                 notifications: updatedUserData.notifications !== undefined ? updatedUserData.notifications : true,
                 twoFactorEnabled: updatedUserData.twoFactorEnabled || false,
             });
             
             setSettingsMessage({ text: 'Ajustes guardados correctamente.', isError: false });
-            // El mensaje desaparecerá después de 3 segundos
             setTimeout(() => setSettingsMessage({ text: '', isError: false }), 3000);
 
         } catch (error) {
@@ -152,7 +133,6 @@ export default function AjustesPage() {
             
             setPasswordMessage({ text: 'Contraseña actualizada exitosamente.', isError: false });
             setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-             // El mensaje desaparecerá después de 3 segundos
             setTimeout(() => setPasswordMessage({ text: '', isError: false }), 3000);
 
         } catch (error: any) {
@@ -163,17 +143,17 @@ export default function AjustesPage() {
 
     const FormStatusMessage = ({ message }: { message: { text: string, isError: boolean }}) => {
         if (!message.text) return null;
-        const textColor = message.isError ? 'text-red-600' : 'text-green-600';
+        const textColor = message.isError ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
         return <span className={`text-sm ${textColor}`}>{message.text}</span>;
     };
 
 
     if (isLoading) {
         return (
-             <div className="flex-1 p-8 bg-gray-50 w-full space-y-8 animate-pulse">
-                <div className="h-9 bg-gray-300 rounded w-1/3"></div>
-                <div className="max-w-2xl mx-auto h-64 bg-gray-200 rounded-lg"></div>
-                <div className="max-w-2xl mx-auto h-80 bg-gray-200 rounded-lg"></div>
+             <div className="flex-1 p-8 bg-gray-50 dark:bg-gray-900 w-full space-y-8 animate-pulse">
+                <div className="h-9 bg-gray-300 dark:bg-gray-700 rounded w-1/3"></div>
+                <div className="max-w-2xl mx-auto h-64 bg-gray-200 dark:bg-gray-800 rounded-lg"></div>
+                <div className="max-w-2xl mx-auto h-80 bg-gray-200 dark:bg-gray-800 rounded-lg"></div>
             </div>
         );
     }
@@ -182,7 +162,6 @@ export default function AjustesPage() {
         <div className="flex-1 p-8 bg-gray-50 dark:bg-gray-900 w-full space-y-8">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Ajustes de Cuenta</h1>
 
-            {/* --- SECCIÓN DE AJUSTES GENERALES --- */}
             <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <form onSubmit={handleSettingsSubmit} className="space-y-6">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b dark:border-gray-600 pb-4">Apariencia y Notificaciones</h2>
@@ -218,14 +197,13 @@ export default function AjustesPage() {
                     
                      <div className="flex justify-end items-center gap-4 border-t dark:border-gray-600 pt-6">
                         <FormStatusMessage message={settingsMessage} />
-                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700">
+                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
                             Guardar Ajustes
                         </button>
                     </div>
                 </form>
             </div>
 
-            {/* --- SECCIÓN DE SEGURIDAD --- */}
             <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <form onSubmit={handlePasswordSubmit} className="space-y-6">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b dark:border-gray-600 pb-4">Seguridad y Contraseña</h2>
@@ -245,19 +223,18 @@ export default function AjustesPage() {
 
                     <div className="flex justify-end items-center gap-4 border-t dark:border-gray-600 pt-6">
                         <FormStatusMessage message={passwordMessage} />
-                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700">
+                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
                             Cambiar Contraseña
                         </button>
                     </div>
                 </form>
             </div>
 
-            {/* --- SECCIÓN 2FA --- */}
             <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <form onSubmit={handleSettingsSubmit} className="space-y-4">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b dark:border-gray-600 pb-4">Autenticación de Dos Factores (2FA)</h2>
                     <div className="flex items-start gap-4">
-                        <ShieldCheck className="w-10 h-10 text-gray-400 flex-shrink-0 mt-1" />
+                        <ShieldCheck className="w-10 h-10 text-gray-400 dark:text-gray-500 flex-shrink-0 mt-1" />
                         <div>
                             <label htmlFor="twoFactorEnabled" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado de 2FA</label>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Añade una capa extra de seguridad a tu cuenta.</p>
@@ -274,7 +251,7 @@ export default function AjustesPage() {
                         </div>
                     </div>
                      <div className="flex justify-end items-center gap-4 border-t dark:border-gray-600 pt-6">
-                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700">
+                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
                             Guardar Ajuste de 2FA
                         </button>
                     </div>
@@ -283,3 +260,4 @@ export default function AjustesPage() {
         </div>
     );
 }
+

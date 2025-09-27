@@ -47,11 +47,8 @@ export const getAllNotificationsByUser = async (req, res) => {
         // Fetch notifications for the specified recipient
         const notifications = await Notification.find({ recipientId }).populate('recipientId', 'name email');
 
-        if (notifications.length === 0) {
-            return res.status(200).json({ message: 'No notifications found for this recipient' });
-        }
-
-        res.status(200).json(notifications);
+        return res.status(200).json(notifications);
+        
     } catch (error) {
         logger.error(`Error fetching notifications: ${error.message}`);
         res.status(500).json({ message: 'Internal server error' });

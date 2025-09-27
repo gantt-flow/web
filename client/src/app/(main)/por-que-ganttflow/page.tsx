@@ -105,20 +105,7 @@ export default function PorQueGanttFlowPage() {
         </div>
       </section>
 
-      {/* --- 4. SECCIÓN VISUAL (SCREENSHOT) --- */}
-      <section className="bg-gray-50 dark:bg-gray-800 p-8 md:p-12">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-semibold mb-8">Todo tu proyecto en una sola vista</h2>
-          {/* Placeholder para una imagen de tu app */}
-          <div className="bg-gray-300 dark:bg-gray-700 w-full max-w-5xl mx-auto h-96 rounded-lg shadow-lg flex items-center justify-center border border-gray-500 dark:border-gray-500">
-            <p className="text-gray-500 dark:text-gray-500">
-              [Aquí va una captura de pantalla impresionante de tu app]
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* --- 5. CALL TO ACTION (CTA) FINAL --- */}
+      {/* --- 4. CALL TO ACTION (CTA) FINAL --- */}
       <section className="container mx-auto p-8 md:py-20 text-center">
         <h2 className="text-3xl font-semibold mb-4">¿Listo para transformar tu gestión?</h2>
         <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto mb-8">

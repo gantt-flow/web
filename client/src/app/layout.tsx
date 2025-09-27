@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fira_Sans } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const firaSans = Fira_Sans({
   weight: ["500", "800"],
@@ -22,13 +23,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body
-        className={`${firaSans.className} antialiased bg-white dark:bg-gray-900 flex flex-col min-h-screen`}
-      >
-        <main className="flex-grow">
-          {children}
-        </main>
+    <html lang="es" suppressHydrationWarning>
+      <body className={`${firaSans.className} antialiased bg-white dark:bg-gray-800 flex flex-col min-h-screen`}>
+        {/* Esto envuelve toda tu app y controla el tema */}
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+          <main className="flex-grow">
+            {children}
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );

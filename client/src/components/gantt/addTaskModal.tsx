@@ -55,7 +55,6 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
     const [dependencySearchTerm, setDependencySearchTerm] = useState('');
     const dependenciesRef = useRef<HTMLDivElement>(null);
 
-    // Función para predecir el tipo de tarea
     const predictTaskType = useCallback(async () => {
         if (!newTask.description.trim()) {
             setPredictionError('La descripción no puede estar vacía');
@@ -67,36 +66,18 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
         setPredictionOptions([]);
 
         try {
-            console.log('Enviando solicitud de predicción...');
             const result: PredictionResult = await predictionService.getPrediction(newTask.description);
-            console.log('Respuesta recibida del servicio:', result);
-            
-            // Debug detallado
-            console.log('Tipo de result:', typeof result);
-            console.log('Keys de result:', Object.keys(result));
-            
-            if (result.top_predictions) {
-                console.log('top_predictions:', result.top_predictions);
-                console.log('Tipo de top_predictions:', typeof result.top_predictions);
-                console.log('Es array?:', Array.isArray(result.top_predictions));
-            }
-            
-            // Manejar diferentes formatos de respuesta
             let options: Array<{label: string; probability: number}> = [];
             
             if (result.top_predictions && Array.isArray(result.top_predictions)) {
                 options = result.top_predictions;
-                console.log('Opciones encontradas en top_predictions:', options);
             }
             
-            console.log('Opciones finales:', options);
             setPredictionOptions(options);
             
-            // Si hay predicciones, establecer la primera como valor por defecto
             if (options.length > 0) {
                 setNewTask(prev => ({ ...prev, typeTask: options[0].label }));
             } else {
-                console.error('No se recibieron opciones de predicción');
                 setPredictionError('El modelo no devolvió opciones de predicción');
             }
         } catch (error: any) {
@@ -185,7 +166,6 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
-        // Validar que se haya seleccionado un tipo de tarea
         if (!newTask.typeTask) {
             setPredictionError('Debes seleccionar un tipo de tarea');
             return;
@@ -206,19 +186,18 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
             onClick={onClose}
         >
             <div 
-                className="bg-gray-50 p-8 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+                className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
                 onClick={e => e.stopPropagation()}
             >
-                <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Agregar Nueva Tarea</h2>
+                <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 border-b pb-4 dark:border-gray-700">Agregar Nueva Tarea</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-                    {/* Título y Descripción */}
                     <div>
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Título de la Tarea</label>
-                        <input type="text" id="title" name="title" value={newTask.title} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500" required />
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título de la Tarea</label>
+                        <input type="text" id="title" name="title" value={newTask.title} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500" required />
                     </div>
                     <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
                         <div className="flex gap-2">
                             <textarea 
                                 id="description" 
@@ -226,26 +205,25 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                                 value={newTask.description} 
                                 onChange={handleChange} 
                                 rows={3} 
-                                className="flex-grow mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500" 
+                                className="flex-grow mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500" 
                                 placeholder="Describe la tarea para predecir su tipo"
                             />
                             <button
                                 type="button"
                                 onClick={predictTaskType}
                                 disabled={isPredicting || !newTask.description.trim()}
-                                className="mt-1 px-4 py-2 h-fit bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                className="mt-1 px-4 py-2 h-fit bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-500"
                             >
                                 {isPredicting ? 'Predecindo...' : 'Predecir Tipo'}
                             </button>
                         </div>
                         {predictionError && (
-                            <p className="text-sm text-red-600 mt-1">{predictionError}</p>
+                            <p className="text-sm text-red-600 dark:text-red-400 mt-1">{predictionError}</p>
                         )}
                     </div>
 
-                    {/* Tipo de Tarea - Campo Mejorado */}
                     <div>
-                        <label htmlFor="typeTask" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="typeTask" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Tipo de Tarea
                             {isPredicting && <span className="text-blue-500 ml-2">(Prediciendo...)</span>}
                         </label>
@@ -257,16 +235,16 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                                     name="typeTask"
                                     value={newTask.typeTask}
                                     onChange={handleChange}
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
                                     required
                                 >
                                     {predictionOptions.map((pred, index) => (
-                                        <option key={index} value={pred.label}>
+                                        <option key={index} value={pred.label} className="dark:bg-gray-700">
                                             {pred.label} ({(pred.probability * 100).toFixed(1)}%)
                                         </option>
                                     ))}
                                 </select>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
                                     Selecciona entre las opciones predichas por el modelo
                                 </p>
                             </div>
@@ -277,75 +255,71 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                                 name="typeTask"
                                 value={newTask.typeTask}
                                 onChange={handleChange}
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
                                 placeholder="Haz clic en 'Predecir Tipo' para ver las opciones"
                                 required
                             />
                         )}
                     </div>
 
-                    {/* Fechas */}
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                         <div>
-                            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
-                            <input type="date" id="startDate" name="startDate" value={newTask.startDate} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
+                            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Inicio</label>
+                            <input type="date" id="startDate" name="startDate" value={newTask.startDate} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" />
                         </div>
                         <div>
-                            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">Fecha Límite</label>
-                            <input type="date" id="dueDate" name="dueDate" value={newTask.dueDate} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
+                            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Límite</label>
+                            <input type="date" id="dueDate" name="dueDate" value={newTask.dueDate} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" />
                         </div>
                     </div>
 
-                    {/* Estado y Prioridad */}
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                         <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                            <select name="status" value={newTask.status} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
-                                {taskStatuses.map(status => <option key={status} value={status}>{status}</option>)}
+                            <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
+                            <select name="status" value={newTask.status} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
+                                {taskStatuses.map(status => <option key={status} value={status} className="dark:bg-gray-700">{status}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">Prioridad</label>
-                            <select name="priority" value={newTask.priority} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" required>
-                                {taskPriorities.map(priority => <option key={priority} value={priority}>{priority}</option>)}
+                            <label htmlFor="priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prioridad</label>
+                            <select name="priority" value={newTask.priority} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
+                                {taskPriorities.map(priority => <option key={priority} value={priority} className="dark:bg-gray-700">{priority}</option>)}
                             </select>
                         </div>
                     </div>
 
-                    {/* Asignado */}
                     <div>
-                        <label htmlFor="assignedTo" className="block text-sm font-medium text-gray-700 mb-1">Asignar a</label>
-                        <select name="assignedTo" value={newTask.assignedTo} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                        <label htmlFor="assignedTo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asignar a</label>
+                        <select name="assignedTo" value={newTask.assignedTo} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                             <option value="">Sin asignar</option>
-                            {teamMembers.map(user => <option key={user._id} value={user._id}>{user.name}</option>)}
+                            {teamMembers.map(user => <option key={user._id} value={user._id} className="dark:bg-gray-700">{user.name}</option>)}
                         </select>
                     </div>
 
-                    {/* Tipo (Tarea/Milestone) */}
                     <div>
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">Tipo de Actividad</label>
+                        <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Actividad</label>
                         <select 
                             id="type" 
                             name="type" 
                             value={newTask.type} 
                             onChange={handleChange} 
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             {taskTypes.map(type => (
-                                <option key={type} value={type}>{type}</option>
+                                <option key={type} value={type} className="dark:bg-gray-700">{type}</option>
                             ))}
                         </select>
                     </div>
                     
                     <div className="relative" ref={dependenciesRef}>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Dependencias</label>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md shadow-sm min-h-[42px] bg-white">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dependencias</label>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md shadow-sm min-h-[42px] bg-white dark:bg-gray-700 dark:border-gray-600">
                             {newTask.dependencies.map(depId => {
                                 const task = projectTasks.find(t => t._id === depId);
                                 return task ? (
-                                    <span key={depId} className="flex items-center gap-1.5 bg-blue-100 text-blue-800 text-sm font-medium px-2 py-1 rounded-full">
+                                    <span key={depId} className="flex items-center gap-1.5 bg-blue-100 text-blue-800 text-sm font-medium px-2 py-1 rounded-full dark:bg-blue-900/50 dark:text-blue-300">
                                         {task.title}
-                                        <button type="button" onClick={() => removeDependency(depId)} className="text-blue-600 hover:text-blue-900 focus:outline-none font-bold">&times;</button>
+                                        <button type="button" onClick={() => removeDependency(depId)} className="text-blue-600 hover:text-blue-900 focus:outline-none font-bold dark:text-blue-400 dark:hover:text-blue-200">&times;</button>
                                     </span>
                                 ) : null;
                             })}
@@ -355,13 +329,13 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                                 onChange={(e) => setDependencySearchTerm(e.target.value)}
                                 onFocus={() => setIsDependenciesOpen(true)}
                                 placeholder="Buscar tareas para agregar..."
-                                className="flex-grow bg-transparent focus:outline-none p-1"
+                                className="flex-grow bg-transparent focus:outline-none p-1 dark:text-gray-200"
                             />
                         </div>
                         {isDependenciesOpen && availableTasks.length > 0 && (
-                            <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                            <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:bg-gray-800 dark:ring-gray-600">
                                 {availableTasks.map(task => (
-                                    <li key={task._id} onClick={() => addDependency(task._id)} className="text-gray-900 cursor-pointer select-none relative py-2 px-4 hover:bg-indigo-600 hover:text-white">
+                                    <li key={task._id} onClick={() => addDependency(task._id)} className="text-gray-900 dark:text-gray-200 cursor-pointer select-none relative py-2 px-4 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500">
                                         <span className="font-normal block truncate">{task.title}</span>
                                     </li>
                                 ))}
@@ -369,14 +343,13 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                         )}
                     </div>
 
-                    {/* Etiquetas */}
                     <div>
-                        <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">Etiquetas (presiona Enter para agregar)</label>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md shadow-sm bg-white">
+                        <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Etiquetas (presiona Enter para agregar)</label>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-700 dark:border-gray-600">
                             {newTask.tags.map(tag => (
-                                <span key={tag} className="flex items-center gap-1 bg-indigo-100 text-indigo-700 text-sm font-medium px-2 py-1 rounded-full">
+                                <span key={tag} className="flex items-center gap-1 bg-indigo-100 text-indigo-700 text-sm font-medium px-2 py-1 rounded-full dark:bg-indigo-900/50 dark:text-indigo-300">
                                     {tag}
-                                    <button type="button" onClick={() => removeTag(tag)} className="text-indigo-500 hover:text-indigo-800 focus:outline-none">&times;</button>
+                                    <button type="button" onClick={() => removeTag(tag)} className="text-indigo-500 hover:text-indigo-800 focus:outline-none dark:text-indigo-400 dark:hover:text-indigo-200">&times;</button>
                                 </span>
                             ))}
                             <input 
@@ -385,18 +358,18 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                                 value={currentTag} 
                                 onChange={(e) => setCurrentTag(e.target.value)} 
                                 onKeyDown={handleTagKeyDown} 
-                                className="flex-grow bg-transparent focus:outline-none p-1" 
+                                className="flex-grow bg-transparent focus:outline-none p-1 dark:text-gray-200" 
                                 placeholder={newTask.tags.length === 0 ? "Ej: Diseño, Frontend, Urgente" : ""} 
                             />
                         </div>
                     </div>
                     
-                    <div className="flex justify-end gap-4 mt-8 pt-4 border-t">
-                        <button type="button" onClick={onClose} className="px-4 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Cancelar</button>
+                    <div className="flex justify-end gap-4 mt-8 pt-4 border-t dark:border-gray-700">
+                        <button type="button" onClick={onClose} className="px-4 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:border-gray-600">Cancelar</button>
                         <button 
                             type="submit" 
                             disabled={!newTask.typeTask}
-                            className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:disabled:bg-gray-500"
                         >
                             Crear Tarea
                         </button>

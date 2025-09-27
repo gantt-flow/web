@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
@@ -8,41 +7,42 @@ export default function Footer() {
         
         {/* Columna 1: Logo y Redes Sociales */}
         <div className="flex flex-col">
-          <Image
+          <img
             className="dark:invert mb-4"
             src="/logo.svg"
             alt="GanttFlow Logo"
             width={150}
             height={32}
+            style={{ height: '32px' }} // Se agrega estilo en línea para mantener la altura
           />
           <p className="text-gray-600 dark:text-gray-400 mb-4">Planifica mejor. Trabaja más inteligente.</p>
           <div className="flex flex-row gap-4">
             <a
-            href="https://x.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 flex items-center"
-            aria-label="X (Twitter) Profile"
+              href="https://x.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 flex items-center"
+              aria-label="X (Twitter) Profile"
             >
-                <Image src="/xLogo.svg" alt="X (Twitter)" width={24} height={24} />
+                <img src="/xLogo.svg" alt="X (Twitter)" width={24} height={24} />
             </a>
             <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 rounded-lg flex items-center"
-            aria-label="Instagram Profile"
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-lg flex items-center"
+              aria-label="Instagram Profile"
             >
-                <Image src="/instagramLogo.svg" alt="Instagram" width={24} height={24} />
+                <img src="/instagramLogo.svg" alt="Instagram" width={24} height={24} />
             </a>
             <a
-            href="https://github.com/gantt-flow"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 rounded-lg flex items-center"
-            aria-label="GitHub Profile"
+              href="https://github.com/gantt-flow"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-lg flex items-center"
+              aria-label="GitHub Profile"
             >
-                <Image src="/githubLogo.svg" alt="GitHub" width={24} height={24} />
+                <img src="/githubLogo.svg" alt="GitHub" width={24} height={24} />
             </a>
             </div>
         </div>
@@ -51,9 +51,9 @@ export default function Footer() {
         <div>
           <h4 className="font-bold text-lg mb-3 text-gray-900 dark:text-white">Navegación</h4>
           <div className="flex flex-col space-y-2">
-            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500" href="/sobre-nosotros">Sobre nosotros</Link>
-            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500" href="/faq">FAQ</Link>
-            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500" href="/costos">Costos</Link>
+            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400" href="/sobre-nosotros">Sobre nosotros</Link>
+            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400" href="/faq">FAQ</Link>
+            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400" href="/costos">Costos</Link>
           </div>
         </div>
         
@@ -61,8 +61,8 @@ export default function Footer() {
         <div>
           <h4 className="font-bold text-lg mb-3 text-gray-900 dark:text-white">Legal</h4>
           <div className="flex flex-col space-y-2">
-            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500" href="/terminos-y-condiciones">Términos y Condiciones</Link>
-            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500" href="/politica-de-privacidad">Política de privacidad</Link>
+            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400" href="/terminos-y-condiciones">Términos y Condiciones</Link>
+            <Link className="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400" href="/politica-de-privacidad">Política de privacidad</Link>
           </div>
         </div>
 

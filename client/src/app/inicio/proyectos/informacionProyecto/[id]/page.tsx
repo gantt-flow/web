@@ -7,14 +7,13 @@ import Image from "next/image";
 import { NewProject, getProjectById, updateProject } from '@/services/projectService';
 
 
-// Estados de proyecto
 const projectStatuses = ['Sin iniciar', 'En progreso', 'En espera']
 
 export default function Proyectos(){
     const router = useRouter();
     const params = useParams();
 
-    const { id: projectId } = params; // Extrae el ID de la URL
+    const { id: projectId } = params;
     const [project, setProject] = useState<NewProject | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,6 +37,7 @@ export default function Proyectos(){
     }, [projectId]);
 
     const [formData, setFormData] = useState<NewProject>({
+        _id: '',
         name: '',
         description: '',
         startDate: '',
@@ -48,6 +48,7 @@ export default function Proyectos(){
     useEffect(() => {
         if (project) {
             setFormData({
+                _id: project._id || '',
                 name: project.name || '',
                 description: project.description || '',
                 startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : '',
@@ -81,109 +82,101 @@ export default function Proyectos(){
     }
 
      if (isLoading) {
-        return <div>Cargando detalles del proyecto...</div>;
+        return <div className="p-8 text-center text-gray-500 dark:text-gray-400">Cargando detalles del proyecto...</div>;
     }
 
     if (!project) {
-        return <div>Proyecto no encontrado.</div>;
+        return <div className="p-8 text-center text-red-500 dark:text-red-400">Proyecto no encontrado.</div>;
     }
 
     if(isSubmitting){
-        return(<p>Cargando datos...</p>)
+        return(<p className="p-8 text-center text-gray-500 dark:text-gray-400">Guardando datos...</p>)
     }
 
     if(error){
-        return(<p>Error: {error}</p>)
+        return(<p className="p-8 text-center text-red-500 dark:text-red-400">Error: {error}</p>)
     }
 
 
     return(
-        <div className="flex flex-row w-full">
+        <div className="flex flex-row w-full bg-gray-50 dark:bg-gray-900 p-8">
 
-            <div className="flex flex-col mt-2 px-6">
+            <div className="flex flex-col flex-1 max-w-lg">
                 <div>
-                    <h1 className="text-3xl">Editar proyecto</h1>
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Editar proyecto</h1>
                 </div>
 
-                <div className="flex flex-col flex-1">
-                    <form className="flex flex-col mt-10 gap-5" onSubmit={handleSubmit}>
+                <div className="flex flex-col flex-1 mt-8">
+                    <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
                         <div>
-                            <label htmlFor="projectName">Dale un nombre a tu proyecto</label>
-                            <div className="mt-2">
-                                <input
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dale un nombre a tu proyecto</label>
+                            <input
                                 id="name"
                                 name="name"
                                 type="text"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="block w-64 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                className="block w-full rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 px-3 py-2 border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
                                 required
-                                />
-                            </div>
+                            />
                         </div>
                         
                         <div>
-                            <label htmlFor="projectDescription">Agrega una pequeña descripción</label>
-                                <div className="mt-2">
-                                    <input
-                                    id="description"
-                                    name="description"
-                                    type="text"
-                                    value={formData.description}
-                                    onChange={handleChange}
-                                    className="block w-64 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                    required
-                                    />
-                                </div>
+                            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Agrega una pequeña descripción</label>
+                            <input
+                                id="description"
+                                name="description"
+                                type="text"
+                                value={formData.description}
+                                onChange={handleChange}
+                                className="block w-full rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 px-3 py-2 border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                                required
+                            />
                         </div>
                         
                         <div>
-                            <label htmlFor="startDate">¿Cuándo comienza tu proyecto?</label>
-                                <div className="mt-2">
-                                    <input
-                                    id="startDate"
-                                    name="startDate"
-                                    type="date"
-                                    value={formData.startDate}
-                                    onChange={handleChange}
-                                    className="block w-64 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                    />
-                                </div>
+                            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">¿Cuándo comienza tu proyecto?</label>
+                            <input
+                                id="startDate"
+                                name="startDate"
+                                type="date"
+                                value={formData.startDate}
+                                onChange={handleChange}
+                                className="block w-full rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 px-3 py-2 border border-gray-300"
+                            />
                         </div>
                         
                         <div>
-                            <label htmlFor="projectDescription">¿Sabes cuando termina tu proyecto?</label>
-                                <div className="mt-2">
-                                    <input
-                                    id="endDate"
-                                    name="endDate"
-                                    type="date"
-                                    value={formData.endDate}
-                                    onChange={handleChange}
-                                    className="block w-64 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                                    />
-                                </div>
+                            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">¿Sabes cuando termina tu proyecto?</label>
+                            <input
+                                id="endDate"
+                                name="endDate"
+                                type="date"
+                                value={formData.endDate}
+                                onChange={handleChange}
+                                className="block w-full rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 px-3 py-2 border border-gray-300"
+                            />
                         </div>
 
                         <div>
-                            <label htmlFor="projectStatus">Estado del proyecto</label>
-                            <div className="mt-2">
-                                <select name="status" value={formData.status || ''} onChange={handleChange} className="block w-64 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" required >
-                                    <option value=''>Selecciona estado del proyecto</option>
-                                    {projectStatuses.map( projectStatus => (
-                                        <option key={projectStatus} value={projectStatus}>{projectStatus}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado del proyecto</label>
+                            <select name="status" value={formData.status || ''} onChange={handleChange} className="block w-full rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 px-3 py-2 border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" required >
+                                <option value='' className="dark:bg-gray-700">Selecciona estado del proyecto</option>
+                                {projectStatuses.map( projectStatus => (
+                                    <option key={projectStatus} value={projectStatus} className="dark:bg-gray-700">{projectStatus}</option>
+                                ))}
+                            </select>
                         </div>
 
-                        <button type="submit" className="w-44 p-2 mt-8 cursor-pointer rounded-lg bg-green-500 border border-gray-200 hover:bg-gray-100 hover:text-green-500">Guardar cambios</button>
+                        <button type="submit" className="w-44 p-2 mt-8 cursor-pointer rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors">
+                            Guardar cambios
+                        </button>
                     </form>
                 </div>                
             </div>
                 
-            <div className="flex flex-col justify-center ml-2">
-                <Image src="/newProjectTemplate.svg" alt="Magnigier Icon" width={937} height={616} />
+            <div className="hidden lg:flex flex-col justify-center items-center flex-1 ml-8">
+                <Image src="/newProjectTemplate.svg" alt="Ilustración de un nuevo proyecto" width={937} height={616} />
             </div>
         </div>
     )

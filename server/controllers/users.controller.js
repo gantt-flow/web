@@ -1,5 +1,5 @@
 import User from '../models/user.js';
-import { isValidObjectId } from 'mongoose'; // Import Mongoose's isValidObjectId for ID validation
+import { isValidObjectId } from 'mongoose';
 import { logger } from '../utils/logger.js';
 import { handleError } from '../utils/errorHandler.js';
 import { generateAuditLog } from '../utils/auditService.js';
@@ -20,7 +20,7 @@ export const getCurrentUser = async (req, res) => {
 
 export const getUserWithId = async (req, res) => {
     try {
-        const userId = req.params._id;
+        const userId = req.params.id;
 
         // Validate the user ID
         if (!isValidObjectId(userId)) {
@@ -28,7 +28,7 @@ export const getUserWithId = async (req, res) => {
         }
 
         // Fetch the user from the database
-        const user = await User.findById(userId).select('-passwordHash'); // Exclude password and version field
+        const user = await User.findById(userId).select('-passwordHash'); // Exclude password
         
         if (!user) {
             return res.status(404).json({ message: 'User not found' });

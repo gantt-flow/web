@@ -10,15 +10,13 @@ import {
     AlertCircle, 
     CheckCircle, 
     TrendingUp,
-    Calendar,
-    ChevronDown
+    ChevronDown,
+    FolderKanban 
 } from 'lucide-react';
-import Link from 'next/link';
+import Button from '@/components/ui/button';
 
-// Tipo para el usuario actual (basado en tu servicio)
 type CurrentUser = AuthenticatedUser['user'] | null;
 
-//--- 1. COMPONENTE DE CALENDARIO LIGERO (NUEVO) ---
 const DashboardCalendar = ({ tasks }: { tasks: Task[] }) => {
     const [date, setDate] = useState(new Date());
 
@@ -39,16 +37,16 @@ const DashboardCalendar = ({ tasks }: { tasks: Task[] }) => {
         <div className="flex justify-between items-center mb-4">
             <button 
                 onClick={() => setDate(new Date(date.setMonth(date.getMonth() - 1)))}
-                className="p-1 rounded-md hover:bg-gray-100"
+                className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
             >
                 &lt;
             </button>
-            <div className="text-lg font-semibold text-gray-900">
+            <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {date.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}
             </div>
             <button 
                 onClick={() => setDate(new Date(date.setMonth(date.getMonth() + 1)))}
-                className="p-1 rounded-md hover:bg-gray-100"
+                className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
             >
                 &gt;
             </button>
@@ -58,8 +56,7 @@ const DashboardCalendar = ({ tasks }: { tasks: Task[] }) => {
     const renderDaysOfWeek = () => {
         const days = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
         return (
-            <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500">
-                {/* --- CORRECCIÓN: Se añade el 'index' al key para hacerlo único (ej: "M-2" y "M-3") --- */}
+            <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500 dark:text-gray-400">
                 {days.map((day, index) => (
                     <div key={`${day}-${index}`} className="w-10 h-10 flex items-center justify-center">{day}</div>
                 ))}
@@ -84,13 +81,13 @@ const DashboardCalendar = ({ tasks }: { tasks: Task[] }) => {
 
             let cellClasses = "w-10 h-10 flex items-center justify-center rounded-full text-sm transition-colors ";
             if (!isCurrentMonth) {
-                cellClasses += "text-gray-300";
+                cellClasses += "text-gray-300 dark:text-gray-600";
             } else if (isToday) {
-                cellClasses += "bg-indigo-600 text-white font-bold";
+                cellClasses += "bg-green-500 text-white font-bold";
             } else if (hasDueDate) {
-                cellClasses += "bg-indigo-100 text-indigo-700 font-semibold";
+                cellClasses += "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 font-semibold";
             } else {
-                cellClasses += "text-gray-700 hover:bg-gray-100";
+                cellClasses += "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700";
             }
 
             cells.push(
@@ -104,7 +101,7 @@ const DashboardCalendar = ({ tasks }: { tasks: Task[] }) => {
     };
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             {renderHeader()}
             {renderDaysOfWeek()}
             {renderCells()}
@@ -112,21 +109,19 @@ const DashboardCalendar = ({ tasks }: { tasks: Task[] }) => {
     );
 };
 
-
-//--- 2. COMPONENTE DE GRÁFICO LIGERO ---
 const SimpleBarChart = ({ data }: { data: { name: string; value: number, color: string }[] }) => {
     const maxValue = Math.max(...data.map(d => d.value), 1); 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Tareas por Estado</h2>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Tareas por Estado</h2>
             <div className="space-y-4">
                 {data.map(item => (
                     <div key={item.name}>
-                        <div className="flex justify-between mb-1 text-sm font-medium text-gray-600">
+                        <div className="flex justify-between mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
                             <span>{item.name}</span>
                             <span>{item.value}</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                             <div 
                                 className={`${item.color} h-2.5 rounded-full`} 
                                 style={{ width: `${(item.value / maxValue) * 100}%` }}
@@ -139,19 +134,14 @@ const SimpleBarChart = ({ data }: { data: { name: string; value: number, color: 
     );
 };
 
-
-//--- 3. COMPONENTE PRINCIPAL DEL DASHBOARD ---
 export default function HomePage() {
     const [user, setUser] = useState<CurrentUser>(null);
     const [projects, setProjects] = useState<Projects[]>([]);
     const [isLoadingPage, setIsLoadingPage] = useState(true); 
-    
     const [selectedProjectId, setSelectedProjectId] = useState<string>(''); 
     const [projectTasks, setProjectTasks] = useState<Task[]>([]); 
     const [isWidgetLoading, setIsWidgetLoading] = useState(false); 
 
-
-    // Efecto 1: Cargar usuario y lista de proyectos (solo una vez)
     useEffect(() => {
         const fetchUserAndProjects = async () => {
             setIsLoadingPage(true);
@@ -160,10 +150,8 @@ export default function HomePage() {
                 if (authData.authenticated && authData.user) {
                     const currentUser = authData.user;
                     setUser(currentUser);
-                    
                     const userProjects = await getUserProjects(currentUser._id);
                     setProjects(userProjects);
-
                     if (userProjects.length > 0) {
                         setSelectedProjectId(userProjects[0]._id);
                     }
@@ -173,6 +161,7 @@ export default function HomePage() {
                 }
             } catch(error) {
                 console.error("Error fetching homepage data:", error);
+                setProjects([]); 
             } finally {
                 setIsLoadingPage(false); 
             }
@@ -180,11 +169,12 @@ export default function HomePage() {
         fetchUserAndProjects();
     }, []); 
 
-    // Efecto 2: Cargar tareas CADA VEZ que selectedProjectId cambie
     useEffect(() => {
         const fetchTasks = async () => {
-            if (!selectedProjectId) return; 
-
+            if (!selectedProjectId) {
+                setProjectTasks([]);
+                return;
+            }; 
             setIsWidgetLoading(true);
             try {
                 const tasks = await getTasksByProject(selectedProjectId);
@@ -196,12 +186,9 @@ export default function HomePage() {
                 setIsWidgetLoading(false);
             }
         };
-
         fetchTasks();
     }, [selectedProjectId]); 
 
-
-    // Cálculo de KPIs
     const projectStats = useMemo(() => {
         const totalTasks = projectTasks.length;
         const completedTasks = projectTasks.filter(t => t.status === 'Completada').length;
@@ -213,13 +200,9 @@ export default function HomePage() {
         return { totalTasks, completedTasks, overdueTasks, completionPercent };
     }, [projectTasks]);
 
-    // Datos del Gráfico
     const chartData = useMemo(() => {
         const statusCounts = {
-            'Sin iniciar': 0,
-            'En progreso': 0,
-            'Completada': 0,
-            'En espera': 0,
+            'Sin iniciar': 0, 'En progreso': 0, 'Completada': 0, 'En espera': 0,
         };
         projectTasks.forEach(task => {
             if (task.status in statusCounts) {
@@ -235,38 +218,53 @@ export default function HomePage() {
         ];
     }, [projectTasks]);
 
-
-    // Estado de carga principal
     if (isLoadingPage) {
          return (
-            <div className="flex-1 p-8 bg-gray-50 animate-pulse w-full">
-                <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
-                <div className="h-10 bg-gray-300 rounded w-1/2 mb-8"></div>
-                <div className="h-96 bg-gray-200 rounded-lg"></div>
+            <div className="flex-1 p-8 bg-gray-50 dark:bg-gray-900 animate-pulse w-full">
+                <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+                <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mb-8"></div>
+                <div className="h-96 bg-gray-200 dark:bg-gray-800 rounded-lg"></div>
             </div>
         )
     }
 
+    if (!isLoadingPage && projects.length === 0) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gray-50 dark:bg-gray-900 w-full h-full">
+                <FolderKanban size={64} className="text-gray-400 dark:text-gray-500 mb-4" />
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+                    ¡Comencemos, {user?.name || 'Invitado'}!
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+                    Estás a un paso de organizar tu trabajo. Crea tu primer proyecto para empezar a añadir tareas.
+                </p>
+                <Button 
+                    text="Crear mi Primer Proyecto"
+                    type="button"
+                    className="px-6 py-3 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors"
+                    redirectTo="/inicio/proyectos/nuevo"
+                />
+            </div>
+        );
+    }
+
     return (
-        <div className="flex-1 p-8 bg-gray-50 w-full min-h-full">
-            {/* Header del Dashboard */}
+        <div className="flex-1 p-8 bg-gray-50 dark:bg-gray-900 w-full min-h-full">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
                         Bienvenido, {user?.name || 'Invitado'}
                     </h1>
-                    <p className="text-gray-600">Este es el resumen de tu proyecto seleccionado.</p>
+                    <p className="text-gray-600 dark:text-gray-400">Este es el resumen de tu proyecto seleccionado.</p>
                 </div>
-                {/* Selector de Proyecto */}
                 <div className="relative">
                     <select
                         value={selectedProjectId}
                         onChange={(e) => setSelectedProjectId(e.target.value)}
-                        className="appearance-none w-full sm:w-72 block pl-4 pr-10 py-3 text-base border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-medium"
+                        className="appearance-none w-full sm:w-72 block pl-4 pr-10 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-medium"
                     >
-                        {projects.length === 0 && <option>No tienes proyectos</option>}
                         {projects.map(project => (
-                            <option key={project._id} value={project._id}>
+                            <option key={project._id} value={project._id} className="dark:bg-gray-700">
                                 {project.name}
                             </option>
                         ))}
@@ -275,13 +273,12 @@ export default function HomePage() {
                 </div>
             </div>
 
-            {/* Widgets de KPI */}
             {isWidgetLoading ? (
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
-                    <div className="h-28 bg-gray-200 rounded-lg"></div>
-                    <div className="h-28 bg-gray-200 rounded-lg"></div>
-                    <div className="h-28 bg-gray-200 rounded-lg"></div>
-                    <div className="h-28 bg-gray-200 rounded-lg"></div>
+                    <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                    <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                    <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                    <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
                  </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -292,19 +289,17 @@ export default function HomePage() {
                 </div>
             )}
             
-
-            {/* Gráficos y Calendario */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
                 <div className="lg:col-span-2">
                      {isWidgetLoading ? (
-                        <div className="h-96 bg-gray-200 rounded-lg animate-pulse"></div>
+                        <div className="h-96 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
                      ) : (
                         <SimpleBarChart data={chartData} />
                      )}
                 </div>
                 <div className="lg:col-span-1">
                      {isWidgetLoading ? (
-                        <div className="h-96 bg-gray-200 rounded-lg animate-pulse"></div>
+                        <div className="h-96 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
                      ) : (
                         <DashboardCalendar tasks={projectTasks} />
                      )}
@@ -314,16 +309,15 @@ export default function HomePage() {
     );
 }
 
-// Componente de Tarjeta KPI (Helper)
 const KpiCard = ({ icon, title, value }: { icon: React.ReactNode, title: string, value: string | number }) => (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-4">
-            <div className="p-3 rounded-full bg-gray-100">
+            <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-700">
                 {icon}
             </div>
             <div>
-                <div className="text-sm font-medium text-gray-500">{title}</div>
-                <div className="text-3xl font-bold text-gray-900">{value}</div>
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{value}</div>
             </div>
         </div>
     </div>
