@@ -158,8 +158,8 @@ export const acceptInvite = async (req, res) => {
 
         // También actualizar el usuario si es necesario (dependiendo de tu modelo)
         // Por ejemplo, si tienes un array de proyectos en el usuario:
-        if (user.projects && !user.projects.includes(project._id)) {
-            user.projects.push(project._id);
+        if (!user.projectId.includes(project._id)) {
+            user.projectId.push(project._id);
             await user.save();
         }
 

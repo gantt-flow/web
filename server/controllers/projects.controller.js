@@ -188,9 +188,15 @@ export const removeMemberFromProject = async (req, res) => {
     try {
         const { projectId, memberId } = req.params;
 
+        // Validar que los IDs sean válidos
+        if (!isValidObjectId(projectId) || !isValidObjectId(memberId)) {
+            return res.status(400).json({ message: 'ID de proyecto o miembro inválido.' });
+        }
+
+        // 1. Buscar y actualizar el proyecto (remover el miembro)
         const project = await Project.findByIdAndUpdate(
             projectId,
-            { $pull: { teamMembers: memberId } }, // $pull elimina un elemento de un array
+            { $pull: { teamMembers: memberId } },
             { new: true }
         );
 
@@ -198,7 +204,24 @@ export const removeMemberFromProject = async (req, res) => {
             return res.status(404).json({ message: 'Proyecto no encontrado.' });
         }
 
-        res.status(200).json({ message: 'Miembro eliminado correctamente.' });
+        // 2. Buscar y actualizar el usuario (remover el proyecto)
+        const user = await User.findByIdAndUpdate(
+            memberId,
+            { $pull: { projectId: projectId } },
+            { new: true }
+        );
+
+        if (!user) {
+            // Aunque el usuario no exista, el miembro fue removido del proyecto
+            console.warn(`Usuario con ID ${memberId} no encontrado, pero fue removido del proyecto`);
+        }
+
+        res.status(200).json({ 
+            message: 'Miembro eliminado correctamente del proyecto y del usuario.',
+            projectUpdated: true,
+            userUpdated: !!user
+        });
+
     } catch (error) {
         logger.error(`Error removing member from project: ${error.message}`);
         res.status(500).json({ message: 'Error interno del servidor' });
