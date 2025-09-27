@@ -11,6 +11,7 @@ export default function Login() {
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
+<<<<<<< HEAD
         e.preventDefault();
         setError('');
         try {
@@ -20,6 +21,34 @@ export default function Login() {
             setError('Credenciales inválidas o error en el servidor.');
         }
     };
+=======
+    e.preventDefault(); // Previene la recarga de la página
+    setError('');
+
+    try {
+        const response = await login({ email, password });
+        // Si llegamos aquí, el login en el backend fue exitoso.
+        const userRole = response.user?.role;
+        
+        // Redirigir según el rol
+        switch (userRole) {
+            case 'Administrador de sistema':
+            router.push('/admin/sistema/usuarios');
+            break;
+            case 'Auditor':
+            router.push('/admin/sistema/auditoria');
+            break;
+            default:
+            router.push('/inicio');
+        }
+
+    } catch (err) {
+        // Si algo sale mal en la llamada a `login()`, se ejecutará esto.
+        setError('Credenciales inválidas o error en el servidor.');
+    }
+};
+
+>>>>>>> c2f367a423545b87380f83e29a565146a99057f8
 
     return (
         <div className="flex flex-row min-h-screen bg-white dark:bg-gray-900">

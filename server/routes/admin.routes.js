@@ -1,10 +1,10 @@
 import express from "express";
-import auth from '../middleware/authMiddleware.js';
-
-import { createUserAdmin } from "../controllers/admin.controller.js";
+import authWithRole from '../middleware/authWithRole.js';
+import { createUserAdmin, getAllUsers } from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
-router.post("/",auth ,createUserAdmin);
+router.post("/",authWithRole('Administrador de sistema'), createUserAdmin);
+router.get("/", authWithRole('Administrador de sistema','Administrador de proyectos','Auditor'), getAllUsers);
 
 export default router;

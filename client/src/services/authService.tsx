@@ -1,5 +1,4 @@
 import api from '@/services/api';
-import { jwtDecode } from 'jwt-decode';
 
 // Definimos una interfaz para las credenciales de inicio de sesión
 export interface LoginCredentials {
@@ -34,6 +33,11 @@ interface ResetPasswordData {
 export const login = async (credentials: LoginCredentials) => {
   // Llamada a la API
   const response = await api.post('/auth/login', credentials);
+  if (response.data.token) {
+      // Guardar token en localStorage como backup
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
   return response.data;
 };
 

@@ -11,7 +11,7 @@ interface AddMemberModalProps {
 
 const AddMemberModal = ({ onClose, projectId, projectName, onInvitationSent }: AddMemberModalProps) => {
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('user');
+  const [role, setRole] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);

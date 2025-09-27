@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { DataTable } from '@/components/ui/DataTable';
 import EditPermissionsModal from '@/components/admin/EditPermissionsModal';
-import { User, getAllUsers, updateUser, normalizePermissionsToArray } from '@/services/userService';
+import { User, updateUser, normalizePermissionsToArray } from '@/services/userService';
+import {getAllUsers} from '@/services/adminService';
 
 // Definir los permisos disponibles según el modelo
 const PERMISSIONS_LIST = [

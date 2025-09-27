@@ -1,10 +1,10 @@
 // server/routes/auditLog.routes.js
 import express from "express";
-import auth from '../middleware/authMiddleware.js';
+import authWithRole from '../middleware/authWithRole.js';
 import { getAuditLogs} from "../controllers/auditLog.controller.js";
 
 const router = express.Router();
 
-router.get("/", auth, getAuditLogs);
+router.get("/", authWithRole('Administrador de sistema','Auditor'), getAuditLogs);
 
 export default router;

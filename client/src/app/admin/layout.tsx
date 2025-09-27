@@ -2,6 +2,7 @@ import Header from '@/components/header';
 import Sidebar from "@/components/admin/sidebar";
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 // La función DEBE ser 'async' para poder usar await
 export default async function DashboardLayout({
@@ -21,32 +22,34 @@ export default async function DashboardLayout({
   // 3. El resto del código es correcto.
   return (
     // El contenedor raíz sigue igual: flex y altura completa.
-    <div className="flex h-screen bg-gray-50 text-gray-800">
-        <Sidebar />
-        
-        {/* --- CONTENEDOR PRINCIPAL CORREGIDO --- */}
-        {/*
-          CAMBIO 1: `flex-1` le dice a este div que crezca y ocupe todo el espacio
-          horizontal disponible que no está usando el Sidebar.
+    <AuthProvider>
+      <div className="flex h-screen bg-gray-50 text-gray-800">
+          <Sidebar />
           
-          CAMBIO 2: `overflow-hidden` previene cualquier desbordamiento accidental
-          de este contenedor, asegurando que el único scroll sea el del <main>.
-        */}
-        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* --- CONTENEDOR PRINCIPAL CORREGIDO --- */}
+          {/*
+            CAMBIO 1: `flex-1` le dice a este div que crezca y ocupe todo el espacio
+            horizontal disponible que no está usando el Sidebar.
             
-            {/* El Header no necesita cambios, pero es buena práctica añadir
-                flex-shrink-0 para asegurar que nunca se encoja si el contenido es muy grande. */}
-            <header className="flex-shrink-0">
-              <Header />
-            </header>
+            CAMBIO 2: `overflow-hidden` previene cualquier desbordamiento accidental
+            de este contenedor, asegurando que el único scroll sea el del <main>.
+          */}
+          <div className="flex flex-1 flex-col overflow-hidden">
+              
+              {/* El Header no necesita cambios, pero es buena práctica añadir
+                  flex-shrink-0 para asegurar que nunca se encoja si el contenido es muy grande. */}
+              <header className="flex-shrink-0">
+                <Header />
+              </header>
 
-            {/* El área de <main> sigue siendo la única con scroll.
-                Ahora funcionará correctamente porque su padre (`div` de arriba)
-                tiene una altura y anchura bien definidas. */}
-            <main className="flex-1 overflow-y-auto">
-                {children} 
-            </main>
-        </div>
-    </div>
+              {/* El área de <main> sigue siendo la única con scroll.
+                  Ahora funcionará correctamente porque su padre (`div` de arriba)
+                  tiene una altura y anchura bien definidas. */}
+              <main className="flex-1 overflow-y-auto">
+                  {children} 
+              </main>
+          </div>
+      </div>
+    </AuthProvider>
   );
 }
