@@ -11,17 +11,6 @@ export default function Login() {
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
-<<<<<<< HEAD
-        e.preventDefault();
-        setError('');
-        try {
-            await login({ email, password });
-            router.push('/inicio');
-        } catch (err) {
-            setError('Credenciales inválidas o error en el servidor.');
-        }
-    };
-=======
     e.preventDefault(); // Previene la recarga de la página
     setError('');
 
@@ -48,7 +37,6 @@ export default function Login() {
     }
 };
 
->>>>>>> c2f367a423545b87380f83e29a565146a99057f8
 
     return (
         <div className="flex flex-row min-h-screen bg-white dark:bg-gray-900">

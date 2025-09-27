@@ -11,7 +11,7 @@ import TimelinePanel from "@/components/gantt/timelinePanel";
 import AddTaskModal from "@/components/gantt/addTaskModal";
 import TaskCommentsModal from "@/components/gantt/tasksCommentsModal";
 import FilterModal, { ActiveFilters } from "@/components/gantt/filterPanel";
-import { Users, Plus, LayoutDashboard } from "lucide-react";
+import { Users, Plus, LayoutDashboard, ClipboardPlus } from "lucide-react";
 import ConfirmDeleteModal from "@/components/gantt/confirmDeleteTask";
 import SortModal, { SortOptions } from "@/components/gantt/sortModal";
 import Button from "@/components/ui/button";
@@ -253,6 +253,23 @@ export default function Gantt() {
              </button>
         </div>
     );
+
+    const NoTasksEmptyState = ({ onAddTaskClick }: { onAddTaskClick: () => void }) => (
+        <div className="flex flex-col items-center justify-center w-full p-10 bg-white dark:bg-gray-800 text-center border-t border-gray-200 dark:border-gray-700" style={{ height: 'calc(100vh - 14rem)' }}>
+            <ClipboardPlus className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" />
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Tu proyecto está listo para empezar</h2>
+            <p className="text-gray-500 dark:text-gray-400 max-w-md mt-2 mb-6">
+                El primer paso es crear una tarea. Asígnale un responsable, establece fechas y observa cómo tu proyecto cobra vida.
+            </p>
+            <button
+                onClick={onAddTaskClick}
+                className="flex items-center gap-2 px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
+            >
+                <Plus size={18} />
+                Crear mi Primera Tarea
+            </button>
+        </div>
+    );
     
     if (isLoadingProjectData && projects.length === 0) {
         return (
@@ -317,6 +334,8 @@ export default function Gantt() {
                     </div>
                 ) : projectMembers.length === 0 ? (
                     <NoMembersEmptyState />
+                ) : allTasks.length === 0 ? (
+                    <NoTasksEmptyState onAddTaskClick={handleToolbarAddTaskClick} />
                 ) : (
                     <div className="overflow-y-auto border-t border-gray-200 dark:border-gray-700" style={{ height: 'calc(100vh - 14rem)' }}>
                         <div className="grid grid-cols-[383px_1fr]">
@@ -365,3 +384,4 @@ export default function Gantt() {
         </div>
     );
 }
+
