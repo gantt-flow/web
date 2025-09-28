@@ -229,34 +229,6 @@ export default function AjustesPage() {
                     </div>
                 </form>
             </div>
-
-            <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <form onSubmit={handleSettingsSubmit} className="space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b dark:border-gray-600 pb-4">Autenticación de Dos Factores (2FA)</h2>
-                    <div className="flex items-start gap-4">
-                        <ShieldCheck className="w-10 h-10 text-gray-400 dark:text-gray-500 flex-shrink-0 mt-1" />
-                        <div>
-                            <label htmlFor="twoFactorEnabled" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado de 2FA</label>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Añade una capa extra de seguridad a tu cuenta.</p>
-                            <select
-                                id="twoFactorEnabled"
-                                name="twoFactorEnabled"
-                                value={String(settings.twoFactorEnabled)}
-                                onChange={handleSettingsChange}
-                                className="mt-1 block w-full max-w-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option value="true">Habilitado</option>
-                                <option value="false">Deshabilitado</option>
-                            </select>
-                        </div>
-                    </div>
-                     <div className="flex justify-end items-center gap-4 border-t dark:border-gray-600 pt-6">
-                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
-                            Guardar Ajuste de 2FA
-                        </button>
-                    </div>
-                </form>
-            </div>
         </div>
     );
 }

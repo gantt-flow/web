@@ -72,10 +72,12 @@ export default function PerfilPage() {
                             className="rounded-full bg-gray-200 dark:bg-gray-700"
                         />
                         <div>
-                            <button type="button" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Estamos trabajando en esta funcionalidad</p>
+                            <button type="button" disabled className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors">
                                 Cambiar foto
                             </button>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">JPG o PNG. Tamaño máx. 5MB.</p>
+                            
                         </div>
                     </div>
 

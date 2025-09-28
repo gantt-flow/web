@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import { NewTask } from '@/services/taskService';
 import { getProjectTasks, getTeamMembers } from '@/services/projectService';
+import { getCurrentUser } from '@/services/userService';
 import { predictionService, PredictionResult } from '@/services/mlService';
 
 interface AddTaskModalProps {
@@ -33,7 +34,7 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
         dueDate: new Date().toISOString().slice(0, 10),
         status: 'Sin iniciar',
         priority: 'Baja',
-        assignedTo: '',
+        assignedTo: null, // Inicia como null para que "Sin asignar" funcione
         projectId: projectId,
         dependencies: [],
         estimatedHours: 0,
@@ -47,74 +48,38 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
     const [currentTag, setCurrentTag] = useState('');
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
     const [projectTasks, setProjectTasks] = useState<Task[]>([]);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [isPredicting, setIsPredicting] = useState(false);
     const [predictionError, setPredictionError] = useState<string | null>(null);
     const [predictionOptions, setPredictionOptions] = useState<Array<{label: string; probability: number}>>([]);
-
     const [isDependenciesOpen, setIsDependenciesOpen] = useState(false);
     const [dependencySearchTerm, setDependencySearchTerm] = useState('');
     const dependenciesRef = useRef<HTMLDivElement>(null);
 
-    const predictTaskType = useCallback(async () => {
-        if (!newTask.description.trim()) {
-            setPredictionError('La descripción no puede estar vacía');
-            return;
-        }
-
-        setIsPredicting(true);
-        setPredictionError(null);
-        setPredictionOptions([]);
-
-        try {
-            const result: PredictionResult = await predictionService.getPrediction(newTask.description);
-            let options: Array<{label: string; probability: number}> = [];
-            
-            if (result.top_predictions && Array.isArray(result.top_predictions)) {
-                options = result.top_predictions;
-            }
-            
-            setPredictionOptions(options);
-            
-            if (options.length > 0) {
-                setNewTask(prev => ({ ...prev, typeTask: options[0].label }));
-            } else {
-                setPredictionError('El modelo no devolvió opciones de predicción');
-            }
-        } catch (error: any) {
-            console.error('Error predicting task type:', error);
-            setPredictionError('No se pudo predecir el tipo de tarea. Intenta nuevamente.');
-        } finally {
-            setIsPredicting(false);
-        }
-    }, [newTask.description]);
-
     useEffect(() => {
-        async function fetchTeamMembers() {
+        async function fetchInitialData() {
             try {
-                const team = await getTeamMembers(projectId);
-                setTeamMembers(team);
-                if (team.length > 0) {
-                    setNewTask(prev => ({...prev, assignedTo: team[0]._id}));
+                const userData = await getCurrentUser();
+                if (userData.authenticated) {
+                    const currentId = userData.user._id;
+                    setCurrentUserId(currentId);
+                    setNewTask(prev => ({ ...prev, assignedTo: currentId }));
                 }
+
+                const [team, tasks] = await Promise.all([
+                    getTeamMembers(projectId),
+                    getProjectTasks(projectId)
+                ]);
+                setTeamMembers(team);
+                setProjectTasks(tasks);
+
             } catch (error) {
-                console.log('Error al obtener los miembros del equipo:', error);
+                console.log('Error al obtener los datos iniciales:', error);
             }
         };
-        fetchTeamMembers();
+        fetchInitialData();
     }, [projectId]);
 
-    useEffect(() => {
-        async function fetchProjectTasks() {
-            try {
-                const tasks = await getProjectTasks(projectId);
-                setProjectTasks(tasks);
-            } catch (error) {
-                console.log('Error al obtener las tareas del proyecto:', error);
-            }
-        };
-        fetchProjectTasks();
-    }, [projectId]);
-    
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dependenciesRef.current && !dependenciesRef.current.contains(event.target as Node)) {
@@ -127,10 +92,40 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
         };
     }, [dependenciesRef]);
     
+    const predictTaskType = useCallback(async () => {
+        if (!newTask.description.trim()) {
+            setPredictionError('La descripción no puede estar vacía');
+            return;
+        }
+        setIsPredicting(true);
+        setPredictionError(null);
+        setPredictionOptions([]);
+        try {
+            const result: PredictionResult = await predictionService.getPrediction(newTask.description);
+            const options = (result.top_predictions && Array.isArray(result.top_predictions)) ? result.top_predictions : [];
+            setPredictionOptions(options);
+            if (options.length > 0) {
+                setNewTask(prev => ({ ...prev, typeTask: options[0].label }));
+            } else {
+                setPredictionError('El modelo no devolvió opciones de predicción');
+            }
+        } catch (error: any) {
+            console.error('Error predicting task type:', error);
+            setPredictionError('No se pudo predecir el tipo de tarea.');
+        } finally {
+            setIsPredicting(false);
+        }
+    }, [newTask.description]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setNewTask(prev => ({ ...prev, [name]: value }));
     }
+    
+    const handleAssigneeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const userId = e.target.value;
+        setNewTask(prev => ({ ...prev, assignedTo: userId === "" ? null : userId }));
+    };
     
     const addDependency = (taskId: string) => {
         if (!newTask.dependencies.includes(taskId)) {
@@ -165,20 +160,28 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
         if (!newTask.typeTask) {
             setPredictionError('Debes seleccionar un tipo de tarea');
             return;
         }
-
         const taskDataWithLocalDates = {
             ...newTask,
             startDate: new Date(newTask.startDate + 'T00:00:00'),
             dueDate: new Date(newTask.dueDate + 'T00:00:00')
         };
-
         onAddTask(taskDataWithLocalDates);
     }
+
+    const hasAvailableDependencies = projectTasks.length > 0;
+
+    const sortedTeamMembers = useMemo(() => {
+        if (!currentUserId) return teamMembers;
+        return [...teamMembers].sort((a, b) => {
+            if (a._id === currentUserId) return -1;
+            if (b._id === currentUserId) return 1;
+            return a.name.localeCompare(b.name);
+        });
+    }, [teamMembers, currentUserId]);
 
     return (
         <div 
@@ -199,67 +202,35 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
                         <div className="flex gap-2">
-                            <textarea 
-                                id="description" 
-                                name="description" 
-                                value={newTask.description} 
-                                onChange={handleChange} 
-                                rows={3} 
-                                className="flex-grow mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500" 
-                                placeholder="Describe la tarea para predecir su tipo"
-                            />
-                            <button
-                                type="button"
-                                onClick={predictTaskType}
-                                disabled={isPredicting || !newTask.description.trim()}
-                                className="mt-1 px-4 py-2 h-fit bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-500"
-                            >
-                                {isPredicting ? 'Predecindo...' : 'Predecir Tipo'}
+                            <textarea id="description" name="description" value={newTask.description} onChange={handleChange} rows={3} className="flex-grow mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe la tarea para predecir su tipo"/>
+                            <button type="button" onClick={predictTaskType} disabled={isPredicting || !newTask.description.trim()} className="mt-1 px-4 py-2 h-fit bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-500">
+                                {isPredicting ? 'Predeciendo...' : 'Predecir Tipo'}
                             </button>
                         </div>
-                        {predictionError && (
-                            <p className="text-sm text-red-600 dark:text-red-400 mt-1">{predictionError}</p>
-                        )}
+                        {predictionError && <p className="text-sm text-red-600 dark:text-red-400 mt-1">{predictionError}</p>}
                     </div>
 
                     <div>
-                        <label htmlFor="typeTask" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Tipo de Tarea
-                            {isPredicting && <span className="text-blue-500 ml-2">(Prediciendo...)</span>}
-                        </label>
-                        
+                        <label htmlFor="typeTask" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Tarea</label>
                         {predictionOptions.length > 0 ? (
                             <div className="space-y-2">
-                                <select
-                                    id="typeTask"
-                                    name="typeTask"
-                                    value={newTask.typeTask}
-                                    onChange={handleChange}
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
-                                    required
-                                >
+                                <select id="typeTask" name="typeTask" value={newTask.typeTask} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500" required>
                                     {predictionOptions.map((pred, index) => (
-                                        <option key={index} value={pred.label} className="dark:bg-gray-700">
-                                            {pred.label} ({(pred.probability * 100).toFixed(1)}%)
-                                        </option>
+                                        <option key={index} value={pred.label} className="dark:bg-gray-700">{pred.label} ({(pred.probability * 100).toFixed(1)}%)</option>
                                     ))}
                                 </select>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    Selecciona entre las opciones predichas por el modelo
-                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Selecciona entre las opciones predichas</p>
                             </div>
                         ) : (
-                            <input
-                                type="text"
-                                id="typeTask"
-                                name="typeTask"
-                                value={newTask.typeTask}
-                                onChange={handleChange}
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Haz clic en 'Predecir Tipo' para ver las opciones"
-                                required
-                            />
+                            <input type="text" id="typeTask" name="typeTask" value={newTask.typeTask} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" placeholder="Haz clic en 'Predecir Tipo' para ver las opciones" required />
                         )}
+                    </div>
+                    
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                        <div>
+                            <label htmlFor="estimatedHours" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Horas Estimadas</label>
+                            <input type="number" id="estimatedHours" name="estimatedHours" min="0" value={newTask.estimatedHours} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"/>
+                        </div>
                     </div>
 
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -290,30 +261,26 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
 
                     <div>
                         <label htmlFor="assignedTo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asignar a</label>
-                        <select name="assignedTo" value={newTask.assignedTo} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        <select name="assignedTo" value={newTask.assignedTo || ''} onChange={handleAssigneeChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                             <option value="">Sin asignar</option>
-                            {teamMembers.map(user => <option key={user._id} value={user._id} className="dark:bg-gray-700">{user.name}</option>)}
+                            {sortedTeamMembers.map(user => (
+                                <option key={user._id} value={user._id} className="dark:bg-gray-700">
+                                    {user.name} {user._id === currentUserId ? '(Yo)' : ''}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
                     <div>
                         <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Actividad</label>
-                        <select 
-                            id="type" 
-                            name="type" 
-                            value={newTask.type} 
-                            onChange={handleChange} 
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            {taskTypes.map(type => (
-                                <option key={type} value={type} className="dark:bg-gray-700">{type}</option>
-                            ))}
+                        <select id="type" name="type" value={newTask.type} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500">
+                            {taskTypes.map(type => (<option key={type} value={type} className="dark:bg-gray-700">{type}</option>))}
                         </select>
                     </div>
                     
                     <div className="relative" ref={dependenciesRef}>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dependencias</label>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md shadow-sm min-h-[42px] bg-white dark:bg-gray-700 dark:border-gray-600">
+                        <div className={`mt-1 flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md shadow-sm min-h-[42px] bg-white dark:bg-gray-700 dark:border-gray-600 ${!hasAvailableDependencies ? 'bg-gray-100 dark:bg-gray-700/50' : ''}`}>
                             {newTask.dependencies.map(depId => {
                                 const task = projectTasks.find(t => t._id === depId);
                                 return task ? (
@@ -323,14 +290,7 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                                     </span>
                                 ) : null;
                             })}
-                            <input
-                                type="text"
-                                value={dependencySearchTerm}
-                                onChange={(e) => setDependencySearchTerm(e.target.value)}
-                                onFocus={() => setIsDependenciesOpen(true)}
-                                placeholder="Buscar tareas para agregar..."
-                                className="flex-grow bg-transparent focus:outline-none p-1 dark:text-gray-200"
-                            />
+                            <input type="text" value={dependencySearchTerm} onChange={(e) => setDependencySearchTerm(e.target.value)} onFocus={() => hasAvailableDependencies && setIsDependenciesOpen(true)} placeholder={hasAvailableDependencies ? "Buscar tareas..." : "No hay tareas para agregar"} className="flex-grow bg-transparent focus:outline-none p-1 dark:text-gray-200 disabled:cursor-not-allowed" disabled={!hasAvailableDependencies}/>
                         </div>
                         {isDependenciesOpen && availableTasks.length > 0 && (
                             <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:bg-gray-800 dark:ring-gray-600">
@@ -352,25 +312,13 @@ export default function AddTaskModal({ onClose, onAddTask, projectId }: AddTaskM
                                     <button type="button" onClick={() => removeTag(tag)} className="text-indigo-500 hover:text-indigo-800 focus:outline-none dark:text-indigo-400 dark:hover:text-indigo-200">&times;</button>
                                 </span>
                             ))}
-                            <input 
-                                type="text" 
-                                id="tags" 
-                                value={currentTag} 
-                                onChange={(e) => setCurrentTag(e.target.value)} 
-                                onKeyDown={handleTagKeyDown} 
-                                className="flex-grow bg-transparent focus:outline-none p-1 dark:text-gray-200" 
-                                placeholder={newTask.tags.length === 0 ? "Ej: Diseño, Frontend, Urgente" : ""} 
-                            />
+                            <input type="text" id="tags" value={currentTag} onChange={(e) => setCurrentTag(e.target.value)} onKeyDown={handleTagKeyDown} className="flex-grow bg-transparent focus:outline-none p-1 dark:text-gray-200" placeholder={newTask.tags.length === 0 ? "Ej: Diseño, Frontend, Urgente" : ""}/>
                         </div>
                     </div>
                     
                     <div className="flex justify-end gap-4 mt-8 pt-4 border-t dark:border-gray-700">
                         <button type="button" onClick={onClose} className="px-4 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:border-gray-600">Cancelar</button>
-                        <button 
-                            type="submit" 
-                            disabled={!newTask.typeTask}
-                            className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:disabled:bg-gray-500"
-                        >
+                        <button type="submit" disabled={!newTask.typeTask} className="px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:disabled:bg-gray-500">
                             Crear Tarea
                         </button>
                     </div>

@@ -1,10 +1,10 @@
 import { FC } from 'react';
 
-interface Column {
+export interface Column {
   key: string;
   header: string;
   width?: string;
-  render?: (value: any, row: any) => React.ReactNode; 
+  render?: (value: any, row: any) => React.ReactNode;
 }
 
 interface DataTableProps {

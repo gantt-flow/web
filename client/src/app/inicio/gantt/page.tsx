@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react"; 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Projects, getUserProjects, getTeamMembers } from "@/services/projectService";
-import { AuthenticatedUser, getCurrentUser } from '@/services/userService'; 
+import { getCurrentUser, AuthenticatedUser } from '@/services/userService'; 
 import { getTasksByProject, updatedTask, Task, NewTask, createTask, deleteTask } from "@/services/taskService"; 
 import GanttToolBar from "@/components/gantt/ganttToolBar";
 import GanttTaskListPanel from "@/components/gantt/ganttTaskListPanel";
@@ -11,7 +11,7 @@ import TimelinePanel from "@/components/gantt/timelinePanel";
 import AddTaskModal from "@/components/gantt/addTaskModal";
 import TaskCommentsModal from "@/components/gantt/tasksCommentsModal";
 import FilterModal, { ActiveFilters } from "@/components/gantt/filterPanel";
-import { Users, Plus, LayoutDashboard, ClipboardPlus } from "lucide-react";
+import { Users, Plus, LayoutDashboard, ClipboardPlus, UserPlus } from "lucide-react";
 import ConfirmDeleteModal from "@/components/gantt/confirmDeleteTask";
 import SortModal, { SortOptions } from "@/components/gantt/sortModal";
 import Button from "@/components/ui/button";
@@ -54,6 +54,7 @@ export default function Gantt() {
     useEffect(() => {
         async function fetchCurrentUser() {
             try {
+                // Cambiado a checkAuth para consistencia
                 const authData = await getCurrentUser(); 
                 if (authData.authenticated) setCurrentUser(authData.user); 
             } catch(err) {
@@ -65,7 +66,7 @@ export default function Gantt() {
 
     useEffect(() => {
         async function fetchProjects() {
-            if (currentUser?._id) { 
+            if (currentUser?._id) {
                 try {
                     const userProjects = await getUserProjects(currentUser._id); 
                     setProjects(userProjects);
@@ -81,6 +82,9 @@ export default function Gantt() {
                     console.error("Error al obtener proyectos:", err);
                     setProjects([]);
                 }
+            } else if (currentUser) {
+                // Si hay un usuario pero no proyectos, dejamos de cargar.
+                 setIsLoadingProjectData(false);
             }
         } 
         fetchProjects();
@@ -271,30 +275,48 @@ export default function Gantt() {
         </div>
     );
     
-    if (isLoadingProjectData && projects.length === 0) {
+    if (!currentUser) {
         return (
             <div className="flex items-center justify-center w-full h-full p-10 bg-gray-50 dark:bg-gray-900">
-                <p className="text-gray-500 dark:text-gray-400">Cargando tus proyectos...</p>
+                <p className="text-gray-500 dark:text-gray-400">Autenticando...</p>
             </div>
         );
     }
 
-    if (!isLoadingProjectData && projects.length === 0) {
+    // --- NUEVO BLOQUE DE BIENVENIDA CONDICIONAL ---
+    if (projects.length === 0) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8 w-full h-full bg-gray-50 dark:bg-gray-900">
-                <LayoutDashboard size={64} className="text-gray-400 dark:text-gray-500 mb-4" />
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                    Bienvenido a tu Vista de Gantt
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                    Para empezar a visualizar tus tareas, primero necesitas crear un proyecto.
-                </p>
-                <Button 
-                    text="Crear un Proyecto" 
-                    type="button" 
-                    className="mt-6 inline-block w-auto px-6 py-3 cursor-pointer rounded-lg bg-green-500 text-white font-semibold shadow-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors" 
-                    redirectTo="/inicio/proyectos/nuevo"
-                />
+                {currentUser?.role === 'Administrador de proyectos' ? (
+                    <>
+                        <LayoutDashboard size={64} className="text-gray-400 dark:text-gray-500 mb-4" />
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+                            Bienvenido a tu Vista de Gantt
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+                            Para empezar a visualizar tus tareas, primero necesitas crear un proyecto.
+                        </p>
+                        <Button 
+                            text="Crear mi Primer Proyecto" 
+                            type="button" 
+                            className="mt-6 inline-block w-auto px-6 py-3 cursor-pointer rounded-lg bg-green-500 text-white font-semibold shadow-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors" 
+                            redirectTo="/inicio/proyectos/informacionProyecto"
+                        />
+                    </>
+                ) : (
+                    <>
+                        <UserPlus size={64} className="text-gray-400 dark:text-gray-500 mb-4" />
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+                            Bienvenido a GanttFlow
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+                            Aún no has sido asignado a ningún proyecto. Una vez que te agreguen a uno, podrás ver tus tareas aquí.
+                        </p>
+                        <p className="p-4 bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-lg">
+                            Pide a un administrador de proyectos que te invite a colaborar.
+                        </p>
+                    </>
+                )}
             </div>
         )
     }
@@ -384,4 +406,3 @@ export default function Gantt() {
         </div>
     );
 }
-

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { registerAndLogin } from '@/services/authService';
 
-const userRoles = ['Administrador de proyectos', 'Miembro de equipo', 'Colaborador', 'Cliente', 'Auditor'];
+const userRoles = ['Administrador de proyectos', 'Miembro de equipo', 'Cliente', 'Auditor'];
 
 export default function SignUpPage() {
     const [step, setStep] = useState(1);

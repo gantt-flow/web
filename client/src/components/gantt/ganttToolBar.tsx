@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useEffect } from "react";
 import { Plus, Filter, Settings, Calendar, ArrowUpDown } from "lucide-react";
 import { ViewMode } from "@/app/inicio/gantt/page";
+import { getCurrentUser } from '@/services/userService'; 
 
 interface GanttToolBarProps {
     viewMode: ViewMode;
@@ -28,12 +30,32 @@ export default function GanttToolBar({
     onGoToToday,
     onSettingsClick 
 }: GanttToolBarProps) {
+    const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            try {
+                const userData = await getCurrentUser();
+                setCurrentUserRole(userData.user.role);
+            } catch (error) {
+                console.error("Error fetching user role:", error);
+            }
+        };
+        fetchUserRole();
+    }, []);
+
     return(
         <div className="flex items-center justify-between h-full px-4 border-y border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2">
-                <button onClick={onAddTaskClick} className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors">
-                    <Plus size={16} /> Crear
-                </button>
+                {/* Renderizado condicional del botón Crear */}
+                {currentUserRole !== 'Cliente' && (
+                    <button 
+                        onClick={onAddTaskClick} 
+                        className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
+                    >
+                        <Plus size={16} /> Crear
+                    </button>
+                )}
                 <button onClick={onFilterClick} className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <Filter size={16} /> Filtro
                 </button>

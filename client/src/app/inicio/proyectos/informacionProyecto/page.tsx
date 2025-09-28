@@ -1,6 +1,5 @@
 'use client';
 
-
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
@@ -13,6 +12,7 @@ const projectStatuses = ['Sin iniciar', 'En progreso', 'En espera']
 export default function Proyectos(){
     const router = useRouter();
     const [formData, setFormData] = useState<NewProject>({
+        _id: '',
         name: '',
         description: '',
         startDate: '',

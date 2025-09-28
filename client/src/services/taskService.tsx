@@ -13,7 +13,7 @@ export interface Task {
     endDate: Date;
     status: string;
     priority: string;
-    assignedTo: User;
+    assignedTo: User | null;
     projectId: NewProject;
     dependencies?: string[];
     estimatedHours: number;
@@ -33,7 +33,7 @@ export interface NewTask {
     dueDate: string;
     status: string;
     priority: string;
-    assignedTo: string;
+    assignedTo: string | null;
     projectId: string;
     dependencies: string[];
     estimatedHours: number;

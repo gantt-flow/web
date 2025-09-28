@@ -1,21 +1,35 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { getCurrentUser, AuthenticatedUser } from '@/services/userService';
+import { AuthenticatedUser, getCurrentUser } from '@/services/userService';
 import { getUserProjects, Projects } from '@/services/projectService';
 import { getTasksByProject, Task } from '@/services/taskService'; 
 import { 
     LayoutGrid, 
-    ClipboardCheck, 
     AlertCircle, 
     CheckCircle, 
     TrendingUp,
     ChevronDown,
-    FolderKanban 
+    FolderKanban,
+    UserPlus
 } from 'lucide-react';
 import Button from '@/components/ui/button';
 
 type CurrentUser = AuthenticatedUser['user'] | null;
+
+const KpiCard = ({ icon, title, value }: { icon: React.ReactNode, title: string, value: string | number }) => (
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center space-x-4">
+            <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-700">
+                {icon}
+            </div>
+            <div>
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{value}</div>
+            </div>
+        </div>
+    </div>
+);
 
 const DashboardCalendar = ({ tasks }: { tasks: Task[] }) => {
     const [date, setDate] = useState(new Date());
@@ -231,19 +245,36 @@ export default function HomePage() {
     if (!isLoadingPage && projects.length === 0) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gray-50 dark:bg-gray-900 w-full h-full">
-                <FolderKanban size={64} className="text-gray-400 dark:text-gray-500 mb-4" />
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                    ¡Comencemos, {user?.name || 'Invitado'}!
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                    Estás a un paso de organizar tu trabajo. Crea tu primer proyecto para empezar a añadir tareas.
-                </p>
-                <Button 
-                    text="Crear mi Primer Proyecto"
-                    type="button"
-                    className="px-6 py-3 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors"
-                    redirectTo="/inicio/proyectos/nuevo"
-                />
+                {user?.role === 'Administrador de proyectos' ? (
+                    <>
+                        <FolderKanban size={64} className="text-gray-400 dark:text-gray-500 mb-4" />
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+                            ¡Hola, {user?.name || ''}!
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+                            Estás a un paso de organizar tu trabajo. Crea tu primer proyecto para empezar a añadir tareas.
+                        </p>
+                        <Button 
+                            text="Crear mi Primer Proyecto"
+                            type="button"
+                            className="px-6 py-3 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors"
+                            redirectTo="/inicio/proyectos/informacionProyecto"
+                        />
+                    </>
+                ) : (
+                    <>
+                        <UserPlus size={64} className="text-gray-400 dark:text-gray-500 mb-4" />
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+                            ¡Te damos la bienvenida, {user?.name || ''}!
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+                            Tu panel de inicio está listo. Los proyectos en los que participes aparecerán aquí.
+                        </p>
+                         <p className="mt-2 p-4 bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-lg">
+                            Pide a un administrador que te invite a un proyecto para comenzar a colaborar.
+                        </p>
+                    </>
+                )}
             </div>
         );
     }
@@ -253,7 +284,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
-                        Bienvenido, {user?.name || 'Invitado'}
+                        Hola de nuevo, {user?.name || ''}
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400">Este es el resumen de tu proyecto seleccionado.</p>
                 </div>
@@ -308,17 +339,3 @@ export default function HomePage() {
         </div>
     );
 }
-
-const KpiCard = ({ icon, title, value }: { icon: React.ReactNode, title: string, value: string | number }) => (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-4">
-            <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-700">
-                {icon}
-            </div>
-            <div>
-                <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{value}</div>
-            </div>
-        </div>
-    </div>
-);
