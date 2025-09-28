@@ -74,12 +74,12 @@ const EditPermissionsModal = ({ user, onClose, onSave }: EditPermissionsModalPro
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 transition-opacity duration-300 p-4">
-      <div className="bg-gray-50 p-8 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700">
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800">Editar Permisos de {user.name}</h2>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Editar Permisos de {user.name}</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           >
             ×
           </button>
@@ -87,19 +87,19 @@ const EditPermissionsModal = ({ user, onClose, onSave }: EditPermissionsModalPro
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {Object.entries(permissionGroups).map(([category, perms]) => (
-            <div key={category} className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm">
+            <div key={category} className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-700 shadow-sm">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold text-gray-700">{category}</h3>
+                <h3 className="font-semibold text-gray-700 dark:text-gray-300">{category}</h3>
                 <div>
                   <button
                     onClick={() => handleSelectAll(category, true)}
-                    className="text-xs text-indigo-600 hover:text-indigo-800 mr-2 font-medium"
+                    className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
                   >
                     Seleccionar todos
                   </button>
                   <button
                     onClick={() => handleSelectAll(category, false)}
-                    className="text-xs text-red-600 hover:text-red-800 font-medium"
+                    className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                   >
                     Deseleccionar todos
                   </button>
@@ -113,9 +113,9 @@ const EditPermissionsModal = ({ user, onClose, onSave }: EditPermissionsModalPro
                       id={permission.key}
                       checked={permissionsMap.get(permission.key) || false}
                       onChange={(e) => handlePermissionChange(permission.key, e.target.checked)}
-                      className="mr-3 h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                      className="mr-3 h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-600"
                     />
-                    <label htmlFor={permission.key} className="text-sm text-gray-700">
+                    <label htmlFor={permission.key} className="text-sm text-gray-700 dark:text-gray-300">
                       {permission.label}
                     </label>
                   </div>
@@ -129,7 +129,7 @@ const EditPermissionsModal = ({ user, onClose, onSave }: EditPermissionsModalPro
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="px-4 py-2 rounded-md border bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800"
           >
             Cancelar
           </button>

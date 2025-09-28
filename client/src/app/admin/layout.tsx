@@ -3,8 +3,16 @@ import Sidebar from "@/components/admin/sidebar";
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ThemeProvider } from "@/components/theme-provider";
+import { Fira_Sans } from "next/font/google";
 
-// La función DEBE ser 'async' para poder usar await
+// Configuración de la fuente (igual que en el layout principal)
+const firaSans = Fira_Sans({
+  weight: ["500", "800"],
+  style: "normal",
+  subsets: ["latin"],
+});
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -21,35 +29,37 @@ export default async function DashboardLayout({
 
   // 3. El resto del código es correcto.
   return (
-    // El contenedor raíz sigue igual: flex y altura completa.
-    <AuthProvider>
-      <div className="flex h-screen bg-gray-50 text-gray-800">
-          <Sidebar />
-          
-          {/* --- CONTENEDOR PRINCIPAL CORREGIDO --- */}
-          {/*
-            CAMBIO 1: `flex-1` le dice a este div que crezca y ocupe todo el espacio
-            horizontal disponible que no está usando el Sidebar.
-            
-            CAMBIO 2: `overflow-hidden` previene cualquier desbordamiento accidental
-            de este contenedor, asegurando que el único scroll sea el del <main>.
-          */}
-          <div className="flex flex-1 flex-col overflow-hidden">
+    // Aplicamos la fuente y el tema al contenedor principal
+    <div className={`${firaSans.className} antialiased`}>
+      {/* Envolvemos con ThemeProvider igual que en el layout principal */}
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        {/* Mantenemos el AuthProvider para la autenticación */}
+        <AuthProvider>
+          {/* Cambiamos las clases para soportar tema claro/oscuro */}
+          <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+              <Sidebar />
               
-              {/* El Header no necesita cambios, pero es buena práctica añadir
-                  flex-shrink-0 para asegurar que nunca se encoja si el contenido es muy grande. */}
-              <header className="flex-shrink-0">
-                <Header />
-              </header>
+              {/* --- CONTENEDOR PRINCIPAL CORREGIDO --- */}
+              <div className="flex flex-1 flex-col overflow-hidden">
+                  
+                  {/* El Header ahora soportará tema oscuro automáticamente */}
+                  <header className="flex-shrink-0">
+                    <Header />
+                  </header>
 
-              {/* El área de <main> sigue siendo la única con scroll.
-                  Ahora funcionará correctamente porque su padre (`div` de arriba)
-                  tiene una altura y anchura bien definidas. */}
-              <main className="flex-1 overflow-y-auto">
-                  {children} 
-              </main>
+                  {/* El área principal también soporta tema oscuro */}
+                  <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-800">
+                      {children} 
+                  </main>
+              </div>
           </div>
-      </div>
-    </AuthProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </div>
   );
 }

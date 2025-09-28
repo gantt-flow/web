@@ -105,12 +105,12 @@ export default function PermissionsAdminPage() {
 
   return (
     <div className="flex flex-row min-h-screen">
-      <div className="flex-1 p-8 bg-gray-50">
+      <div className="flex-1 p-8 bg-gray-50 dark:bg-gray-900">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Gestión de Permisos de Usuarios</h1>
-          <p className="text-gray-600">Administra los permisos de acceso para cada usuario del sistema</p>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Gestión de Permisos de Usuarios</h1>
+          <p className="text-gray-600 dark:text-gray-400">Administra los permisos de acceso para cada usuario del sistema</p>
         </div>
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700">
           <DataTable columns={columns} data={users} isLoading={isLoading} />
         </div>
         

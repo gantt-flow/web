@@ -63,7 +63,7 @@ export const getAllUsers = async (req, res) => {
     // Destructure query parameters from the request URL (e.g., /api/users?page=2&role=admin).
     // Set default values for pagination: page 1 and a limit of 10 items per page.
     // 'role' will be undefined if not provided in the URL.
-    const { page = 1, limit = 10, role } = req.query;
+    const { page = 1, limit = 500, role } = req.query;
 
     // Create a filter object for the database query.
     // This is a conditional (ternary) operator. If a 'role' was provided in the query,

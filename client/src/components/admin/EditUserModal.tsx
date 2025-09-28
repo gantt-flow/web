@@ -40,45 +40,45 @@ const EditUserModal = ({ user, onClose, onSave }: EditUserModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 transition-opacity duration-300">
-      <div className="bg-gray-50 p-8 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Editar Usuario</h2>
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200 border-b pb-4 border-gray-200 dark:border-gray-700">Editar Usuario</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre</label>
             <input
               type="text"
               id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
               required
             />
           </div>
           
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
             <input
               type="email"
               id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-100 cursor-not-allowed"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
               required
               disabled
             />
           </div>
           
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rol</label>
             <select
               id="role"
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
             >
               <option value="Administrador de sistema">Administrador de sistema</option>
@@ -91,13 +91,13 @@ const EditUserModal = ({ user, onClose, onSave }: EditUserModalProps) => {
           </div>
           
           <div>
-            <label htmlFor="isActive" className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <label htmlFor="isActive" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
             <select
               id="isActive"
               name="isActive"
               value={String(formData.isActive)}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
             >
               <option value="true">Activo</option>
@@ -109,7 +109,7 @@ const EditUserModal = ({ user, onClose, onSave }: EditUserModalProps) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md border bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              className="px-4 py-2 rounded-md border bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800 transition-colors"
             >
               Cancelar
             </button>

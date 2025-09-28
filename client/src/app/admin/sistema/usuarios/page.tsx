@@ -124,19 +124,19 @@ export default function DashboardLayoutAdmin() {
   return (
     <div className="flex flex-row min-h-screen">
       {/* Contenido principal */}
-      <div className="flex-1 p-8 bg-gray-50">
+      <div className="flex-1 p-8 bg-gray-50 dark:bg-gray-900">
         <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">Gestión de Usuarios</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Gestión de Usuarios</h1>
           <button 
             onClick={() => setIsCreateModalOpen(true)} // Abrir modal de creación
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
           >
             + Nuevo Usuario
           </button>
         </div>
 
         {/* DataTable */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700">
           <DataTable
             columns={userColumns}
             data={users}

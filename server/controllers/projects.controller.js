@@ -22,7 +22,8 @@ export const createProject = async (req, res) => {
             startDate,
             endDate,
             status,
-            projectManager: projectManagerId
+            projectManager: projectManagerId,
+            teamMembers: [projectManagerId]
         });
 
         await newProject.save();

@@ -57,8 +57,8 @@ export default function Sidebar() {
     // Si no hay items visibles
     if (sideBarItems.length === 0) {
         return (
-            <aside className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm">
-                <div className="flex items-center h-16 px-6 border-b border-gray-200">
+            <aside className="h-screen w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shadow-sm">
+                <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700">
                     <Link href="/inicio">
                          <Image
                             src="/logo.svg" 
@@ -66,28 +66,29 @@ export default function Sidebar() {
                             width={140}
                             height={28}
                             priority
+                            className="filter dark:invert"
                         />
                     </Link>
                 </div>
 
                 <div className="flex-1 flex items-center justify-center px-4">
                     <div className="text-center">
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
                             No tienes acceso a las funciones de administración
                         </p>
                         <Link 
                             href="/inicio"
-                            className="text-indigo-600 hover:text-indigo-800 text-sm mt-2 inline-block"
+                            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm mt-2 inline-block"
                         >
                             Volver al inicio
                         </Link>
                     </div>
                 </div>
 
-                <div className="p-4 border-t border-gray-200">
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left hover:bg-red-50 hover:text-red-600 transition-colors"
+                        className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                     >
                         <LogOut />
                         <span className="font-medium">Salir</span>
@@ -98,9 +99,9 @@ export default function Sidebar() {
     }
 
     return (
-        <aside className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm">
-            {/* Header */}
-            <div className="flex items-center h-16 px-6 border-b border-gray-200">
+        <aside className="h-screen w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shadow-sm">
+            {/* Header con logo */}
+            <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700">
                 <Link href={userRole === 'Administrador de sistema' ? "/admin/sistema/usuarios" : "/admin/sistema/auditoria"}>
                      <Image
                         src="/logo.svg" 
@@ -108,6 +109,7 @@ export default function Sidebar() {
                         width={140}
                         height={28}
                         priority
+                        className="filter dark:invert"
                     />
                 </Link>
             </div>
@@ -125,7 +127,7 @@ export default function Sidebar() {
                                         ${
                                             isActive
                                                 ? 'bg-green-500 text-white shadow-sm'
-                                                : 'text-black hover:bg-gray-100'
+                                                : 'text-black dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                                         }`
                                     }
                                 >
@@ -138,11 +140,11 @@ export default function Sidebar() {
                 </ul>
             </nav>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-gray-200">
+            {/* Footer con botón de logout */}
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left hover:bg-red-50 hover:text-red-600 transition-colors"
+                    className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                 >
                     <LogOut />
                     <span className="font-medium">Salir</span>

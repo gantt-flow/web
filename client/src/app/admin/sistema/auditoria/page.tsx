@@ -123,159 +123,162 @@ export default function AuditLogPage() {
     },
   ];
   return (
-    <div className="flex flex-row min-h-screen">
-      <div className="flex-1 p-8 bg-gray-50">
-        {/* Header con estadísticas */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Registros de Auditoría</h1>
-        </div>
-        {/* Filtros mejorados */}
-        <div className="mb-6 bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4 text-black">Filtros</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-black">
-            <div>
-              <label className="block text-sm font-medium mb-1">Acción</label>
-              <select
-                value={filters.action || ''}
-                onChange={(e) => handleFilterChange('action', e.target.value)}
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Todas las acciones</option>
-                <option value="CREATE">CREATE</option>
-                <option value="UPDATE">UPDATE</option>
-                <option value="DELETE">DELETE</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">Tipo de Entidad</label>
-              <select
-                value={filters.entityType || ''}
-                onChange={(e) => handleFilterChange('entityType', e.target.value)}
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Todas las entidades</option>
-                <option value="User">Usuario</option>
-                <option value="Project">Proyecto</option>
-                <option value="Task">Tarea</option>
-                <option value="Comment">Comentario</option>
-                <option value="Notification">Notificación</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1 text-black">Desde</label>
-              <input
-                type="date"
-                value={filters.startDate || ''}
-                onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                className="w-full p-2 border rounded text-black"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1 text-black">Hasta</label>
-              <input
-                type="date"
-                value={filters.endDate || ''}
-                onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                className="w-full p-2 border rounded text-black"
-              />
-            </div>
+      <div className="flex flex-row min-h-screen">
+        <div className="flex-1 p-8 bg-gray-50 dark:bg-gray-900">
+          {/* Header con estadísticas */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">Registros de Auditoría</h1>
           </div>
           
-          <div className="mt-4 flex justify-between items-center text-black">
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium">Mostrar:</label>
-              <select
-                value={pagination.limit}
-                onChange={(e) => handleLimitChange(Number(e.target.value))}
-                className="p-1 border rounded"
-              >
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-              <span className="text-sm">registros por página</span>
-            </div>
-            
-            <button
-              onClick={() => {
-                setFilters({
-                  action: '',
-                  entityType: '',
-                  startDate: '',
-                  endDate: ''
-                });
-                setPagination(prev => ({ ...prev, page: 1 }));
-              }}
-              className="px-4 py-2 text-gray-600 border rounded hover:bg-gray-50 "
-            >
-              Limpiar Filtros
-            </button>
-          </div>
-        </div>
-        {/* DataTable */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <DataTable
-            columns={auditLogColumns}
-            data={auditLogs}
-            isLoading={isLoading}
-          />
-        </div>
-        {/* Paginación mejorada */}
-        <div className="mt-4 flex justify-between items-center bg-white p-4 rounded-lg shadow">
-          <div>
-            <span className="text-sm text-gray-700">
-              Mostrando {(pagination.page - 1) * pagination.limit + 1} -{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} de{' '}
-              {pagination.total} registros
-            </span>
-          </div>
-          
-          <div className="flex items-center space-x-2 text-black">
-            <button
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page === 1}
-              className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50"
-            >
-              ← Anterior
-            </button>
-            
-            <div className="flex items-center space-x-1 text-black">
-              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                const pageNum = i + 1;
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`px-3 py-1 border rounded min-w-[2.5rem] ${
-                      pagination.page === pageNum
-                        ? 'bg-indigo-600 text-white'
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+          {/* Filtros mejorados */}
+          <div className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold mb-4 text-black dark:text-gray-200">Filtros</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-black dark:text-gray-300">
+              <div>
+                <label className="block text-sm font-medium mb-1">Acción</label>
+                <select
+                  value={filters.action || ''}
+                  onChange={(e) => handleFilterChange('action', e.target.value)}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-black dark:text-gray-100"
+                >
+                  <option value="">Todas las acciones</option>
+                  <option value="CREATE">CREATE</option>
+                  <option value="UPDATE">UPDATE</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
               
-              {pagination.totalPages > 5 && (
-                <span className="px-2">...</span>
-              )}
+              <div>
+                <label className="block text-sm font-medium mb-1">Tipo de Entidad</label>
+                <select
+                  value={filters.entityType || ''}
+                  onChange={(e) => handleFilterChange('entityType', e.target.value)}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-black dark:text-gray-100"
+                >
+                  <option value="">Todas las entidades</option>
+                  <option value="User">Usuario</option>
+                  <option value="Project">Proyecto</option>
+                  <option value="Task">Tarea</option>
+                  <option value="Comment">Comentario</option>
+                  <option value="Notification">Notificación</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1 text-black dark:text-gray-300">Desde</label>
+                <input
+                  type="date"
+                  value={filters.startDate || ''}
+                  onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-black dark:text-gray-100"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1 text-black dark:text-gray-300">Hasta</label>
+                <input
+                  type="date"
+                  value={filters.endDate || ''}
+                  onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-black dark:text-gray-100"
+                />
+              </div>
             </div>
             
-            <button
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page >= pagination.totalPages}
-              className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50"
-            >
-              Siguiente →
-            </button>
+            <div className="mt-4 flex justify-between items-center text-black dark:text-gray-300">
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium">Mostrar:</label>
+                <select
+                  value={pagination.limit}
+                  onChange={(e) => handleLimitChange(Number(e.target.value))}
+                  className="p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-black dark:text-gray-100"
+                >
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                <span className="text-sm">registros por página</span>
+              </div>
+              
+              <button
+                onClick={() => {
+                  setFilters({
+                    action: '',
+                    entityType: '',
+                    startDate: '',
+                    endDate: ''
+                  });
+                  setPagination(prev => ({ ...prev, page: 1 }));
+                }}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Limpiar Filtros
+              </button>
+            </div>
+          </div>
+          
+          {/* DataTable */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700">
+            <DataTable
+              columns={auditLogColumns}
+              data={auditLogs}
+              isLoading={isLoading}
+            />
+          </div>
+          
+          {/* Paginación mejorada */}
+          <div className="mt-4 flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+            <div>
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Mostrando {(pagination.page - 1) * pagination.limit + 1} -{' '}
+                {Math.min(pagination.page * pagination.limit, pagination.total)} de{' '}
+                {pagination.total} registros
+              </span>
+            </div>
+            
+            <div className="flex items-center space-x-2 text-black dark:text-gray-300">
+              <button
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page === 1}
+                className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-black dark:text-gray-100"
+              >
+                ← Anterior
+              </button>
+              
+              <div className="flex items-center space-x-1 text-black dark:text-gray-300">
+                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                  const pageNum = i + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`px-3 py-1 border rounded min-w-[2.5rem] transition-colors ${
+                        pagination.page === pageNum
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-black dark:text-gray-100'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                
+                {pagination.totalPages > 5 && (
+                  <span className="px-2">...</span>
+                )}
+              </div>
+              
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page >= pagination.totalPages}
+                className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-black dark:text-gray-100"
+              >
+                Siguiente →
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
 }
