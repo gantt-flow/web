@@ -84,7 +84,7 @@ export default function GanttTaskListPanel({ tasks, onTaskStatusChange, onTaskUp
                   <div className="relative inline-flex items-center justify-center group">
                     <CircleUser className="text-gray-500 dark:text-gray-400 cursor-pointer" />
                     <div className="absolute bottom-full mb-2 px-3 py-1.5 bg-gray-700 dark:bg-black text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                      {task.assignedTo.name}
+                      {task.assignedTo?.name}
                       <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-700 dark:border-t-black"></div>
                     </div>
                   </div>

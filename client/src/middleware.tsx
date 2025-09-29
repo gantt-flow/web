@@ -6,14 +6,14 @@ import type { NextRequest } from 'next/server';
 const protectedRoutes: { [key: string]: string[] } = {
   // Rutas de Administrador de Sistema
   '/admin/sistema/usuarios': ['Administrador de sistema'],
-  '/admin/proyectos/permisos': ['Administrador de sistema','Administrador de proyectos'],
+  '/admin/proyectos/permisos': ['Administrador de sistema'],
   
   // Rutas de Auditor (puede acceder a auditoría)
   '/admin/sistema/auditoria': ['Administrador de sistema', 'Auditor'],
 };
 
 // Rutas públicas que no requieren autenticación
-const publicRoutes = ['/auth', '/unauthorized', '/accept-invite'];
+const publicRoutes = ['/auth/login', '/unauthorized', '/accept-invite','/'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -28,7 +28,7 @@ export function middleware(request: NextRequest) {
 
   // Si no hay token y la ruta no es pública, redirigir al login
   if (!token) {
-    const loginUrl = new URL('/auth', request.url);
+    const loginUrl = new URL('/auth/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -65,7 +65,7 @@ export function middleware(request: NextRequest) {
 
   } catch (error) {
     // Token inválido, limpiar cookie y redirigir al login
-    const response = NextResponse.redirect(new URL('/auth', request.url));
+    const response = NextResponse.redirect(new URL('/auth/login', request.url));
     response.cookies.delete('token');
     return response;
   }
