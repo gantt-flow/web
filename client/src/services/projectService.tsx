@@ -2,7 +2,6 @@ import api from '@/services/api';
 import { User } from './userService';
 import { Task } from './taskService';
 
-// Definimos una interfaz para los datos del proyecto del usuario actual
 export interface Projects {
     _id: string;
     name: string;
@@ -15,7 +14,6 @@ export interface Projects {
     tasks: Task[];
 }
 
-// Definimos una interfaz para los datos de un nuevo proyecto
 export interface NewProject {
     _id: string;
     name: string;

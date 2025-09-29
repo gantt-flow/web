@@ -12,16 +12,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* ELIMINAMOS COMPLETAMENTE la sección @media (prefers-color-scheme: dark) 
-  porque tu ThemeProvider y las clases de Tailwind ya se encargan de esto de una manera más controlada.
-*/
-
 body {
-  /* ELIMINAMOS la línea 'background: var(--background);'
-    Esta era la línea que causaba el conflicto y forzaba el fondo negro.
-  */
+ 
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* ... resto del archivo sin cambios ... */
+

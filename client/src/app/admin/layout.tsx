@@ -31,14 +31,13 @@ export default async function DashboardLayout({
   return (
     // Aplicamos la fuente y el tema al contenedor principal
     <div className={`${firaSans.className} antialiased`}>
-      {/* Envolvemos con ThemeProvider igual que en el layout principal */}
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange
       >
-        {/* Mantenemos el AuthProvider para la autenticación */}
+        {/* AuthProvider para la autenticación */}
         <AuthProvider>
           {/* Cambiamos las clases para soportar tema claro/oscuro */}
           <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -47,7 +46,6 @@ export default async function DashboardLayout({
               {/* --- CONTENEDOR PRINCIPAL CORREGIDO --- */}
               <div className="flex flex-1 flex-col overflow-hidden">
                   
-                  {/* El Header ahora soportará tema oscuro automáticamente */}
                   <header className="flex-shrink-0">
                     <Header />
                   </header>

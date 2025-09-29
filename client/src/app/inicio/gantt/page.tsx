@@ -158,7 +158,6 @@ export default function Gantt() {
                 case 'dueDate':
                     return (new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()) * orderMultiplier;
                 case 'createdAt':
-                    // Fallback to sorting by dueDate if createdAt does not exist
                     // TODO
                     const dateA = new Date(a.dueDate).getTime();
                     const dateB = new Date(b.dueDate).getTime();
@@ -283,7 +282,6 @@ export default function Gantt() {
         );
     }
 
-    // --- NUEVO BLOQUE DE BIENVENIDA CONDICIONAL ---
     if (projects.length === 0) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8 w-full h-full bg-gray-50 dark:bg-gray-900">

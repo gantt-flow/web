@@ -43,10 +43,10 @@ export default function PoliticaPrivacidadPage() {
       {/* --- 2. CONTENIDO LEGAL --- */}
       <main className="container mx-auto max-w-3xl p-8 md:p-12">
         <SectionTitle>1. Introducción</SectionTitle>
-        <p>
+        <p className='dark:text-gray-300'>
           Bienvenido a GanttFlow ("nosotros", "nuestro", o "el Servicio"). Nos tomamos tu privacidad muy en serio. Esta Política de Privacidad explica qué información personal recopilamos, cómo la usamos, cómo la protegemos y qué derechos tienes sobre ella.
         </p>
-        <p>
+        <p className='dark:text-gray-300'>
           Esta política forma parte de nuestros 
           <Link href="/terminos-y-condiciones" passHref>
             <span className="text-green-600 dark:text-green-400 hover:underline cursor-pointer">
@@ -93,21 +93,19 @@ export default function PoliticaPrivacidadPage() {
         </p>
         
         <SectionTitle>4. Cómo Protegemos tu Información</SectionTitle>
-        <p>
+        <p className='dark:text-gray-300'>
           La seguridad de tus datos es una prioridad fundamental para nosotros. Implementamos las siguientes medidas:
         </p>
         <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 mb-4">
-          <li><strong>Encriptación en Tránsito:</strong> Todo el tráfico entre tu navegador y nuestros servidores está encriptado usando SSL (HTTPS).</li>
           <li><strong>Hasheo de Contraseñas:</strong> Nunca almacenamos tu contraseña en texto plano. Usamos algoritmos de hasheo robustos y unidireccionales.</li>
-          <li><strong>Autenticación de Dos Factores (2FA):</strong> Ofrecemos 2FA como una capa adicional de seguridad para tu cuenta y te recomendamos encarecidamente que la actives.</li>
           <li><strong>Control de Acceso:</strong> Nuestro personal tiene un acceso estrictamente limitado a tus datos, y solo para fines de soporte o mantenimiento.</li>
         </ul>
-        <p>
+        <p className='dark:text-gray-300'>
           Aunque ninguna medida de seguridad es perfecta, nos esforzamos por utilizar las mejores prácticas de la industria para proteger tus datos.
         </p>
 
         <SectionTitle>5. Tus Derechos y Opciones</SectionTitle>
-        <p>
+        <p className='dark:text-gray-300'>
           Tienes control sobre tu información personal:
         </p>
         <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 mb-4">
@@ -117,17 +115,17 @@ export default function PoliticaPrivacidadPage() {
         </ul>
 
         <SectionTitle>6. Privacidad de Menores</SectionTitle>
-        <p>
+        <p className='dark:text-gray-300'>
           Nuestro Servicio no está dirigido a personas menores de 13 años (o la edad mínima legal en tu jurisdicción). No recopilamos intencionadamente información de menores. Si descubrimos que lo hemos hecho, tomaremos medidas para eliminar esa información.
         </p>
 
         <SectionTitle>7. Cambios a esta Política</SectionTitle>
-        <p>
+        <p className='dark:text-gray-300'>
           Podemos actualizar esta Política de Privacidad de vez en cuando. Si realizamos cambios significativos, te lo notificaremos por correo electrónico o mediante un aviso destacado dentro de la aplicación antes de que los cambios entren en vigor.
         </p>
 
         <SectionTitle>8. Contacto</SectionTitle>
-        <p>
+        <p className='dark:text-gray-300'>
           Si tienes alguna pregunta sobre esta Política de Privacidad, puedes contactarnos a través de nuestra 
           <Link href="/contacto" passHref>
             <span className="text-green-600 dark:text-green-400 hover:underline cursor-pointer">

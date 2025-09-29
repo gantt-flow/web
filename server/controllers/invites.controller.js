@@ -143,7 +143,7 @@ export const acceptInvite = async (req, res) => {
         // Buscar al usuario por email o crear uno nuevo si no existe
         let user = await User.findOne({ email: invite.email });
         if (!user) {
-            // En un caso real, aquí redirigirías al usuario a una página de registro
+   
             return res.status(404).json({ 
                 message: 'Usuario no encontrado. Debe registrarse primero.' 
             });
@@ -156,10 +156,8 @@ export const acceptInvite = async (req, res) => {
             await project.save();
         }
 
-        // También actualizar el usuario si es necesario (dependiendo de tu modelo)
-        // Por ejemplo, si tienes un array de proyectos en el usuario:
-        if (!user.projectId.includes(project._id)) {
-            user.projectId.push(project._id);
+        if (user.projects && !user.projects.includes(project._id)) {
+            user.projects.push(project._id);
             await user.save();
         }
 

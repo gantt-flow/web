@@ -10,12 +10,11 @@ export const createProject = async (req, res) => {
         const { name, description, startDate, endDate, status } = req.body;
         const projectManagerId = req.user._id;
 
-        // Validate the required fields
+       
         if (!name || !description) {
             return res.status(400).json({ message: 'Recuerda llenar los campos requeridos' });
         }
 
-        // Create a new project entry
         const newProject = new Project({
             name,
             description,
@@ -42,12 +41,10 @@ export const getProjectById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Validate the project ID
         if (!isValidObjectId(id)) {
             return res.status(400).json({ message: 'Invalid project ID' });
         }
 
-        // Fetch the project by ID
         const project = await Project.findById(id)
             .select('name description startDate endDate status')
             .populate('teamMembers', 'name email role profilePicture')
@@ -69,12 +66,12 @@ export const getCurrentUserProjects = async (req, res) => {
     try {
         const userId = req.params.id;
 
-        // Validate the user ID
+   
         if (!isValidObjectId(userId)) {
             return res.status(400).json({ message: 'Invalid user ID' });
         }
 
-        // Fetch the user from the database
+       
         const user = await User.findById(userId).populate('projectId').select('projectId'); // Populate only the projects field
         
         if (!user) {
@@ -93,7 +90,7 @@ export const updateProject = async (req, res) => {
         const { id } = req.params;
         const updateData = req.body;
 
-        // Validate the project ID
+        
         if (!isValidObjectId(id)) {
             return res.status(400).json({ message: 'Invalid project ID' });
         }
@@ -119,12 +116,12 @@ export const deleteProject = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Validate the project ID
+       
         if (!isValidObjectId(id)) {
             return res.status(400).json({ message: 'Invalid project ID' });
         }
 
-        // Delete the project
+    
         const deletedProject = await Project.findByIdAndDelete(id);
 
         if (!deletedProject) {
@@ -194,7 +191,6 @@ export const removeMemberFromProject = async (req, res) => {
             return res.status(400).json({ message: 'ID de proyecto o miembro inválido.' });
         }
 
-        // 1. Buscar y actualizar el proyecto (remover el miembro)
         const project = await Project.findByIdAndUpdate(
             projectId,
             { $pull: { teamMembers: memberId } },
@@ -205,7 +201,6 @@ export const removeMemberFromProject = async (req, res) => {
             return res.status(404).json({ message: 'Proyecto no encontrado.' });
         }
 
-        // 2. Buscar y actualizar el usuario (remover el proyecto)
         const user = await User.findByIdAndUpdate(
             memberId,
             { $pull: { projectId: projectId } },
@@ -239,7 +234,7 @@ export const addProjectManagerToProject = async (req, res) => {
             return res.status(400).json({ message: 'Datos no válidos.' });
         }
 
-        // * Solo se actualiza el campo de proyectos del usuario
+        // Solo se actualiza el campo de proyectos del usuario
         const projectToUpdate = await Project.findByIdAndUpdate(
             projectId,
             { projectManager: userId },
@@ -260,7 +255,6 @@ export const addProjectManagerToProject = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
 
-        // Se solo un mensaje de éxito
         res.status(200).json({ message: "Manager agregado al proyecto."});
 
     }catch (error) {
@@ -273,12 +267,11 @@ export const getTeamMembers = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Validate the project ID
+  
         if (!isValidObjectId(id)) {
             return res.status(400).json({ message: 'Invalid project ID' });
         }
 
-        // Fetch the project by ID
         const teamMembers = await Project.findById(id)
             .select('teamMembers')
             .populate('teamMembers', 'name email profilePicture');
@@ -298,12 +291,12 @@ export const getProjectTasks = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Validate the project ID
+    
         if (!isValidObjectId(id)) {
             return res.status(400).json({ message: 'Invalid project ID' });
         }
 
-        // Fetch the project and populate all its tasks
+
         const project = await Project.findById(id)
             .select('tasks')
             .populate({
@@ -318,7 +311,6 @@ export const getProjectTasks = async (req, res) => {
             return res.status(404).json({ message: 'Project not found' });
         }
 
-        // Return just the array of tasks directly
         res.status(200).json(project.tasks);
     } catch (error) {
         logger.error(`Error fetching project tasks: ${error.message}`);

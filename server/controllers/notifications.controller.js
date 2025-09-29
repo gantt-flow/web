@@ -7,17 +7,17 @@ export const createNotification = async (req, res) => {
     try {
         const { recipientId, title, message } = req.body;
 
-        // Validate the recipientId field
+
         if (!isValidObjectId(recipientId)) {
             return res.status(400).json({ message: 'Invalid recipient ID' });
         }
 
-        // Validate the required fields
+
         if (!title || !message || !recipientId) {
             return res.status(400).json({ message: 'Fill all the required fields' });
         }
 
-        // Create a new notification entry
+       
         const newNotification = new Notification({
             recipientId,
             title,
@@ -39,12 +39,11 @@ export const getAllNotificationsByUser = async (req, res) => {
     try {
         const recipientId = req.user._id;
 
-        // Validate the recipientId field
+   
         if (!isValidObjectId(recipientId)) {
             return res.status(400).json({ message: 'Invalid recipient ID' });
         }
 
-        // Fetch notifications for the specified recipient
         const notifications = await Notification.find({ recipientId }).populate('recipientId', 'name email');
 
         return res.status(200).json(notifications);

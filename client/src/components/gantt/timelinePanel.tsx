@@ -19,7 +19,6 @@ interface HeaderItem {
     width: number;
 }
 
-// --- Componente para dibujar las flechas de dependencia ---
 const DependencyArrows = ({ tasks, taskPositions, totalWidth }: { tasks: Task[], taskPositions: Map<string, any>, totalWidth: number }) => {
     if (!taskPositions || taskPositions.size === 0) return null;
 

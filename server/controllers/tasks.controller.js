@@ -63,11 +63,10 @@ export const createTask = async (req, res) => {
             { new: true }
         );
 
-        // --- INICIO: Lógica para crear notificación ---
-        // 3. Verificamos que la tarea fue asignada a alguien y que no es el mismo usuario que la creó.
+    
         if (savedTask.assignedTo && savedTask.createdBy.toString() !== savedTask.assignedTo.toString()) {
             try {
-                // Buscamos el nombre de quien creó la tarea para un mensaje más claro
+              
                 const creator = await User.findById(savedTask.createdBy).select('name');
                 const creatorName = creator ? creator.name : 'Alguien';
 
@@ -79,10 +78,10 @@ export const createTask = async (req, res) => {
                 await notification.save();
             } catch (notificationError) {
                 logger.error(`Error al crear la notificación para la tarea ${savedTask._id}: ${notificationError.message}`);
-                // No detenemos el proceso, la tarea ya se creó. Solo registramos el error.
+               
             }
         }
-        // --- FIN: Lógica para crear notificación ---
+     
         
         if (comments && typeof comments === 'string' && comments.trim() !== '') {
             const mockReq = {
@@ -132,12 +131,12 @@ export const getTasksByProject = async (req, res) => {
     try {
         const { projectId } = req.params;
 
-        // Validate the project ID
+       
         if (!isValidObjectId(projectId)) {
             return res.status(400).json({ message: 'Invalid project ID' });
         }
 
-        // Fetch tasks for the specified project
+        
         const tasks = await Task.find({ projectId }).populate('assignedTo', 'name email');
 
         res.status(200).json(tasks);
@@ -152,12 +151,11 @@ export const updateTask = async (req, res) => {
         const { taskId } = req.params;
         const updates = req.body;
 
-        // Validate the task ID
+       
         if (!isValidObjectId(taskId)) {
             return res.status(400).json({ message: 'Invalid task ID' });
         }
 
-        // Update the task in the database
         const updatedTask = await Task.findByIdAndUpdate(taskId, updates, { new: true });
 
         if (!updatedTask) {

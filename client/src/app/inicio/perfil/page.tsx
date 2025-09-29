@@ -64,21 +64,9 @@ export default function PerfilPage() {
             <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex items-center space-x-6">
-                        <img 
-                            src="/defaultUserPicture.svg"
-                            alt="Foto de perfil"
-                            width={80}
-                            height={80}
-                            className="rounded-full bg-gray-200 dark:bg-gray-700"
-                        />
-                        <div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Estamos trabajando en esta funcionalidad</p>
-                            <button type="button" disabled className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors">
-                                Cambiar foto
-                            </button>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">JPG o PNG. Tamaño máx. 5MB.</p>
-                            
-                        </div>
+                        
+                        <p className="text-xl text-gray-500 dark:text-gray-400 mt-2">Edita información relacionada a tu perfil</p>
+                        
                     </div>
 
                     <div className="border-t pt-6 dark:border-gray-700">

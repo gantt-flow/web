@@ -10,8 +10,6 @@ export const search = async (req, res) => {
     }
 
     try {
-
-        // Búsqueda en paralelo para mejorar el rendimiento
         const [projects, tasks, comments] = await Promise.all([
             Project.find({
                 name: { $regex: query, $options: 'i' },
