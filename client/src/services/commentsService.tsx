@@ -1,4 +1,3 @@
-// client/src/services/commentsService.tsx
 import api from '@/services/api';
 import { User } from './userService';
 

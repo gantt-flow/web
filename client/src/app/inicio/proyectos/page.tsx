@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Button from "@/components/ui/button";
 import { getUserProjects, Projects } from "@/services/projectService"; 
-// Asumo que checkAuth devuelve el usuario actual, es más directo que getCurrentUser
 import { getCurrentUser } from '@/services/userService'; 
 import { FolderKanban, UserPlus } from "lucide-react";
 
@@ -12,7 +11,7 @@ export default function Proyectos(){
     const [projects, setProjects] = useState<Projects[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentUserRole, setCurrentUserRole] = useState<string | null>(null); // Estado para el rol
+    const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
     const router = useRouter();
 
     useEffect(() => {

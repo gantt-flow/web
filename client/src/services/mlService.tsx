@@ -1,4 +1,3 @@
-// src/services/predictionService.tsx
 import api from '@/services/api';
 
 export interface PredictionResult {

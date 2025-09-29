@@ -1,4 +1,3 @@
-// server/routes/auditLog.routes.js
 import express from "express";
 import authWithRole from '../middleware/authWithRole.js';
 import { getAuditLogs} from "../controllers/auditLog.controller.js";

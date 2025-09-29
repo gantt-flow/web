@@ -1,5 +1,3 @@
-// Asegúrate de tener 'lucide-react' instalado
-// npm install lucide-react
 import { Rocket, Users, Heart, Eye, Target } from 'lucide-react';
 import Image from 'next/image'; // Importa el componente de Imagen de Next.js
 
@@ -11,14 +9,6 @@ export default function SobreNosotrosPage() {
       <header className="relative w-full">
         {/* Puedes reemplazar este div con un componente Image de Next.js */}
         <div className="absolute inset-0 bg-gray-300 dark:bg-gray-700 opacity-50">
-          {/* Ejemplo de cómo usar una imagen de fondo (requiere configuración):
-          <Image 
-            src="/images/nuestra-oficina.jpg" // Asegúrate de que esta ruta exista en /public
-            alt="Nuestra oficina" 
-            layout="fill" 
-            objectFit="cover" 
-          />
-          */}
         </div>
         
         {/* Contenido superpuesto */}
@@ -70,15 +60,6 @@ export default function SobreNosotrosPage() {
             <div className="text-center bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               {/* Placeholder para la foto */}
               <div className="w-32 h-32 rounded-full bg-gray-300 dark:bg-gray-600 mx-auto mb-4 flex items-center justify-center overflow-hidden">
-                {/* Ejemplo con Imagen:
-                <Image 
-                  src="/images/equipo/nombre.jpg" 
-                  alt="Foto de [Nombre]" 
-                  width={128} 
-                  height={128}
-                  className="object-cover"
-                />
-                */}
                 <Users className="w-16 h-16 text-gray-500" />
               </div>
               <h3 className="text-xl font-semibold">Diego Salinas</h3>
@@ -89,7 +70,6 @@ export default function SobreNosotrosPage() {
             </div>
             {/* --- Fin del Perfil --- */}
 
-            {/* Agrega más perfiles copiando el bloque anterior */}
             <div className="text-center bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="w-32 h-32 rounded-full bg-gray-300 dark:bg-gray-600 mx-auto mb-4 flex items-center justify-center">
                 <Users className="w-16 h-16 text-gray-500" />

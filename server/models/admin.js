@@ -34,20 +34,20 @@ const adminSchema = new Schema({
     },
     twoFactorEnabled: {
         type: Boolean,
-        default: false // Indica si la autenticación de dos factores está habilitada
+        default: false 
     },
     theme: {
         type: String,
         enum: ['light', 'dark', 'system'],
-        default: 'system' // Tema por defecto
+        default: 'system'
     },
     globalAccess: {
         type: Boolean,
-        default: false // Indica si el administrador tiene acceso global a todas las funciones
+        default: false 
     },
     isActive: {
         type: Boolean,
-        default: true // Indica si el administrador está activo
+        default: true 
     }
 });
 

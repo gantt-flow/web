@@ -1,4 +1,3 @@
-// src/hooks/useRole.ts
 import { useAuth } from '@/contexts/AuthContext';
 
 export const useRole = () => {

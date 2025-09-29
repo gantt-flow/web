@@ -1,22 +1,19 @@
 import Reminder from "../models/reminder.js";
-import { isValidObjectId } from 'mongoose'; // Import Mongoose's isValidObjectId for ID validation
+import { isValidObjectId } from 'mongoose';
 import { logger } from '../utils/logger.js';
 
 export const createReminder = async (req, res) => {
     try {
         const { userId, title, description, dueDate } = req.body;
 
-        // Validate the required fields
         if (!userId || !title || !dueDate) {
             return res.status(400).json({ message: 'Fill all the required fields' });
         }
 
-        // Validate ObjectId for userId
         if (!isValidObjectId(userId)) {
             return res.status(400).json({ message: 'Invalid user ID' });
         }
 
-        // Create a new reminder entry
         const newReminder = new Reminder({
             userId,
             title,
@@ -37,12 +34,10 @@ export const getRemindersByUser = async (req, res) => {
     try {
         const { userId } = req.params;
 
-        // Validate the user ID
         if (!isValidObjectId(userId)) {
             return res.status(400).json({ message: 'Invalid user ID' });
         }
 
-        // Fetch reminders for the specified user
         const reminders = await Reminder.find({ userId }).populate('userId', 'name email');
 
         if (reminders.length === 0) {
@@ -60,12 +55,11 @@ export const deleteReminder = async (req, res) => {
     try {
         const { reminderId } = req.params;
 
-        // Validate the reminder ID
         if (!isValidObjectId(reminderId)) {
             return res.status(400).json({ message: 'Invalid reminder ID' });
         }
 
-        // Delete the reminder
+       
         const result = await Reminder.findByIdAndDelete(reminderId);
 
         if (!result) {
@@ -84,12 +78,12 @@ export const updateReminder = async (req, res) => {
         const { reminderId } = req.params;
         const updateData = req.body;
 
-        // Validate the reminder ID
+      
         if (!isValidObjectId(reminderId)) {
             return res.status(400).json({ message: 'Invalid reminder ID' });
         }
 
-        // Update the reminder
+       
         const updatedReminder = await Reminder.findByIdAndUpdate(reminderId, updateData, { new: true });
 
         if (!updatedReminder) {
@@ -107,12 +101,12 @@ export const getReminderById = async (req, res) => {
     try {
         const { reminderId } = req.params;
 
-        // Validate the reminder ID
+    
         if (!isValidObjectId(reminderId)) {
             return res.status(400).json({ message: 'Invalid reminder ID' });
         }
 
-        // Fetch the reminder by ID
+       
         const reminder = await Reminder.findById(reminderId).populate('userId', 'name email');
 
         if (!reminder) {

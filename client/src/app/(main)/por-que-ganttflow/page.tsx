@@ -69,9 +69,9 @@ export default function PorQueGanttFlowPage() {
           {/* Beneficio 3: Seguridad Enterprise */}
           <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <ShieldCheck className="w-10 h-10 text-green-500 dark:text-green-500 mb-3" />
-            <h3 className="text-xl font-semibold mb-2">Seguridad de Nivel Empresarial</h3>
+            <h3 className="text-xl font-semibold mb-2">Gestión de Dependencias</h3>
             <p className="text-gray-700 dark:text-gray-300">
-              Protege tu trabajo. Ofrecemos autenticación de dos factores (2FA) y logs de auditoría para un control y una seguridad incomparables.
+              Visualiza cómo una tarea depende de otra, asegurando que el trabajo se realice en el orden correcto y evitando cuellos de botella antes de que ocurran.
             </p>
           </div>
 

@@ -25,7 +25,6 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={`${firaSans.className} antialiased bg-white dark:bg-gray-800 flex flex-col min-h-screen`}>
-        {/* Esto envuelve toda tu app y controla el tema */}
         <ThemeProvider
             attribute="class"
             defaultTheme="system"

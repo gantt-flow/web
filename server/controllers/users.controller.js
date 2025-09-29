@@ -10,7 +10,7 @@ export const getCurrentUser = async (req, res) => {
     try {
         res.status(200).json({
             authenticated: true,
-            user: req.user // req.user is set in the auth middleware and sends only non-sensitive user data
+            user: req.user 
         });
     } catch (error) {
         logger.error(`Error fetching user: ${error.message}`);
@@ -22,13 +22,13 @@ export const getUserWithId = async (req, res) => {
     try {
         const userId = req.params.id;
 
-        // Validate the user ID
+        
         if (!isValidObjectId(userId)) {
             return res.status(400).json({ message: 'Invalid user ID' });
         }
 
-        // Fetch the user from the database
-        const user = await User.findById(userId).select('-passwordHash'); // Exclude password
+        
+        const user = await User.findById(userId).select('-passwordHash'); 
         
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -45,31 +45,31 @@ export const createUser = async (req, res) => {
     try {
         const userData = req.body;
 
-        // Validate the user data
+   
         if (!userData.name || !userData.email || !userData.password || !userData.role) {
             return res.status(400).json({ message: 'Fill all the required fields' });
         }
 
-        // Check if the user already exists
+     
         const existingUser = await User.findOne({ email: userData.email });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Hash the password before saving
+    
         const passwordHash = hashPassword(userData.password);
 
-        // Create a new user in the database
+      
         const newUser = new User({
             name: userData.name,
             email: userData.email,
-            passwordHash: passwordHash, // Store the hashed password, not the original.
+            passwordHash: passwordHash, 
             role: userData.role
         })
 
-        // Save the new user to the database
+    
         await newUser.save();
-        // Record this important event in an audit log for security and tracking.
+      
         await generateAuditLog(req, 'CREATE', 'User', newUser._id, `Usuario creado: ${newUser.email}`);
 
         res.status(201).json({ message: 'User created successfully'});
@@ -92,21 +92,21 @@ export const updateUser = async (req, res) => {
             return res.status(400).json({ message: 'Invalid user ID' });
         }
 
-        // 1. Actualizar al usuario en la BD
+    
         const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select('-passwordHash');
 
         if (!updatedUser) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // 2. Generar el log de auditoría
+       
         await generateAuditLog(req, 'UPDATE', 'User', userId, `Usuario actualizado: Campos modificados: ${Object.keys(updateData).join(', ')}`);
 
-        // 3. Solo regenerar el token si el usuario editado es el mismo que está logueado
+        
         const isEditingOwnProfile = req.user._id.toString() === userId.toString();
         
         if (isEditingOwnProfile) {
-            // Solo regenerar token si el usuario está editando su propio perfil
+          
             const payload = {
                 user: {
                     _id: req.user._id,   
@@ -116,10 +116,10 @@ export const updateUser = async (req, res) => {
                 }
             };
 
-            // 4. Establecer nueva cookie SOLO si es el propio usuario
+            
             const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3h' });
 
-            // 5. Volver a establecer la cookie httpOnly con el token actualizado
+            
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -127,10 +127,10 @@ export const updateUser = async (req, res) => {
             });
         }
 
-        // 6. Enviar la respuesta 
+       
         res.status(200).json({
             user: updatedUser,
-            tokenRegenerated: isEditingOwnProfile // Informar si se regeneró el token
+            tokenRegenerated: isEditingOwnProfile 
         });
 
     } catch (error) {
@@ -144,12 +144,12 @@ export const deleteUser = async (req, res) => {
     try {
         const userId = req.params.id;
 
-        // Validate the user ID
+    
         if (!isValidObjectId(userId)) {
             return res.status(400).json({ message: 'Invalid user ID' });
         }
 
-        // Delete the user from the database
+      
         const deletedUser = await User.findByIdAndDelete(userId);
 
         if (!deletedUser) {

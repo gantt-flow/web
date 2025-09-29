@@ -1,5 +1,5 @@
-import Header from "@/components/mainLayout/header"; // Asegúrate que la ruta sea correcta
-import Footer from "@/components/mainLayout/footer"; // Asegúrate que la ruta sea correcta
+import Header from "@/components/mainLayout/header"; 
+import Footer from "@/components/mainLayout/footer"; 
 
 export default function MainLayout({
   children,

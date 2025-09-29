@@ -19,15 +19,13 @@ import mlRoutes from './routes/mlRoutes.js';
 import searchRoutes from './routes/search.routes.js';
 
 
-dotenv.config(); // Load environment variables from .env file
+dotenv.config();
 const app = express();
-// Use PORT from environment or default to 8080
 const PORT = process.env.PORT || 8080;
-// Middlware to parse JSON
 app.use(express.json());
 app.use(cookieParser()); // Parsear cookies
 
-// Enable CORS for specific origin
+// Habilitar CORS para un origen específico
 app.use(cors({
     origin: 'http://localhost:3000',
     optionsSuccessStatus: 200,

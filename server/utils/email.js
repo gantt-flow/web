@@ -1,6 +1,5 @@
 import nodemailer from 'nodemailer';
 
-// --- Configuración del Transporter (Sin cambios) ---
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -11,9 +10,8 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-// --- Plantilla de Correo para INVITACIONES (Tu diseño) ---
 export const generateInvitationEmailHTML = ({ projectName, invitationLink }) => {
-    const mainColor = '#22c55e'; // Un verde más esmeralda como en tu diseño
+    const mainColor = '#22c55e'; 
     return `
     <!DOCTYPE html>
     <html>
@@ -52,9 +50,8 @@ export const generateInvitationEmailHTML = ({ projectName, invitationLink }) => 
     </html>`;
 };
 
-// --- Plantilla de Correo para RESTABLECER CONTRASEÑA ---
 export const generatePasswordResetEmailHTML = ({ resetUrl }) => {
-    const mainColor = '#22c55e'; // El green-500 que definimos
+    const mainColor = '#22c55e'; 
     return `
     <!DOCTYPE html>
     <html>
@@ -107,7 +104,6 @@ export const sendEmail = async ({ to, subject, html }) => {
         to,
         subject,
         html,
-        // Opcional: generar texto plano a partir del HTML para clientes antiguos
         text: html.replace(/<[^>]*>?/gm, ''),
     };
 

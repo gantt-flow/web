@@ -1,21 +1,18 @@
 import { FileText } from 'lucide-react';
 import Link from 'next/link';
 
-// Componente de ayuda para las secciones (para no repetir clases)
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <h2 className="text-2xl font-semibold mt-10 mb-4 text-gray-900 dark:text-white">
     {children}
   </h2>
 );
 
-// Componente de ayuda para sub-secciones (para no repetir clases)
 const SectionSubTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <h3 className="text-xl font-bold mt-6 mb-3 text-gray-800 dark:text-gray-100">
     {children}
   </h3>
 );
 
-// Componente de ayuda para los párrafos (para no repetir clases)
 const P: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p className="mb-4 text-gray-700 dark:text-gray-300">
     {children}
@@ -29,7 +26,6 @@ export default function TerminosYCondicionesPage() {
       {/* --- 1. ENCABEZADO --- */}
       <header className="bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-8 py-16 text-center">
-          {/* Aplicando el color 'green' solicitado */}
           <FileText className="w-16 h-16 mx-auto text-green-600 dark:text-green-400 mb-4" />
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-gray-100">
             Términos y Condiciones del Servicio

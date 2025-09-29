@@ -1,7 +1,6 @@
 import Button from "@/components/ui/button";
 
 export default function Home() {
-  // ¡Adiós al div contenedor! El fondo ahora viene del layout raíz.
   return (
     <main className="container mx-auto px-5">
       <div className="flex flex-col my-16 text-center">

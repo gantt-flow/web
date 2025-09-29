@@ -1,4 +1,3 @@
-// src/utils/tokenUtils.ts
 export interface User {
   _id: string;
   email: string;

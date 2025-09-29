@@ -10,17 +10,16 @@ export const createComment = async (req, res) => {
 
         const userId = req.user._id;
 
-        // Validate the userId and relatedEntity fields
+     
         if (!isValidObjectId(userId) || !isValidObjectId(relatedEntity)) {
             return res.status(400).json({ message: 'Invalid user ID or related entity ID' });
         }
 
-        // Validate the required fields
         if (!comment || !userId || !relatedEntity ) {
             return res.status(400).json({ message: 'Fill all the required fields' });
         }
 
-        // Create a new comment entry
+
         const newComment = new Comment({
             userId,
             comment,
@@ -30,8 +29,8 @@ export const createComment = async (req, res) => {
         await newComment.save();
 
         await Task.findByIdAndUpdate(
-            relatedEntity, // El ID de la tarea a actualizar
-            { $push: { comments: newComment._id } } // Agrega el ID del comentario al arreglo 'comments'
+            relatedEntity, 
+            { $push: { comments: newComment._id } } 
         );
 
         await generateAuditLog(req,'CREATE','Comment', newComment._id, `Comentario creado por usuario ${userId} en entidad ${relatedEntity}`);
@@ -57,13 +56,13 @@ export const getCommentsByTask = async (req, res) => {
         }
 
         const comments = await Comment.find({ relatedEntity: taskId })
-            .populate('userId', 'name email') // Obtenemos nombre y email del autor
-            .sort({ createdAt: 'desc' }); // Mostramos los más recientes primero
+            .populate('userId', 'name email') 
+            .sort({ createdAt: 'desc' }); 
 
         res.status(200).json(comments);
 
     } catch (error) {
-        // ...tu manejo de errores
+        logger.error(`Error fetching comments for task: ${error.message}`);
     }
 }
 
