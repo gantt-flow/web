@@ -1,10 +1,12 @@
+// web/client/src/app/accept-invite/page.tsx
 'use client';
 
+import { Suspense } from 'react';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { invitationService } from '@/services/invitationService';
 
-export default function AcceptInvitePage() {
+function AcceptInviteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -24,7 +26,6 @@ export default function AcceptInvitePage() {
         setStatus('success');
         setMessage(`${result.message} Ahora eres miembro del proyecto "${result.projectName}".`);
         
-        // Redirigir al proyecto después de 3 segundos
         setTimeout(() => {
           router.push(`/inicio/proyectos/${result.projectId}`);
         }, 3000);
@@ -68,5 +69,22 @@ export default function AcceptInvitePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AcceptInvitePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold mb-6 text-center">Aceptar Invitación</h1>
+          <div className="text-center">
+            <p>Cargando...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <AcceptInviteContent />
+    </Suspense>
   );
 }
